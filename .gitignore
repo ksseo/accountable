@@ -56,7 +56,6 @@ supabase/.temp/
 supabase/.branches/
 
 # Coding agents' personal settings
-.claude/settings.local.json
 .github/copilot/settings.local.json
 
 # Claude Code's worktrees, one folder for each parallel session
