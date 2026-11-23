@@ -3,17 +3,20 @@ This project will use the following high level technical stack:
 1. Node.js 26, the current LTS (24 or later works) / TypeScript for the frontend, using React and Vite, in `frontend/`
 2. Python 3.12 for the backend using uv, with FastAPI, in `backend/`, with `pyproject.toml` and `uv.lock` at the repo root
 
-The frontend gets its data from the backend's JSON API. The backend keeps the data in a local SQLite database file, using SQLAlchemy Core with no raw SQL, and fills it with the sample data when the database is new.
+The frontend gets its data from the backend's JSON API. The backend keeps the data in a local SQLite database file, using SQLAlchemy Core with no raw SQL, and fills it with the sample data when the database is new. Alembic migrations update the tables when they change, so later features don't wipe real data, and they run by themselves when the backend starts.
 
-Prefer popular, well-supported libraries to custom code, such as for the data tables, the charts and the drag-and-drop pipeline. Don't hand-roll what a mature library does well.
+Prefer popular, well-supported libraries to custom code, such as for the data tables, the charts and the drag-and-drop pipeline. Don't hand-roll what a mature library does well. The library chosen for each job is listed in `docs/spec.md`.
+
+Everything the app needs, including its fonts, is installed by npm and uv and served from this computer, so after the one-time install it works with no internet connection.
 
 For now it runs locally. Later, Supabase will provide sign-in and the database, and the app will be deployed to Render.
 
 Commands are npm scripts in a `package.json` at the repo root, with `frontend/` as an npm workspace, so they work the same on Mac, Linux and Windows:
 
-- `npm run dev` starts the backend and the frontend together
+- `npm install`, once, installs the Node packages and then the Python packages with `uv sync`
+- `npm run dev` starts the backend and the frontend together, prints the app's address and opens it in the browser
 - `npm test` runs all the tests and fails if any test fails
-- `npm run seed` resets the database to the sample data
+- `npm run seed` resets the database to the sample data, after asking
 
 `docs/STATUS.md` says how to run the app. `README.md` is the course's own guide, so leave it as it is.
 
