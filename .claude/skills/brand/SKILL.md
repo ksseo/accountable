@@ -7,12 +7,11 @@ description: Accountable's brand guidelines for fonts, colors, surfaces and tone
 
 ## Fonts
 
-All are on Google Fonts. In the app they're bundled from npm (`@fontsource` packages) instead, so it works offline; a standalone mockup may load them from Google Fonts.
+The screens are in Korean, so everything uses one font that has both Korean and Latin letters: **Noto Sans KR**, weights 400, 500, 600 and 700. That covers headings, body, numbers, amounts and the Accountable wordmark (bold). Its numbers are all the same width, so amounts line up in columns without a monospace font. Never use italic; Korean fonts have none.
 
-- **Headings and body**: Instrument Sans
-- **Accent (a tagline or a quote)**: Instrument Serif
-- **Code, numbers and identifiers**: JetBrains Mono
-- **Korean text**: Noto Sans KR behind Instrument Sans and JetBrains Mono, and Noto Serif KR behind Instrument Serif. Latin letters and numbers keep the brand fonts, and the browser takes each Korean letter from the Korean font. Korean is never set in italic.
+The brand's original fonts (Instrument Sans, Instrument Serif and JetBrains Mono) aren't used: they have no Korean letters, and mixing them with a Korean font looks patchy.
+
+Noto Sans KR is on Google Fonts. In the app it's bundled from npm (`@fontsource/noto-sans-kr`) instead, so the app works offline; a standalone mockup may load it from Google Fonts.
 
 ## Colors
 

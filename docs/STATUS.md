@@ -1,5 +1,5 @@
 # Status
 
 - Plan: `docs/intent.md` updated with interview answers (deletion rules, stage probabilities, Won/Lost columns, timelines, Korean UI, sample data, accessibility, scale).
-- Design: `docs/spec.md` written and its concerns answered (Korean glossary, bundled fonts with Noto Sans KR and Noto Serif KR, contrast-safe ink shades, stage colors). `docs/TECH_STACK.md` and the brand skill updated to match. Mockups not made yet.
+- Design: `docs/spec.md` written and its concerns answered (Korean glossary, contrast-safe ink shades, stage colors). `docs/TECH_STACK.md` and the brand skill updated to match. Three mockups of the dashboard and pipeline are in `docs/mockups/` (1-open-ledger, 2-side-desk, 3-stage-lanes), each with dashboard and pipeline screenshots. Mockup 3, Stage lanes, was chosen; the reasons and the layout to follow are in `docs/spec.md` 6.1. After the mockups, the fonts changed to one font for all text: Noto Sans KR for Korean, Latin letters, numbers and the wordmark. The brand's Instrument Sans, Instrument Serif and JetBrains Mono are no longer used. The brand skill, `docs/spec.md`, `docs/intent.md` and the mockups were updated to match.
 - Build has not started.

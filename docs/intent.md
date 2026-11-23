@@ -35,7 +35,7 @@ Accountable comes with realistic sample data, so every screen looks alive the fi
 
 The look follows Accountable's brand guidelines, which take priority over any general design guidance. The MVP is light mode, designed for a laptop or desktop screen.
 
-The screens are in Korean. Dates are written the Korean way (2026. 11. 23.) and amounts in US dollars ($12,500). Korean text uses Noto Sans KR, and Latin letters and numbers keep the brand fonts.
+The screens are in Korean. Dates are written the Korean way (2026. 11. 23.) and amounts in US dollars ($12,500). All text uses Noto Sans KR, including Latin letters and numbers, so a line never mixes fonts.
 
 Everything can be done from the keyboard, including moving a deal to another stage on the pipeline. Text has enough contrast to read easily, and every input has a label.
 

@@ -1,0 +1,68 @@
+/* Brand tokens and a small reset shared by the three mockups. */
+:root {
+  --sea-green: #06D6A0;
+  --marigold: #FFC145;
+  --coral: #F78C6B;
+  --cerulean: #118AB2;
+  --raspberry: #EF476F;
+  --midnight: #073B4C;
+  --sea-mist: #CDD8DB;
+  --page: #F0F4F5;
+  --panel: #FFFFFF;
+
+  /* Darker shades for text, thin lines and small white-on-color labels (spec LOOK-4). */
+  --sea-green-ink: #047A5C;
+  --marigold-ink: #8A6000;
+  --coral-ink: #A8432A;
+  --cerulean-ink: #0D7194;
+  --raspberry-ink: #C2244C;
+  --muted: #4A6470;
+
+  /* One font for all text, Korean and Latin, so a line never mixes typefaces.
+     Its numbers are all the same width, so amounts line up. */
+  --font-sans: "Noto Sans KR", sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { background: var(--page); }
+
+body {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--midnight);
+  background: var(--page);
+  font-variant-numeric: tabular-nums;
+  word-break: keep-all;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+ul, ol { list-style: none; }
+
+.icon {
+  width: 18px; height: 18px; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 1.75;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+:focus-visible { outline: 2px solid var(--cerulean-ink); outline-offset: 2px; }
+
+[hidden] { display: none !important; }
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; overflow: hidden;
+  clip: rect(0 0 0 0); white-space: nowrap;
+}
+
+.check {
+  appearance: none; width: 18px; height: 18px; flex: none; margin-top: 2px;
+  border-radius: 5px; border: 2px solid #5B7681; background: var(--panel); cursor: pointer;
+}
+.check:checked { background: var(--sea-green-ink); border-color: var(--sea-green-ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}

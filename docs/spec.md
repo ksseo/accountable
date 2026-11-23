@@ -1,14 +1,14 @@
 # Spec: the Accountable MVP
 
-This spec turns `docs/intent.md` into requirements and a design. The intent says what and why; this file says how it works and how it looks. The stack is in `docs/TECH_STACK.md` and the brand in `.claude/skills/brand/SKILL.md`. The exact look of the dashboard and the pipeline is chosen from the mockups in `docs/mockups/` (the next step) and recorded here afterwards.
+This spec turns `docs/intent.md` into requirements and a design. The intent says what and why; this file says how it works and how it looks. The stack is in `docs/TECH_STACK.md` and the brand in `.claude/skills/brand/SKILL.md`. The look of the dashboard and the pipeline follows mockup 3, Stage lanes, in `docs/mockups/`; the choice and the reasons are in 6.1.
 
 ## Concerns and answers
 
 These were raised when the spec was first written and answered on 2026. 11. 23. The rest of the spec follows the answers.
 
 1. **Korean names for sections, stages and statuses.** The intent names everything in English. *Answer:* use the glossary in 7.1 (거래처, 연락처, 영업 기회; 신규, 적격, 제안, 협상, 수주, 실주; 리드, 적격, 고객), which is close to the words Korean Salesforce uses.
-2. **Fonts can't come from Google Fonts.** The brand says "From Google Fonts", but the app must work offline, and the brand didn't mention a Korean font. *Answer:* every font is bundled as an `@fontsource` npm package (LOOK-1), and the brand skill now lists the Korean fonts and says they're bundled.
-3. **Instrument Serif has no Korean letters.** Korean in the serif accent would fall back to some other font and look mismatched. Korean fonts almost always include Latin letters and numbers; it's the brand's Latin fonts that lack Korean. *Answer:* add Noto Serif KR, the most widely used free Korean serif and the partner of Noto Sans KR, behind Instrument Serif in the accent's font stack. Latin letters and numbers keep Instrument Serif and Korean uses Noto Serif KR (LOOK-2). Korean accent text is never italic, since Korean fonts have no italic.
+2. **Fonts can't come from Google Fonts.** The brand says "From Google Fonts", but the app must work offline, and the brand didn't mention a Korean font. *Answer:* every font is bundled as an `@fontsource` npm package (LOOK-1), and the brand skill now names the Korean font and says it's bundled.
+3. **The brand fonts have no Korean letters.** Instrument Sans, Instrument Serif and JetBrains Mono cover only Latin letters and numbers, so Korean text set in them falls back to another font. Korean fonts almost always include Latin letters and numbers. *Answer:* all text uses Noto Sans KR, the most widely used free Korean font, including Latin letters, numbers and amounts (LOOK-2). Its numbers are all the same width, so amounts still line up without JetBrains Mono. The Accountable wordmark uses it too, in bold, so no brand font is left. *Revised after the mockups:* the first answer kept the brand fonts for Latin letters and numbers with Noto Sans KR and Noto Serif KR behind them, but one short label such as "예상 $20,000" then drew on three fonts and the screens looked patchy.
 4. **Some brand pairings fail the contrast the intent asks for.** White text on Cerulean measures 3.96:1 and on Raspberry 3.62:1, below the 4.5:1 needed for normal text. As text on white, Sea Green is 1.89:1, Marigold 1.62:1 and Coral 2.35:1. *Answer:* the darker ink shades in LOOK-4, which all reach 4.5:1 on white and on the page background, for text, thin lines and small white-on-color labels. The bright colors stay for large fills such as columns, bars, funnel segments and big buttons.
 5. **Six stages, five brand colors, and Raspberry means alert.** A Raspberry "Won" column would read as a warning. *Answer:* New to Negotiation in the brand's order (Sea Green, Marigold, Coral, Cerulean), Won in Midnight, Lost in Sea Mist, and Raspberry only for late deals and overdue follow-ups (LOOK-5).
 6. **Optional fields.** *Answer:* a contact's organization, a deal's organization and main contact, and an open deal's close date are all optional. A deal with no close date is never late.
@@ -87,7 +87,7 @@ Mature libraries do these jobs, and none of them is hand-rolled (TECH_STACK.md).
 | Forms and validation | React Hook Form with Zod |
 | Icons | Lucide React |
 | Date arithmetic | date-fns |
-| Fonts | `@fontsource/instrument-sans`, `@fontsource/instrument-serif`, `@fontsource/jetbrains-mono`, `@fontsource/noto-sans-kr`, `@fontsource/noto-serif-kr` |
+| Font | `@fontsource/noto-sans-kr` |
 | Styles | CSS Modules and CSS custom properties for the brand tokens |
 | Running both servers | concurrently |
 | Backend | FastAPI, Pydantic, SQLAlchemy Core, Alembic, Uvicorn |
@@ -196,7 +196,7 @@ The rules live in plain backend functions in the feature they belong to, with un
 
 ### 4.1 Shared layout
 
-- **[UI-1]** A navigation bar with the wordmark "Accountable" and the five sections in the intent's order: 대시보드, 거래처, 연락처, 영업 기회, 파이프라인. The current section is marked visually and with `aria-current="page"`. Whether it sits on the left or the top is decided by the chosen mockup.
+- **[UI-1]** A navigation bar with the wordmark "Accountable" and the five sections in the intent's order: 대시보드, 거래처, 연락처, 영업 기회, 파이프라인. The current section is marked visually and with `aria-current="page"`. It runs across the top of the page, with no sidebar (6.1).
 - **[UI-2]** Each page starts with a header row: the page title, a one-line summary in plain words (for example "연락처 248명 · 고객 61명"), and the page's actions as buttons on the right.
 - **[UI-3]** Content sits in white panels on the page background, rounded, with no outline (LOOK-6).
 - **[UI-4]** Saving, deleting and moving show a short message that disappears by itself, such as "저장했어요" or "김민준 님이 고객이 되었어요", announced to screen readers.
@@ -206,12 +206,12 @@ The rules live in plain backend functions in the feature they belong to, with un
 
 ### 4.2 Dashboard (`/`)
 
-The landing page. Which figures each panel shows is set here; how they're arranged is settled by the chosen mockup.
+The landing page. Which figures each panel shows is set here; how they're arranged is in 6.1.
 
 - **[DASH-1]** All figures come from one call, `GET /api/dashboard`, so they agree with each other. The dashboard fetches fresh figures every time it's shown, so a deal marked won or a new follow-up shows up straight away.
 - **[DASH-2]** Header: the title, today's date ("2026. 11. 23. (월)"), and a summary such as "기한 지난 후속 조치 3건 · 지연된 영업 기회 2건".
 
-Four figures, amounts in JetBrains Mono at a large size:
+Four figures, amounts in bold at a large size:
 
 - **[DASH-3]** **진행 중 파이프라인**: total value of open deals, and how many.
 - **[DASH-4]** **예상 매출**: expected revenue of open deals (RULE-1), and its share of the open pipeline.
@@ -222,7 +222,7 @@ Charts:
 
 - **[DASH-7]** **월별 수주 금액** (line chart): revenue won per month for the last 12 months, including this one. Hovering or focusing a month shows the month and amount.
 - **[DASH-8]** **월별 수주·실주 건수** (bar chart): deals won and deals lost per month for the same 12 months, side by side, won in Sea Green and lost in Coral, each bar labeled with its count.
-- **[DASH-9]** **단계별 파이프라인** (visual of the pipeline): one bar per open stage in its stage color, its length showing the stage's total value, with the value and expected revenue written beside it. Clicking a stage opens the Pipeline board.
+- **[DASH-9]** **단계별 파이프라인** (visual of the pipeline): one band across the top panel, under the four figures. Each open stage is a block in its stage color, its width set by the stage's total value, showing the stage name, the number of deals and the total value. A small stage keeps a minimum width so its label still fits. Under each block, a bar shows how much of the stage's value is expected revenue, with the amount ("예상 $48,250"). A line under the band says "칸의 너비는 단계별 금액, 아래 막대는 그중 예상 매출의 비율이에요." Clicking a block opens the Pipeline board.
 - **[DASH-10]** **영업 퍼널** (sales funnel): New, Qualified, Proposal, Negotiation and Won as segments that narrow from top to bottom, each width set by the value that reached that stage (RULE-13), with a minimum width so small segments stay readable. Beside each: the value, the number of deals and the share of New. Underneath: "신규 → 수주 전환율 (금액 기준)" with its percentage.
 - **[DASH-11]** Each chart has a short text summary for screen readers, and its figures are available as a table (A11Y-6).
 
@@ -306,13 +306,10 @@ JSON under `/api`. Amounts are integers, dates are `YYYY-MM-DD`, timestamps are 
 
 ## 6. Look
 
-The brand skill takes priority over general design guidance. The chosen mockup settles layout, spacing and detail; these rules hold whichever is chosen.
+The brand skill takes priority over general design guidance. The chosen mockup (6.1) settles layout, spacing and detail; where it and these rules disagree, these rules win.
 
-- **[LOOK-1]** Fonts are bundled from npm (APP-4): Instrument Sans, Instrument Serif, JetBrains Mono, Noto Sans KR (weights 400, 500 and 700) and Noto Serif KR (weight 400). The Korean fonts come in many small pieces, and the browser loads only the pieces for the Korean letters on screen.
-- **[LOOK-2]** Font stacks. Each puts a brand font first, so Latin letters and numbers use it, and the browser takes each Korean letter from the Korean font behind it:
-  - text and headings: `"Instrument Sans", "Noto Sans KR", sans-serif`
-  - amounts, percentages and dates in tables and figures: `"JetBrains Mono", "Noto Sans KR", monospace`
-  - accent (the wordmark, the dashboard's headline line, a tagline): `"Instrument Serif", "Noto Serif KR", serif`. Italic is allowed only for Latin text, since Korean fonts have no italic.
+- **[LOOK-1]** One font, bundled from npm (APP-4): Noto Sans KR, weights 400, 500, 600 and 700. It comes in many small pieces, and the browser loads only the pieces for the letters on screen.
+- **[LOOK-2]** Everything uses `"Noto Sans KR", sans-serif`: text, headings, amounts, percentages, dates and the Accountable wordmark (bold). One font covers Korean, Latin letters and numbers, so a line never mixes typefaces. Amounts get `font-variant-numeric: tabular-nums` so they line up in tables and figures. No italic anywhere, since Korean fonts have no italic.
 - **[LOOK-3]** Colors are CSS custom properties in one file, named after the brand: `--sea-green`, `--marigold`, `--coral`, `--cerulean`, `--raspberry`, `--midnight`, `--sea-mist`, `--page` (`#F0F4F5`) and `--panel` (white), plus the ink shades below. Body text is Midnight.
 - **[LOOK-4]** Bright brand colors are for fills: columns, bars, funnel segments, badges and large buttons, with Midnight text on Sea Green, Marigold, Coral and Sea Mist. For text, thin lines, small icons and white-on-color small text, use the darker ink shades. Each reaches 4.5:1 on white and on the page background:
 
@@ -332,6 +329,39 @@ White on Cerulean (3.96) and on Raspberry (3.62) are allowed only for large text
 - **[LOOK-8]** Charts: thin lines and points use ink shades; bars and segments use fills with their value written in Midnight; grid lines are faint Sea Mist; tooltips are Midnight with white text.
 - **[LOOK-9]** Keyboard focus shows a 2px Cerulean ink ring with a small gap, on every focusable thing.
 - **[LOOK-10]** Icons are Lucide, at one stroke width, always beside a text label or with an accessible name.
+
+### 6.1 Chosen mockup
+
+Chosen on 2026. 11. 23.: **mockup 3, Stage lanes** (`docs/mockups/3-stage-lanes.html`, screenshots `3-stage-lanes-dashboard.png` and `3-stage-lanes-pipeline.png`). The build follows its layout, spacing and detail. Its sample figures are only for the mockup; the real ones come from the API.
+
+Why this one:
+
+- The open pipeline comes first on the dashboard, as one band of stage colors, so it's clear at a glance where the deals stand.
+- It looks like a screen for daily work, not a manual.
+- Mockup 1, Open ledger, made this month's won revenue the headline. The dashboard then read as a report on wins rather than a review of the whole pipeline.
+- Mockup 2, Side desk, with its dark sidebar and dense panels, felt like a manual.
+
+Layout to follow:
+
+- **Top bar**: the wordmark on the left, with a small mark of four rounded blocks in the four open-stage colors. The five sections are a segmented control on a `#E3EAEC` track, with the current one on white. The Midnight "영업 기회 추가" button is on the right.
+- **Dashboard**, on a 12-column grid with 22px gaps, in this order:
+  1. Full width: the top panel with the four figures (DASH-3 to DASH-6), the open pipeline largest, and the pipeline band under them (DASH-9).
+  2. 월별 수주 금액 (7 columns) beside 월별 수주·실주 건수 (5 columns).
+  3. 영업 퍼널 as stacked trapezoids, with the figures to their right (5 columns), beside 후속 조치 as one-line rows with the date on the right (7 columns).
+  4. Full width: 최근 활동 in two columns.
+- **Pipeline**: under the header, a thin band of the open stages with each stage's share of the open value written under it. Then six lanes, each with a light background in its stage's tint, holding white cards. A lane's head has the stage name in its ink shade, a count pill, the total, expected revenue ("최근 30일" for Won and Lost) and, for open stages, a bar for its share of the open value. The "추가" button sits at the top of the lane, above the cards. A late card starts with a "지연 N일" chip (a clock icon, white text on Raspberry ink), and its close date and probability turn Raspberry ink.
+- **Sizes**: panels have 26px corners, lanes 22px and cards 14px. Page titles are 32px bold. The open pipeline figure is 40px and the other three figures 28px.
+
+Lane colors. Every title and the muted text (`#4A6470`) on these tints reaches 4.5:1:
+
+| Stage | Lane tint | Title ink | Title on tint | Muted text on tint |
+| --- | --- | --- | --- | --- |
+| 신규 | `#E1FAF3` | `#047A5C` | 4.86 | 5.73 |
+| 적격 | `#FFF5DE` | `#8A6000` | 5.16 | 5.78 |
+| 제안 | `#FEEDE7` | `#A8432A` | 5.28 | 5.52 |
+| 협상 | `#E2F1F6` | `#0D7194` | 4.77 | 5.42 |
+| 수주 | `#E3E9EC` | `#073B4C` | 9.85 | 5.12 |
+| 실주 | `#EBF0F1` | `#4A6470` | 5.46 | 5.46 |
 
 ## 7. Korean text and formats
 
