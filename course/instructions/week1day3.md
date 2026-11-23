@@ -6,7 +6,7 @@ All the prompts to take Accountable's MVP through the six stages, then share you
 
 You share today's documents in a pull request at the end of the day, and that needs your own fork:
 
-1. Open https://github.com/ed-donner/accountable and click **Fork**, then **Create fork**.
+1. Open <https://github.com/ed-donner/accountable> and click **Fork**, then **Create fork**.
 2. Add your fork as a second remote, with your GitHub username in place of `<username>`:
 
 ```
@@ -81,6 +81,14 @@ git commit -m "Design: chosen mockup"
 
 ```
 Read docs/intent.md and docs/spec.md and write docs/plan.md with four sections: Files that change, Order of work, Risks and Proof. Order the work in phases. Proof lists the unit and end-to-end tests. Don't write any code yet.
+```
+
+```
+The plan.md document identifies Spec IDs delivered against each part of the plan. How can you be sure that you covered all the Spec IDs? ... Please reply with a table listing all Spec IDs and referencing which phase of the plan they are delivered in, for traceable ...
+```
+
+```
+Are you satisfied that the packaging structure is well designed and a good foundation for the future? In the backend, there seem to be a lot of modules in app/. I haven't checked the frontedn. I don't want over-engineered abstractions or helpers, but I do want a sensible foundation for futrue expansion
 ```
 
 Then question the plan. For example: What could this break? Which step is riskiest? What did you decide against? Keep revising it until another engineer could build from `docs/plan.md` alone.
