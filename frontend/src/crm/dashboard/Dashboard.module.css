@@ -1,0 +1,380 @@
+/* The dashboard, after mockup 3 (docs/spec.md 6.1). */
+
+.band {
+  display: flex;
+  gap: 4px;
+  margin: 30px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bandItem {
+  flex-basis: 0;
+  min-width: 0;
+}
+
+.bandBlock {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 84px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  outline: none;
+}
+
+.bandBlock:focus-visible {
+  outline: 2px solid var(--cerulean-ink);
+  outline-offset: 2px;
+}
+
+.bandName {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.bandName span {
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.bandValue {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.bandExpected {
+  height: 12px;
+  margin-top: 8px;
+  border-radius: 6px;
+  background: var(--track);
+  overflow: hidden;
+}
+
+.bandExpected span {
+  display: block;
+  height: 100%;
+  border-radius: 6px;
+}
+
+.bandExpectedLabel {
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bandExpectedLabel b {
+  font-weight: 500;
+  color: var(--midnight);
+}
+
+.bandKey {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.funnel {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+.funnelName {
+  font-size: 13.5px;
+  font-weight: 700;
+}
+
+.funnelValue {
+  font-size: 14px;
+  font-weight: 600;
+  fill: var(--midnight);
+}
+
+.funnelSub {
+  font-size: 12px;
+  fill: var(--muted);
+}
+
+.funnelFoot {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 12px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.funnelFoot b {
+  font-size: 20px;
+  color: var(--midnight);
+}
+
+.axis {
+  font-size: 11.5px;
+  font-weight: 500;
+  fill: var(--muted);
+}
+
+.tooltip {
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: var(--midnight);
+  color: #fff;
+  font-size: 13px;
+}
+
+.tooltipTitle {
+  font-weight: 600;
+}
+
+.pointLabel {
+  font-size: 13px;
+  font-weight: 600;
+  fill: var(--midnight);
+}
+
+.barLabel {
+  font-size: 11px;
+  font-weight: 600;
+  fill: var(--midnight);
+}
+
+.legend {
+  display: inline-flex;
+  gap: 16px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.legend i {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  margin-right: 6px;
+  border-radius: 3px;
+  vertical-align: -1px;
+}
+
+/* The 12-column grid from mockup 3; one column below 1180px. */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--gap);
+  align-items: start;
+}
+
+.full {
+  grid-column: span 12;
+}
+
+.wide {
+  grid-column: span 7;
+}
+
+.narrow {
+  grid-column: span 5;
+}
+
+@media (max-width: 1180px) {
+  .wide,
+  .narrow {
+    grid-column: span 12;
+  }
+}
+
+.hero {
+  padding: 30px 32px;
+  border-radius: var(--radius-panel);
+  background: var(--panel);
+  min-width: 0;
+}
+
+.figures {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr 1fr 1fr;
+  gap: 24px;
+}
+
+.figureLabel {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.figureValue {
+  margin-top: 2px;
+  font-size: 28px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.figureMain .figureValue {
+  font-size: 40px;
+}
+
+.figureSub {
+  margin-top: 2px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.up {
+  color: var(--sea-green-ink);
+  font-weight: 600;
+}
+
+.figureLink {
+  border-radius: 14px;
+  outline: none;
+}
+
+.figureLink:hover .figureLabel {
+  color: var(--midnight);
+}
+
+.figureLink:focus-visible {
+  outline: 2px solid var(--cerulean-ink);
+  outline-offset: 4px;
+}
+
+.late .figureValue,
+.late .figureSub b {
+  color: var(--raspberry-ink);
+}
+
+.late .figureSub b {
+  font-weight: 600;
+}
+
+@media (max-width: 1100px) {
+  .figures {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.todo {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.todo li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 10px 16px;
+  border-radius: var(--radius-card);
+  background: var(--page);
+}
+
+.todoMain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 10px;
+  min-width: 0;
+}
+
+.todoWhat {
+  font-size: 14.5px;
+  font-weight: 500;
+}
+
+.on {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.on a {
+  color: var(--cerulean-ink);
+  font-weight: 500;
+}
+
+.when {
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.overdue {
+  color: var(--raspberry-ink);
+}
+
+.today {
+  color: var(--sea-green-ink);
+}
+
+.upcoming {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.todoFoot {
+  margin-top: 12px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.feed {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px 40px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+@media (max-width: 900px) {
+  .feed {
+    grid-template-columns: 1fr;
+  }
+}
+
+.feed li {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.feedIcon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: var(--page);
+  color: var(--midnight);
+}
+
+.feedBody {
+  min-width: 0;
+}
+
+.feedText {
+  font-size: 14px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.feed .on {
+  margin-top: 1px;
+  font-size: 12.5px;
+}
+
+.at {
+  font-size: 12.5px;
+  color: var(--muted);
+  white-space: nowrap;
+}

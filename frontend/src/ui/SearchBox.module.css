@@ -1,0 +1,44 @@
+.field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: min(360px, 100%);
+}
+
+.icon {
+  position: absolute;
+  left: 13px;
+  color: var(--muted);
+  pointer-events: none;
+}
+
+.input {
+  width: 100%;
+  height: 42px;
+  padding: 0 40px 0 40px;
+  border: 1px solid var(--control-line);
+  border-radius: var(--radius-control);
+  background: var(--panel);
+  outline: none;
+}
+
+.input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.input[data-focused] {
+  outline: 2px solid var(--cerulean-ink);
+  outline-offset: 2px;
+}
+
+.input::placeholder {
+  color: var(--muted);
+}
+
+.clear {
+  position: absolute;
+  right: 5px;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+}

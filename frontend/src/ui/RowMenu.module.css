@@ -1,0 +1,53 @@
+.trigger {
+  width: 34px;
+  padding: 0;
+}
+
+.popover {
+  min-width: 160px;
+  background: var(--panel);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-lift);
+  padding: 6px;
+  outline: none;
+}
+
+.menu {
+  outline: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+}
+
+.item[data-focused] {
+  background: var(--page);
+}
+
+.item[data-focus-visible] {
+  outline: 2px solid var(--cerulean-ink);
+  outline-offset: -2px;
+}
+
+.danger {
+  color: var(--raspberry-ink);
+}
+
+.item[data-disabled] {
+  color: var(--muted);
+  opacity: 0.55;
+  cursor: default;
+}
+
+.item[data-open] {
+  background: var(--page);
+}

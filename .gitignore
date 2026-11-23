@@ -76,3 +76,8 @@ Thumbs.db
 logs/
 *.log
 tmp/
+
+# Accountable's data and the end-to-end tests' own database and server state
+backend/data/
+e2e/.data/
+e2e/.run/

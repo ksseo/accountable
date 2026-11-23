@@ -1,0 +1,126 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 18px;
+}
+
+/* A wide table scrolls inside its panel, so the page never scrolls sideways. */
+.scroller {
+  overflow-x: auto;
+  margin: 0 -8px;
+  padding: 0 8px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 14px;
+}
+
+.table th {
+  height: 40px;
+  padding: 0 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: left;
+  white-space: nowrap;
+  background: var(--page);
+}
+
+/* Cells sit at fractional widths; reaching 1px into the next cell hides the
+   light seam the browser would draw between two backgrounds. */
+.table th:not(:last-child) {
+  box-shadow: 1px 0 0 var(--page);
+}
+
+.table th:first-child {
+  border-radius: 12px 0 0 12px;
+}
+
+.table th:last-child {
+  border-radius: 0 12px 12px 0;
+}
+
+.table td {
+  height: 52px;
+  padding: 6px 10px;
+  vertical-align: middle;
+}
+
+.table tbody tr + tr td {
+  border-top: 1px solid var(--track);
+}
+
+.row {
+  cursor: pointer;
+}
+
+.row:hover td {
+  background: #f7fafa;
+}
+
+.row:hover td:not(:last-child) {
+  box-shadow: 1px 0 0 #f7fafa;
+}
+
+.end {
+  text-align: right !important;
+}
+
+.end .sort {
+  margin-left: auto;
+}
+
+.nowrap {
+  white-space: nowrap;
+}
+
+.sort {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 30px;
+  padding: 0 6px;
+  margin: 0 -6px;
+  border-radius: 8px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.sort:hover,
+.sorted {
+  color: var(--midnight);
+}
+
+.menuCell {
+  width: 48px;
+  text-align: right;
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.range {
+  margin-right: auto;
+}
+
+.pageNumber {
+  min-width: 56px;
+  text-align: center;
+  color: var(--midnight);
+}

@@ -1,0 +1,148 @@
+/* Record pages: details and linked records on the left, the figures, deals or
+   timeline on the right; one column on narrower screens. */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--gap);
+  align-items: start;
+}
+
+.column {
+  display: grid;
+  gap: var(--gap);
+  min-width: 0;
+}
+
+@media (max-width: 1100px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.details {
+  display: grid;
+  gap: 14px;
+  margin: 0;
+}
+
+.detail {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+}
+
+.detail dt {
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.detail dd {
+  margin: 0;
+  font-size: 14.5px;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.detail dd a {
+  color: var(--cerulean-ink);
+  font-weight: 500;
+}
+
+.none {
+  color: var(--muted);
+}
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 18px;
+  margin: 0;
+}
+
+.figure dt {
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.figure dd {
+  margin: 4px 0 0;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.figureNote {
+  display: block;
+  margin-top: 2px;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--muted);
+}
+
+.list {
+  display: grid;
+  gap: 6px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: var(--radius-card);
+  background: var(--page);
+}
+
+.rowMain {
+  min-width: 0;
+}
+
+.rowTitle {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  font-size: 14.5px;
+}
+
+.rowMeta {
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.rowEnd {
+  flex: none;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.rowEnd small {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.external {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.stage {
+  max-width: 220px;
+}
+
+.late {
+  color: var(--raspberry-ink);
+  font-weight: 500;
+}

@@ -1,0 +1,141 @@
+.group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 4px;
+}
+
+.group[data-focus-within] {
+  outline: 2px solid var(--cerulean-ink);
+  outline-offset: 2px;
+}
+
+.input {
+  display: flex;
+  align-items: center;
+}
+
+.segment {
+  padding: 0 1px;
+  /* Literal parts such as ". " keep their space: "2026. 11. 23." */
+  white-space: pre;
+  border-radius: 4px;
+  outline: none;
+}
+
+.segment[data-placeholder] {
+  color: var(--muted);
+}
+
+.segment[data-type='literal'] {
+  padding: 0;
+}
+
+.segment[data-focused] {
+  background: var(--cerulean-ink);
+  color: #fff;
+}
+
+.open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: var(--muted);
+}
+
+.open[data-hovered] {
+  background: var(--page);
+}
+
+.popover {
+  background: var(--panel);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-lift);
+  outline: none;
+}
+
+.dialog {
+  padding: 14px;
+  outline: none;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.month {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+}
+
+.nav[data-hovered] {
+  background: var(--page);
+}
+
+.grid {
+  border-spacing: 2px;
+}
+
+.grid th {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  height: 28px;
+}
+
+.cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  font-size: 14px;
+  cursor: pointer;
+  outline: none;
+}
+
+.cell[data-outside-month] {
+  display: none;
+}
+
+.cell[data-hovered] {
+  background: var(--page);
+}
+
+.cell[data-selected] {
+  background: var(--midnight);
+  color: #fff;
+  font-weight: 600;
+}
+
+.cell[data-focus-visible] {
+  outline: 2px solid var(--cerulean-ink);
+  outline-offset: 1px;
+}
+
+/* A date and time with no calendar button: the parts sit together on the left. */
+.dateTime {
+  display: flex;
+  align-items: center;
+}
+
+.dateTime[data-focus-within] {
+  outline: 2px solid var(--cerulean-ink);
+  outline-offset: 2px;
+}

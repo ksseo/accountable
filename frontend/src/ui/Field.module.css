@@ -1,0 +1,86 @@
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.label {
+  font-size: 13.5px;
+  font-weight: 600;
+}
+
+.required {
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.inputRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Inputs keep a full outline so their edges reach 3:1 against white. */
+.input {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--control-line);
+  border-radius: var(--radius-control);
+  background: var(--panel);
+  outline: none;
+}
+
+.input[data-focus-visible],
+.input:focus-visible,
+.input[data-focused] {
+  outline: 2px solid var(--cerulean-ink);
+  outline-offset: 2px;
+}
+
+.input[data-invalid],
+.input[aria-invalid='true'] {
+  border-color: var(--raspberry-ink);
+}
+
+.input::placeholder {
+  color: var(--muted);
+}
+
+.textarea {
+  height: auto;
+  min-height: 96px;
+  padding: 10px 12px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.suffix {
+  flex: none;
+  color: var(--muted);
+}
+
+.description {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.error {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--raspberry-ink);
+}

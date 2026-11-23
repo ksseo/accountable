@@ -1,0 +1,31 @@
+.control {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input {
+  padding-right: 42px;
+}
+
+.toggle {
+  position: absolute;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  color: var(--muted);
+}
+
+.toggle[data-hovered] {
+  background: var(--page);
+}
+
+.none {
+  padding: 10px 12px;
+  color: var(--muted);
+  font-size: 14px;
+}

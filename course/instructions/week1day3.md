@@ -129,7 +129,7 @@ Start the app, use Playwright to compare it with the chosen mockup, and fix what
 
 ### Check it yourself
 
-Run `npm test` yourself. Then start the app the way `docs/STATUS.md` says, open it in your browser and check the success criteria in `docs/intent.md`.
+Run `npm run test`, `npm run dev` & `http://localhost:OOOO` yourself. Then start the app the way `docs/STATUS.md` says, open it in your browser and check the success criteria in `docs/intent.md`.
 
 ```
 git add .

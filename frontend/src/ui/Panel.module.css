@@ -1,0 +1,29 @@
+.panel {
+  background: var(--panel);
+  border-radius: var(--radius-panel);
+  padding: 26px 28px;
+  min-width: 0;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.title {
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.aside {
+  font-size: 13.5px;
+  color: var(--muted);
+}
+
+.aside b {
+  color: var(--midnight);
+  font-weight: 600;
+}

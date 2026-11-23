@@ -1,0 +1,26 @@
+.region {
+  position: fixed;
+  left: 50%;
+  bottom: 28px;
+  transform: translateX(-50%);
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+  z-index: 200;
+  pointer-events: none;
+}
+
+.toast {
+  background: var(--midnight);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 11px 18px;
+  border-radius: var(--radius-control);
+  box-shadow: var(--shadow-lift);
+  max-width: min(560px, calc(100vw - 32px));
+}
+
+.error {
+  background: var(--raspberry-ink);
+}

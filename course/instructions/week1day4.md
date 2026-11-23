@@ -68,6 +68,8 @@ This is the longest step of the day. The prompt asks for 80% unit test coverage,
 Optional, in Claude Code only: start the prompt with "Use a dynamic workflow to" and lowercase the "Add" that follows. Claude Code then splits the work across several agents at once, which can be faster but uses more of your plan's limits.
 
 ```
+Please use dynamic workflows to carry this out efficiently, particularly to fix any existing problems across the repo.
+
 Add npm run check, which runs all of these and fails if any of them fails:
 - Prettier and ESLint for the frontend, using the recommended TypeScript, React Hooks and accessibility rules
 - ruff format and ruff check for the backend

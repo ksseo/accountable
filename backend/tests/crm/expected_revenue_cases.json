@@ -1,0 +1,15 @@
+[
+  { "value": 1, "probability": 50, "expected": 1, "why": "half rounds up; Python's round() would give 0" },
+  { "value": 3, "probability": 50, "expected": 2, "why": "1.5 rounds up" },
+  { "value": 5, "probability": 10, "expected": 1, "why": "0.5 rounds up" },
+  { "value": 250, "probability": 1, "expected": 3, "why": "2.5 rounds up; round() would give 2" },
+  { "value": 1, "probability": 49, "expected": 0, "why": "0.49 rounds down" },
+  { "value": 999, "probability": 75, "expected": 749, "why": "749.25 rounds down" },
+  { "value": 12345, "probability": 33, "expected": 4074, "why": "4073.85 rounds up" },
+  { "value": 10000, "probability": 25, "expected": 2500, "why": "exact" },
+  { "value": 0, "probability": 50, "expected": 0, "why": "nothing" },
+  { "value": 48250, "probability": 0, "expected": 0, "why": "lost" },
+  { "value": 1000000000, "probability": 100, "expected": 1000000000, "why": "the largest value" },
+  { "value": 1000000000, "probability": 99, "expected": 990000000, "why": "large and exact" },
+  { "value": 33333, "probability": 50, "expected": 16667, "why": "16666.5 rounds up" }
+]

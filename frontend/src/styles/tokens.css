@@ -1,0 +1,70 @@
+/* Brand colors, ink shades, stage colors and lane tints (LOOK-3 to LOOK-5, spec 6.1). */
+:root {
+  /* Fills, for large areas: columns, bars, segments, badges, big buttons. */
+  --sea-green: #06d6a0;
+  --marigold: #ffc145;
+  --coral: #f78c6b;
+  --cerulean: #118ab2;
+  --raspberry: #ef476f;
+  --midnight: #073b4c;
+  --sea-mist: #cdd8db;
+
+  /* Surfaces. */
+  --page: #f0f4f5;
+  --panel: #ffffff;
+  --track: #e3eaec;
+
+  /* Ink shades, for text, thin lines and small white-on-color labels.
+     Each reaches 4.5:1 on white and on the page background (LOOK-4). */
+  --sea-green-ink: #047a5c;
+  --marigold-ink: #8a6000;
+  --coral-ink: #a8432a;
+  --cerulean-ink: #0d7194;
+  --raspberry-ink: #c2244c;
+  --muted: #4a6470;
+  --control-line: #5b7681;
+
+  /* Stages: fill, ink, text on the fill, lane tint (LOOK-5). */
+  --stage-new: var(--sea-green);
+  --stage-new-ink: var(--sea-green-ink);
+  --stage-new-on: var(--midnight);
+  --stage-new-tint: #e1faf3;
+
+  --stage-qualified: var(--marigold);
+  --stage-qualified-ink: var(--marigold-ink);
+  --stage-qualified-on: var(--midnight);
+  --stage-qualified-tint: #fff5de;
+
+  --stage-proposal: var(--coral);
+  --stage-proposal-ink: var(--coral-ink);
+  --stage-proposal-on: var(--midnight);
+  --stage-proposal-tint: #feede7;
+
+  /* White text on Cerulean only reaches 3.96:1, so small labels use the ink. */
+  --stage-negotiation: var(--cerulean);
+  --stage-negotiation-chip: var(--cerulean-ink);
+  --stage-negotiation-ink: var(--cerulean-ink);
+  --stage-negotiation-on: #ffffff;
+  --stage-negotiation-tint: #e2f1f6;
+
+  --stage-won: var(--midnight);
+  --stage-won-ink: var(--midnight);
+  --stage-won-on: #ffffff;
+  --stage-won-tint: #e3e9ec;
+
+  --stage-lost: var(--sea-mist);
+  --stage-lost-ink: var(--muted);
+  --stage-lost-on: var(--midnight);
+  --stage-lost-tint: #ebf0f1;
+
+  /* Sizes from the chosen mockup. */
+  --radius-panel: 26px;
+  --radius-lane: 22px;
+  --radius-card: 14px;
+  --radius-control: 12px;
+  --gap: 22px;
+
+  --font-sans: 'Noto Sans KR', sans-serif;
+
+  --shadow-lift: 0 12px 32px rgba(7, 59, 76, 0.16);
+}

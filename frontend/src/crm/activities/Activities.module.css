@@ -1,0 +1,111 @@
+.kinds {
+  align-self: flex-start;
+}
+
+.logActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.timeline {
+  display: grid;
+  gap: 18px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: var(--page);
+  color: var(--midnight);
+}
+
+.automatic {
+  color: var(--muted);
+}
+
+.body {
+  min-width: 0;
+}
+
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+}
+
+.kind {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.when {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.text {
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.on {
+  margin-top: 4px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.on a {
+  color: var(--cerulean-ink);
+}
+
+.followUp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+  margin-top: 8px;
+  font-size: 13.5px;
+}
+
+.doneText {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+
+.overdue {
+  color: var(--raspberry-ink);
+  font-weight: 600;
+}
+
+.today {
+  color: var(--midnight);
+  font-weight: 600;
+}
+
+.done {
+  color: var(--muted);
+}
+
+.more {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}

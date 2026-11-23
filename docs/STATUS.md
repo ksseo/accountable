@@ -1,5 +1,67 @@
 # Status
 
+## Running Accountable
+
+Needs Node 24 or later and uv. Everything else is installed by npm and uv.
+
+| What | Command |
+| --- | --- |
+| Install, once | `npm install` (the Node packages, then the Python packages through `uv sync`) |
+| Start | `npm run dev`. Opens `http://127.0.0.1:5173` when both servers are ready. Ctrl+C stops both. If port 8000 or 5173 is taken, it says so and stops; `ACCOUNTABLE_API_PORT` and `ACCOUNTABLE_WEB_PORT` move them |
+| Reset to the sample data | `npm run seed` asks first; `npm run seed -- --yes` doesn't |
+| Test | `npm test`: the frontend type check, pytest, Vitest, then Playwright in the installed Google Chrome. Stops at the first failure. One part at a time: `npm run test:types`, `test:backend`, `test:frontend`, `test:e2e` |
+| After changing the API | `npm run api:types` regenerates `frontend/src/api/openapi.json` and `schema.d.ts`; a test fails until it's run |
+
+The data is in `backend/data/accountable.db`, which git ignores. The first start creates it with the sample data. The tests never touch it: pytest uses a temp file per test, and the end-to-end tests use `e2e/.data/accountable-test.db` with servers on ports 8100 and 5273, so they can run while `npm run dev` is running.
+
+## Progress
+
 - Plan: `docs/intent.md` updated with interview answers (deletion rules, stage probabilities, Won/Lost columns, timelines, Korean UI, sample data, accessibility, scale).
-- Design: `docs/spec.md` written and its concerns answered (Korean glossary, contrast-safe ink shades, stage colors). `docs/TECH_STACK.md` and the brand skill updated to match. Three mockups of the dashboard and pipeline are in `docs/mockups/` (1-open-ledger, 2-side-desk, 3-stage-lanes), each with dashboard and pipeline screenshots. Mockup 3, Stage lanes, was chosen; the reasons and the layout to follow are in `docs/spec.md` 6.1. After the mockups, the fonts changed to one font for all text: Noto Sans KR for Korean, Latin letters, numbers and the wordmark. The brand's Instrument Sans, Instrument Serif and JetBrains Mono are no longer used. The brand skill, `docs/spec.md`, `docs/intent.md` and the mockups were updated to match.
-- Build: `docs/plan.md` written: the files that change, eight phases of work, the risks (the pipeline board with 1,000 deals is the riskiest step) and the tests that prove each requirement. Every requirement ID in `docs/spec.md` appears in it. No code yet.
+- Design: `docs/spec.md` written and its concerns answered (Korean glossary, contrast-safe ink shades, stage colors). `docs/TECH_STACK.md` and the brand skill updated to match. Three mockups of the dashboard and pipeline are in `docs/mockups/`; mockup 3, Stage lanes, was chosen (`docs/spec.md` 6.1). All text uses Noto Sans KR.
+- Build: `docs/plan.md` written: the files that change, eight phases of work, the risks and the tests that prove each requirement.
+- Build, phase 1, the app starts: npm workspace and uv project; backend core (settings, clock, SQLite engine with foreign keys, WAL and a busy timeout, UTC timestamps, one transaction per request), the four CRM tables and the first Alembic migration, run on start; `/api/health` and `/api/meta`; the frontend frame (fonts, color tokens, top bar from mockup 3, the eight routes, connection banner, message area); `npm run dev` with the port check; `npm run api:types`; pytest, Vitest and Playwright set up with their own databases and ports.
+- Build, phase 2, rules and sample data: the rules as plain functions with tests (expected revenue, lateness, stage changes, Won making a customer, card positions, the board's 30 days, months, funnel, follow-up window). The sample: 25 organizations, 70 contacts, 80 deals and about 250 activities, worked out from today, so every chart and list has something in it on any date. It loads on first start; `npm run seed` asks before resetting. `uv run python -m accountable.crm.bulk` loads about 1,000 of each for the speed tests.
+- Build, phase 3, the JSON API: organizations, contacts, deals and activities (add, read, edit, delete, delete-impact counts), both timelines (newest first, 50 at a time), `GET /api/pipeline`, `POST /api/deals/{id}/move` and `GET /api/dashboard`. Field rules return 422 with the field's name; automatic entries return 409 on edit or delete. With the bulk data, `/api/dashboard` and `/api/pipeline` each answer in about 12 ms (limit 300 ms), and no query reads a whole table.
+- Build, phase 4, tables and forms: the three tables search, sort and page in the browser, 50 rows a page, with all of it in the page address. Contacts have the status filter with counts; deals have the "지연된 것만" switch (`?late=1`) and the late badge. Adding and editing happen in dialogs (React Hook Form and Zod), with Korean messages under each field, the money field, the Korean date picker and comboboxes that search as you type. The deal form fills in the organization, probability and close date. Deleting asks first, with the linked-record counts. "영업 기회 추가" in the top bar opens the deal form on any page.
+- Build, phase 5, the pipeline board, as in mockup 3: the share band, six tinted lanes with their counts and totals ("최근 30일" for Won and Lost), "추가" in each lane, white cards with the "지연 N일" chip. Cards move by mouse (dnd-kit), by keyboard (Space, the arrows, Space or Escape, each step announced in Korean; Enter opens the deal) and by the card menu (단계 이동, 위로, 아래로, 수정, 삭제). The card and every total change as soon as the card enters a lane; if the save fails, the card goes back with "이동하지 못했어요. 다시 시도해 주세요." A long lane scrolls inside itself. At 1280px the six lanes fit; narrower, the board scrolls sideways and the page doesn't. A card lands below every card whose middle is above its own, the same rule on entering a lane and within one, so it lands where the board showed it during the drag.
+- Build, phase 6, record pages and timelines: the organization page shows its details (the website opens in a new tab), open pipeline and revenue won, and its contacts and deals; the contact page shows status, job title, organization, email, phone and the deals where they're the main contact; the deal page shows its figures, close date with the late badge, its links, and a stage selector that moves it as the board does (the deal goes to the top of the new lane). Contacts and deals have the "활동 기록" form (메모, 통화 or 이메일, the description, when, which can't be in the future, and an optional follow-up date) above their timeline. The timeline shows each entry's icon, kind, Korean date and time, and on a contact's page the deal it came from, 50 at a time with "더 보기". Notes, calls and emails have a menu to edit or delete; stage and status changes don't. A follow-up shows its date, how many days overdue, and a box to mark it done. Every name links to its record. Deleting from a record's page goes back to its table.
+- Build, phase 7, the dashboard, as in mockup 3: the header with today's date and a sentence on overdue follow-ups and late deals; the top panel with the four figures (open pipeline, expected revenue and its share, won this month against last month, late deals, which opens `/deals?late=1`) and the pipeline band, each block as wide as its value with a minimum, the expected-revenue bar under it, and a link to the board; 월별 수주 금액 as a Recharts line with a flat light Sea Green area, and 월별 수주·실주 건수 as bars with their counts; the funnel as trapezoids with a minimum width and the conversion rate; 후속 조치 with a checkbox that marks one done and takes it off the list; 최근 활동 in two columns. Each chart has a text summary for screen readers and "표로 보기". Focusing a chart and pressing the arrow keys shows each month's figures. The dashboard is fetched again every time it's shown. Below 1180px the panels stack. The mockup's "활동 기록" button in the header is left out: the spec doesn't list it, and an activity is always logged on a contact or deal page.
+- Build, phase 8, whole-app proof: end-to-end tests for the backend restarting (the banner shows, the page recovers, the change is kept, the seed brings the sample back), one keyboard-only pass (nav, search, sort, paging, add, edit, delete, logging an activity, marking a follow-up done, focus kept in dialogs and given back), axe on every screen and with each dialog, the date picker, a card menu and the chart tables open, the widths (nothing scrolls sideways at 1280px or 1024px; six lanes fit at 1280px; at 1024px the board scrolls inside itself), and the speed of each screen with the bulk data. The smoke test also checks every section has the sample in it. Two things found and fixed on the way: the dashboard's band and late-figure links had names that didn't match their text (WCAG 2.5.3), and a backend restarted inside a test outlived the test run, because on Windows `uv` exits with the process that started it and leaves Python running, so the test servers are now also stopped by their port.
+
+## Speed (PERF-1, PERF-2)
+
+With the bulk data, by `e2e/perf/screens.spec.ts`: each screen opened from the nav shows its content in 90 to 330 ms (limit 1 second); on the contacts table with 1,000 rows, a search updates it in about 35 to 50 ms and a click on a heading in about 70 to 100 ms (limit 200 ms).
+
+## Checks by hand (still to do)
+
+These need a person, so they aren't part of `npm test`:
+
+- From a fresh clone, `npm install` then `npm run dev` opens the dashboard.
+- Every section and action used in Chrome as a salesperson would, with the console open.
+- Each screen compared by eye with the mockup 3 screenshots. The dashboard and board were compared at 1440px and 1024px while building; the record pages have no mockup.
+- Korean typed with a Korean keyboard in search and in forms, including Enter in the middle of a letter.
+- The network unplugged, then the app started and used.
+- The Korean wording read through for tone.
+
+## Accessibility notes
+
+- axe's label-in-name rule is turned off for one check only: the date picker's calendar. React Aria names each day with the whole date ("2026년 11월 1일 일요일") while showing "1", and in Korean the day is written "1일", so the rule can't find "1" as a word.
+- In the activity form's kind buttons (메모, 통화, 이메일), the arrow keys move between them and Space picks one, as React Aria's toggle button group does.
+- A dialog opened from the keyboard puts focus on the dialog itself, so its title is read first; Tab then reaches 닫기 and the fields.
+
+## Board measurement (PERF-3)
+
+Measured with the bulk data (171, 151, 173 and 168 cards in the open lanes) in Chrome, through the dev server as `npm run dev` serves it, by `e2e/perf/board.spec.ts`: a card dragged from 신규 to 제안 in about 1.3 seconds, timing every frame.
+
+| Board | Median frame | Slowest frame |
+| --- | --- | --- |
+| Every card drawn | 16.7 ms | 1,566 ms when the drag starts, about 1,200 ms each time the card enters a lane |
+| Card contents kept from drawing again | 16.7 ms | 283 ms |
+| Only the cards in view drawn (@tanstack/react-virtual), 6 extra above and below | 16.7 ms | 50 to 117 ms |
+| The same with 3 extra, and the card list kept apart from the lane's drop area | 16.7 ms | 33 to 84 ms |
+
+The slow frames come when the drag starts and when the card enters another lane: dnd-kit draws every drawn card again then, and the dev server's React with StrictMode draws each one twice. So lanes only draw the cards in view (the plan's fallback), and the dragged card is drawn in a drag overlay. The limits are a slowest frame under 100 ms and a median under 20 ms; the last runs are within both, with less room for the slowest frame on a busy machine. The totals are right the moment the card is dropped, since they change when it enters a lane. With the same data, `/api/dashboard` and `/api/pipeline` answer in 20 to 43 ms.
+
+## Library versions
+
+The newest release of each library is used, except where the newest is a major version this build wasn't written against: React Router 7, `@hookform/resolvers` 5 and TypeScript 5.9 (openapi-typescript needs TypeScript 5). TanStack Table, listed in the plan, isn't used: searching, sorting and paging are three small functions in `ui/DataTable/` that the tests call directly. `@internationalized/date` is added for the date picker's values. `@tanstack/react-virtual` is added for the board (phase 5) at 3.14.26, three weeks old, rather than 3.14.28, which came out the day before. The board's keyboard moves are its own key handler rather than dnd-kit's keyboard sensor, so only Space picks a card up and the arrows can move it between lanes. The test client uses `httpx2`, which Starlette now asks for in place of `httpx`.

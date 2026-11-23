@@ -1,0 +1,249 @@
+/* The pipeline board from mockup 3: the share band, tinted lanes and white cards. */
+
+.share {
+  margin-bottom: 22px;
+}
+
+.shareBand {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 8px;
+}
+
+.shareBand span {
+  height: 10px;
+  min-width: 6px;
+  border-radius: 5px;
+}
+
+.shareKey {
+  display: flex;
+  gap: 3px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.shareKey span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Six lanes fit at 1280px. Narrower, the board scrolls sideways inside
+   itself and the page doesn't (PIPE-7). */
+.board {
+  /* Holds the screen-reader text in the lanes, which is positioned, inside
+     the board's own sideways scroll rather than the page's. */
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(6, minmax(176px, 1fr));
+  gap: 14px;
+  align-items: start;
+  overflow-x: auto;
+  padding: 4px;
+  margin: -4px;
+}
+
+.lane {
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 32px);
+  min-height: 160px;
+  border-radius: var(--radius-lane);
+  padding: 14px 12px 12px;
+}
+
+.laneHead {
+  padding: 2px 4px 12px;
+}
+
+.laneTitle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.laneTitle h2 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.laneCount {
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--panel);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+
+.laneTotal {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-top: 8px;
+}
+
+.laneExpected {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.laneExpected b {
+  font-weight: 500;
+  color: var(--midnight);
+}
+
+.laneShare {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.85);
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.laneShare span {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.2s ease;
+}
+
+.laneAdd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  height: 34px;
+  flex: none;
+  border: none;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--midnight);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+.laneAdd[data-hovered] {
+  background: var(--panel);
+}
+
+/* A long lane scrolls inside itself, so the board's sideways scroll stays in
+   reach. Only the cards in view are drawn, placed by the virtual list. */
+.cards {
+  margin: 0 -4px;
+  padding: 4px;
+  min-height: 60px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(7, 59, 76, 0.22) transparent;
+}
+
+.cardList {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.slot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  touch-action: manipulation;
+}
+
+.placeholder {
+  opacity: 0.35;
+}
+
+.card {
+  position: relative;
+  background: var(--panel);
+  border-radius: var(--radius-card);
+  padding: 12px 14px;
+  cursor: grab;
+}
+
+.card:focus-visible {
+  outline: 2px solid var(--cerulean-ink);
+  outline-offset: 2px;
+}
+
+/* Only a card being moved has a shadow (LOOK-6). */
+.lifted {
+  box-shadow: var(--shadow-lift);
+}
+
+.overlay {
+  cursor: grabbing;
+}
+
+.lateChip {
+  margin-bottom: 8px;
+}
+
+.cardName {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  padding-right: 22px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+}
+
+.cardOrg {
+  font-size: 12.5px;
+  color: var(--muted);
+  margin-top: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardMenu {
+  position: absolute;
+  top: 7px;
+  right: 5px;
+}
+
+.menuButton {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  color: var(--muted);
+}
+
+.submenuMark {
+  margin-left: auto;
+}
+
+.cardValue {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-top: 10px;
+}
+
+.cardFoot {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.lateFoot {
+  color: var(--raspberry-ink);
+  font-weight: 500;
+}

@@ -8,3 +8,4 @@
 - Use `uv` as Python package manager. Always `uv run xxx` never `python3 xxx`, always `uv add xxx` never `pip install xxx`
 - Never use emojis in code or in print statements or logging
 - Keep README.md concise
+- Write code, comments, commit messages and docs in English.

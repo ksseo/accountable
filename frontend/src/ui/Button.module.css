@@ -1,0 +1,71 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 42px;
+  padding: 0 18px;
+  border-radius: var(--radius-control);
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.button[data-disabled] {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.sm {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 13px;
+}
+
+.dark {
+  background: var(--midnight);
+  color: #fff;
+}
+
+.dark[data-hovered] {
+  background: #0b4a5e;
+}
+
+.white {
+  background: var(--panel);
+  color: var(--midnight);
+}
+
+.white[data-hovered] {
+  background: #f7fafa;
+}
+
+.page {
+  background: var(--page);
+  color: var(--midnight);
+}
+
+.page[data-hovered] {
+  background: var(--track);
+}
+
+.danger {
+  background: var(--raspberry-ink);
+  color: #fff;
+}
+
+.danger[data-hovered] {
+  background: #a91f42;
+}
+
+.ghost {
+  background: transparent;
+  color: var(--midnight);
+}
+
+.ghost[data-hovered] {
+  background: var(--page);
+}

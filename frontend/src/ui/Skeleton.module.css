@@ -1,0 +1,17 @@
+.block {
+  display: inline-block;
+  border-radius: 8px;
+  background: var(--track);
+}
+
+.rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.row {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  height: 52px;
+}

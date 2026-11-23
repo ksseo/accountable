@@ -1,0 +1,115 @@
+/* Bits of the three table pages' cells. */
+.muted {
+  color: var(--muted);
+}
+
+.external {
+  color: var(--cerulean-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  border-radius: 4px;
+}
+
+.closeDate {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.late {
+  color: var(--raspberry-ink);
+  font-weight: 600;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.segments {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 14px;
+  background: var(--track);
+}
+
+.segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  outline: none;
+}
+
+.segment[data-hovered] {
+  color: var(--midnight);
+}
+
+.segment[data-selected] {
+  background: var(--panel);
+  color: var(--midnight);
+  font-weight: 600;
+}
+
+.segment[data-focus-visible] {
+  outline: 2px solid var(--cerulean-ink);
+  outline-offset: 2px;
+}
+
+.segmentCount {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+}
+
+.track {
+  position: relative;
+  width: 40px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--control-line);
+  transition: background-color 120ms ease;
+}
+
+.track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 120ms ease;
+}
+
+.switch[data-selected] .track {
+  background: var(--raspberry-ink);
+}
+
+.switch[data-selected] .track::after {
+  transform: translateX(16px);
+}
+
+.switch[data-focus-visible] .track {
+  outline: 2px solid var(--cerulean-ink);
+  outline-offset: 2px;
+}
