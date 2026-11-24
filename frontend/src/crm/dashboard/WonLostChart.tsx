@@ -2,7 +2,15 @@ import { Bar, BarChart, CartesianGrid, LabelList, Tooltip, XAxis, YAxis } from '
 import { count } from '../../lib/korean'
 import { ChartPanel } from '../../ui/ChartPanel'
 import type { MonthFigures } from './api'
-import { CHART_HEIGHT, ChartTooltip, fullMonth, GRID_OPACITY, GRID_STROKE, MONTH_AXIS, TightMonthTick } from './chartParts'
+import {
+  CHART_HEIGHT,
+  ChartTooltip,
+  fullMonth,
+  GRID_OPACITY,
+  GRID_STROKE,
+  MONTH_AXIS,
+  TightMonthTick,
+} from './chartParts'
 import styles from './Dashboard.module.css'
 
 const WON = 'var(--sea-green)'
@@ -18,7 +26,9 @@ export function WonLostChart({ months, className }: { months: readonly MonthFigu
     won + lost === 0
       ? '최근 12개월 동안 수주하거나 실주한 영업 기회가 없어요.'
       : `최근 12개월 수주 ${count(won, 'deal')}, 실주 ${count(lost, 'deal')}이에요.${
-          best.won_count > 0 ? ` 수주가 가장 많은 달은 ${fullMonth(best.month)} ${count(best.won_count, 'deal')}이에요.` : ''
+          best.won_count > 0
+            ? ` 수주가 가장 많은 달은 ${fullMonth(best.month)} ${count(best.won_count, 'deal')}이에요.`
+            : ''
         }`
   const hideZero = (value: unknown) => (Number(value) > 0 ? String(value) : '')
 
@@ -41,7 +51,11 @@ export function WonLostChart({ months, className }: { months: readonly MonthFigu
       className={className}
       table={{
         columns: ['월', '수주', '실주'],
-        rows: months.map((month) => [fullMonth(month.month), count(month.won_count, 'deal'), count(month.lost_count, 'deal')]),
+        rows: months.map((month) => [
+          fullMonth(month.month),
+          count(month.won_count, 'deal'),
+          count(month.lost_count, 'deal'),
+        ]),
       }}
     >
       <BarChart
@@ -60,7 +74,14 @@ export function WonLostChart({ months, className }: { months: readonly MonthFigu
           strokeOpacity={GRID_OPACITY}
           horizontalCoordinatesGenerator={({ offset }) => [offset.top, offset.top + offset.height]}
         />
-        <XAxis dataKey="month" tick={TightMonthTick} interval={0} axisLine={false} tickLine={false} height={MONTH_AXIS.height} />
+        <XAxis
+          dataKey="month"
+          tick={TightMonthTick}
+          interval={0}
+          axisLine={false}
+          tickLine={false}
+          height={MONTH_AXIS.height}
+        />
         {/* One more than the tallest bar, so its count stays under the top line. */}
         <YAxis hide allowDecimals={false} domain={[0, (max: number) => max + 1]} />
         <Tooltip
@@ -78,10 +99,22 @@ export function WonLostChart({ months, className }: { months: readonly MonthFigu
           }}
         />
         <Bar dataKey="won" name="수주" fill={WON} radius={3} maxBarSize={14} isAnimationActive={false}>
-          <LabelList dataKey="won" position="top" fill="var(--midnight)" className={styles.barLabel} formatter={hideZero} />
+          <LabelList
+            dataKey="won"
+            position="top"
+            fill="var(--midnight)"
+            className={styles.barLabel}
+            formatter={hideZero}
+          />
         </Bar>
         <Bar dataKey="lost" name="실주" fill={LOST} radius={3} maxBarSize={14} isAnimationActive={false}>
-          <LabelList dataKey="lost" position="top" fill="var(--midnight)" className={styles.barLabel} formatter={hideZero} />
+          <LabelList
+            dataKey="lost"
+            position="top"
+            fill="var(--midnight)"
+            className={styles.barLabel}
+            formatter={hideZero}
+          />
         </Bar>
       </BarChart>
     </ChartPanel>

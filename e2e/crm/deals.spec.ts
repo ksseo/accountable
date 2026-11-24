@@ -5,7 +5,13 @@ import { apiGet, expect, resetData, test, today } from '../support/fixtures'
 import { dialog, rowAction, search, tableRows } from './helpers'
 
 type Deal = { id: number; name: string; value: number; is_late: boolean; stage: string }
-type Contact = { id: number; name: string; status: string; organization_id: number | null; organization_name: string | null }
+type Contact = {
+  id: number
+  name: string
+  status: string
+  organization_id: number | null
+  organization_name: string | null
+}
 
 const koreanDate = (iso: string) => {
   const [year, month, day] = iso.split('-').map(Number)
@@ -20,7 +26,9 @@ const addDays = (iso: string, days: number) => {
 
 test.beforeEach(() => resetData())
 
-test('adds a deal from the top bar with the money field, the date picker and the filled-in fields', async ({ page }) => {
+test('adds a deal from the top bar with the money field, the date picker and the filled-in fields', async ({
+  page,
+}) => {
   const contact = (await apiGet<Contact[]>('/api/contacts')).find((c) => c.organization_id !== null)!
   const closeDate = addDays(await today(), 40)
   await page.goto('/contacts')

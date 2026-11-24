@@ -10,7 +10,9 @@ test.use({ allowConsole: [/status of 503/] })
 
 test.beforeEach(() => resetData())
 
-test('a change is still there after the backend restarts, and the page recovers by itself', async ({ page }) => {
+test('a change is still there after the backend restarts, and the page recovers by itself', async ({
+  page,
+}) => {
   await page.goto('/organizations')
   await page.getByRole('button', { name: '거래처 추가' }).click()
   const form = dialog(page, '거래처 추가')
@@ -43,6 +45,8 @@ test('the seed command brings the sample back', async () => {
   const after = await apiGet<{ id: number; name: string }[]>('/api/organizations')
   expect(after).toHaveLength(before.length)
   expect(after.some((organization) => organization.name === '시드 확인용 거래처')).toBe(false)
-  expect(after.map((organization) => organization.name).sort()).toEqual(before.map((organization) => organization.name).sort())
+  expect(after.map((organization) => organization.name).sort()).toEqual(
+    before.map((organization) => organization.name).sort(),
+  )
   expect(added.id).toBeGreaterThan(0)
 })

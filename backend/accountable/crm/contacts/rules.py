@@ -34,9 +34,7 @@ def promote_to_customer(conn: Connection, contact_id: int, deal_name: str) -> di
     """Makes the main contact of a won deal a customer, if they aren't one.
 
     Returns the contact's id and name when their status changed."""
-    row = conn.execute(
-        select(contacts.c.name, contacts.c.status).where(contacts.c.id == contact_id)
-    ).first()
+    row = conn.execute(select(contacts.c.name, contacts.c.status).where(contacts.c.id == contact_id)).first()
     if row is None or row.status == "customer":
         return None
     change_status(conn, contact_id, row.status, "customer", deal_name=deal_name)

@@ -2,9 +2,9 @@
 
 from datetime import date, datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from accountable.crm.fields import Email, Name, Phone, ShortText
+from accountable.crm.fields import Email, Name, Phone, ShortText, omittable
 from accountable.crm.stages import StageKey, StatusKey
 
 
@@ -20,12 +20,12 @@ class ContactIn(BaseModel):
 class ContactPatch(BaseModel):
     """Only the fields sent are changed. A name and status can't be emptied."""
 
-    name: Name = Field(default=None)
+    name: Name = omittable()
     email: Email = None
     phone: Phone = None
     job_title: ShortText = None
     organization_id: int | None = None
-    status: StatusKey = Field(default=None)
+    status: StatusKey = omittable()
 
 
 class Contact(BaseModel):

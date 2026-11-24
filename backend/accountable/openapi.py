@@ -4,6 +4,7 @@ Run with: uv run python -m accountable.openapi <output.json>
 Without a path it prints the schema.
 """
 
+import io
 import json
 import sys
 from pathlib import Path
@@ -20,7 +21,8 @@ def main(argv: list[str]) -> int:
     if argv:
         Path(argv[0]).write_text(text, encoding="utf-8", newline="\n")
     else:
-        sys.stdout.reconfigure(encoding="utf-8")
+        if isinstance(sys.stdout, io.TextIOWrapper):
+            sys.stdout.reconfigure(encoding="utf-8")
         sys.stdout.write(text)
     return 0
 

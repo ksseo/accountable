@@ -19,7 +19,13 @@ const LINE = 'var(--sea-green-ink)'
 
 /** Revenue won per month for the last 12 months, this one last, as a line with
  * a flat light Sea Green area (DASH-7, LOOK-7). */
-export function WonRevenueChart({ months, className }: { months: readonly MonthFigures[]; className?: string }) {
+export function WonRevenueChart({
+  months,
+  className,
+}: {
+  months: readonly MonthFigures[]
+  className?: string
+}) {
   const data = months.map((month) => ({ month: month.month, value: month.won_value }))
   const total = months.reduce((sum, month) => sum + month.won_value, 0)
   const best = months.reduce((top, month) => (month.won_value > top.won_value ? month : top), months[0])
@@ -39,7 +45,10 @@ export function WonRevenueChart({ months, className }: { months: readonly MonthF
       }
       summary={summary}
       className={className}
-      table={{ columns: ['월', '수주 금액'], rows: months.map((month) => [fullMonth(month.month), formatMoney(month.won_value)]) }}
+      table={{
+        columns: ['월', '수주 금액'],
+        rows: months.map((month) => [fullMonth(month.month), formatMoney(month.won_value)]),
+      }}
     >
       <AreaChart
         responsive
@@ -49,8 +58,22 @@ export function WonRevenueChart({ months, className }: { months: readonly MonthF
         title="월별 수주 금액"
       >
         <CartesianGrid vertical={false} stroke={GRID_STROKE} strokeOpacity={GRID_OPACITY} />
-        <XAxis dataKey="month" tick={MonthTick} interval={0} axisLine={false} tickLine={false} height={MONTH_AXIS.height} />
-        <YAxis tickFormatter={formatAxisMoney} tick={AXIS_TICK} axisLine={false} tickLine={false} tickMargin={4} width={52} />
+        <XAxis
+          dataKey="month"
+          tick={MonthTick}
+          interval={0}
+          axisLine={false}
+          tickLine={false}
+          height={MONTH_AXIS.height}
+        />
+        <YAxis
+          tickFormatter={formatAxisMoney}
+          tick={AXIS_TICK}
+          axisLine={false}
+          tickLine={false}
+          tickMargin={4}
+          width={52}
+        />
         <Tooltip
           cursor={{ stroke: GRID_STROKE }}
           isAnimationActive={false}
@@ -84,13 +107,19 @@ export function WonRevenueChart({ months, className }: { months: readonly MonthF
             dataKey="value"
             content={({ x, y, index, value }) => {
               if (index !== data.length - 1) return null
-              const place = lastLabelPlace(Number(y), current.won_value, months[months.length - 2]?.won_value ?? 0)
+              const place = lastLabelPlace(
+                Number(y),
+                current.won_value,
+                months[months.length - 2]?.won_value ?? 0,
+              )
               return (
                 <text
                   x={Number(x)}
                   y={place.y}
                   textAnchor="end"
-                  className={place.overLine ? `${styles.pointLabel} ${styles.pointLabelOverLine}` : styles.pointLabel}
+                  className={
+                    place.overLine ? `${styles.pointLabel} ${styles.pointLabelOverLine}` : styles.pointLabel
+                  }
                 >
                   {formatMoney(Number(value))}
                 </text>

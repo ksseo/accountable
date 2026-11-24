@@ -94,7 +94,10 @@ test('a record page with the activity edit dialog and a card menu on the board',
     }
   }
   await open(page, `/contacts/${withNote!.id}`)
-  const entry = page.getByRole('list', { name: '타임라인' }).getByRole('listitem').filter({ has: page.getByRole('button', { name: /메뉴$/ }) })
+  const entry = page
+    .getByRole('list', { name: '타임라인' })
+    .getByRole('listitem')
+    .filter({ has: page.getByRole('button', { name: /메뉴$/ }) })
   await entry.first().getByRole('button', { name: /메뉴$/ }).click()
   await page.getByRole('menuitem', { name: '수정' }).click()
   await expect(dialog(page, '활동 수정')).toBeVisible()
@@ -102,7 +105,11 @@ test('a record page with the activity edit dialog and a card menu on the board',
   await page.keyboard.press('Escape')
 
   await open(page, '/pipeline')
-  await page.getByRole('region', { name: '파이프라인 보드' }).getByRole('button', { name: /메뉴$/ }).first().click()
+  await page
+    .getByRole('region', { name: '파이프라인 보드' })
+    .getByRole('button', { name: /메뉴$/ })
+    .first()
+    .click()
   await expect(page.getByRole('menu')).toBeVisible()
   await expectNoA11yViolations(page, 'card menu')
 })

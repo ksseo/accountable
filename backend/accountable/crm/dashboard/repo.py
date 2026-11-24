@@ -48,11 +48,15 @@ def _record(row: Mapping[str, Any]) -> dict:
 
 
 def follow_up_query() -> Select:
-    return _with_records().where(activities.c.follow_up_done.is_(False), activities.c.follow_up_date.is_not(None))
+    return _with_records().where(
+        activities.c.follow_up_done.is_(False), activities.c.follow_up_date.is_not(None)
+    )
 
 
 def recent_query() -> Select:
-    return _with_records().order_by(activities.c.occurred_at.desc(), activities.c.id.desc()).limit(RECENT_COUNT)
+    return (
+        _with_records().order_by(activities.c.occurred_at.desc(), activities.c.id.desc()).limit(RECENT_COUNT)
+    )
 
 
 def deals_query(today: date) -> Select:
@@ -128,7 +132,9 @@ def dashboard(conn: Connection, today: date) -> dict:
                 "stage": stage,
                 "count": sum(1 for deal in open_deals if deal["stage"] == stage),
                 "value": sum(deal["value"] for deal in open_deals if deal["stage"] == stage),
-                "expected_revenue": sum(deal["expected_revenue"] for deal in open_deals if deal["stage"] == stage),
+                "expected_revenue": sum(
+                    deal["expected_revenue"] for deal in open_deals if deal["stage"] == stage
+                ),
             }
             for stage in OPEN_STAGE_KEYS
         ],
@@ -139,5 +145,3 @@ def dashboard(conn: Connection, today: date) -> dict:
         "follow_ups_later": later,
         "recent": recent,
     }
-
-

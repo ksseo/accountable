@@ -86,7 +86,8 @@ def create_deal(conn: Connection, data: Mapping[str, Any], today: date) -> tuple
     if close_date is None and stage in CLOSED_STAGE_KEYS:
         close_date = today
     deal_id = conn.execute(
-        insert(deals).values(
+        insert(deals)
+        .values(
             name=data["name"],
             organization_id=data.get("organization_id"),
             contact_id=data.get("contact_id"),
@@ -97,7 +98,8 @@ def create_deal(conn: Connection, data: Mapping[str, Any], today: date) -> tuple
             furthest_open_stage=initial_furthest_stage(stage),
             position=top_position(conn, stage),
         )
-    ).inserted_primary_key[0]
+        .returning(deals.c.id)
+    ).scalar_one()
     return deal_id, _won_makes_customer(conn, deal_id)
 
 

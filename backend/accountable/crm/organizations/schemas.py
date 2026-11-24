@@ -2,9 +2,9 @@
 
 from datetime import date, datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from accountable.crm.fields import LongText, Name, ShortText, Website
+from accountable.crm.fields import LongText, Name, ShortText, Website, omittable
 from accountable.crm.stages import StageKey, StatusKey
 
 
@@ -18,7 +18,7 @@ class OrganizationIn(BaseModel):
 class OrganizationPatch(BaseModel):
     """Only the fields sent are changed. A name can't be emptied."""
 
-    name: Name = Field(default=None)
+    name: Name = omittable()
     website: Website = None
     industry: ShortText = None
     notes: LongText = None

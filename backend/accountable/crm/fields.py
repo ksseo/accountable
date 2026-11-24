@@ -27,16 +27,28 @@ def _add_scheme(value: str | None) -> str | None:
     return f"https://{value}"
 
 
-def _text(max_length: int) -> Any:
-    return Annotated[str, StringConstraints(max_length=max_length)]
+def omittable() -> Any:
+    """A PATCH field that may be left out but can't be null.
+
+    Pydantic doesn't check a default, so None here only means "not sent".
+    """
+    return Field(default=None)
 
 
 Name = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=200)]
 Description = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1, max_length=5000)]
-ShortText = Annotated[_text(200) | None, BeforeValidator(_blank_to_none)]
-LongText = Annotated[_text(5000) | None, BeforeValidator(_blank_to_none)]
-Phone = Annotated[_text(40) | None, BeforeValidator(_blank_to_none)]
+ShortText = Annotated[
+    Annotated[str, StringConstraints(max_length=200)] | None, BeforeValidator(_blank_to_none)
+]
+LongText = Annotated[
+    Annotated[str, StringConstraints(max_length=5000)] | None, BeforeValidator(_blank_to_none)
+]
+Phone = Annotated[Annotated[str, StringConstraints(max_length=40)] | None, BeforeValidator(_blank_to_none)]
 Email = Annotated[EmailStr | None, BeforeValidator(_blank_to_none)]
-Website = Annotated[_text(2000) | None, BeforeValidator(_blank_to_none), AfterValidator(_add_scheme)]
+Website = Annotated[
+    Annotated[str, StringConstraints(max_length=2000)] | None,
+    BeforeValidator(_blank_to_none),
+    AfterValidator(_add_scheme),
+]
 Money = Annotated[int, Field(ge=0, le=1_000_000_000)]
 Probability = Annotated[int, Field(ge=0, le=100)]

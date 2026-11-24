@@ -26,7 +26,13 @@ const COLUMNS: Column<OrganizationRow>[] = [
       </RecordLink>
     ),
   },
-  { key: 'industry', header: '업종', value: (row) => row.industry, searchable: true, cell: (row) => row.industry },
+  {
+    key: 'industry',
+    header: '업종',
+    value: (row) => row.industry,
+    searchable: true,
+    cell: (row) => row.industry,
+  },
   {
     key: 'website',
     header: '웹사이트',
@@ -83,7 +89,11 @@ export function OrganizationsPage() {
     <>
       <PageHeader
         title="거래처"
-        summary={data ? `거래처 ${count(data.length, 'organization')} · 연결된 연락처 ${count(linkedContacts, 'contact')}` : ' '}
+        summary={
+          data
+            ? `거래처 ${count(data.length, 'organization')} · 연결된 연락처 ${count(linkedContacts, 'contact')}`
+            : ' '
+        }
         actions={addButton}
       />
       <Panel>

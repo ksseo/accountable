@@ -24,7 +24,9 @@ const savesMove = (url: string) => /\/api\/deals\/\d+\/move$/.test(url)
 
 const announcer = (page: import('@playwright/test').Page) => page.getByTestId('board-announcer')
 
-test('Space, the arrows and Space move a card across lanes and within one, kept after a refresh', async ({ page }) => {
+test('Space, the arrows and Space move a card across lanes and within one, kept after a refresh', async ({
+  page,
+}) => {
   const board = await pipeline()
   const card = laneOf(board, 'new').deals[0]
   const newCount = laneOf(board, 'new').count
@@ -34,20 +36,28 @@ test('Space, the arrows and Space move a card across lanes and within one, kept 
   await element.focus()
 
   await page.keyboard.press('Space')
-  await expect(announcer(page)).toHaveText(pickedUp(card.name, { stageLabel: '신규', position: 1, total: newCount }))
+  await expect(announcer(page)).toHaveText(
+    pickedUp(card.name, { stageLabel: '신규', position: 1, total: newCount }),
+  )
 
   await page.keyboard.press('ArrowRight')
-  await expect(announcer(page)).toHaveText(movedTo({ stageLabel: '적격', position: 1, total: qualified.count + 1 }))
+  await expect(announcer(page)).toHaveText(
+    movedTo({ stageLabel: '적격', position: 1, total: qualified.count + 1 }),
+  )
   await expect(cardOn(page, card.id)).toBeFocused()
   await expect(laneTotal(page, 'qualified')).toHaveText(formatMoney(qualified.value + card.value))
 
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('ArrowUp')
-  await expect(announcer(page)).toHaveText(movedTo({ stageLabel: '적격', position: 2, total: qualified.count + 1 }))
+  await expect(announcer(page)).toHaveText(
+    movedTo({ stageLabel: '적격', position: 2, total: qualified.count + 1 }),
+  )
 
   await page.keyboard.press('Space')
-  await expect(announcer(page)).toHaveText(dropped(card.name, { stageLabel: '적격', position: 2, total: qualified.count + 1 }))
+  await expect(announcer(page)).toHaveText(
+    dropped(card.name, { stageLabel: '적격', position: 2, total: qualified.count + 1 }),
+  )
   await expect(page.getByRole('status').getByText('적격 단계로 옮겼어요')).toBeVisible()
   await expect(cardOn(page, card.id)).toBeFocused()
   await expect.poll(() => savedOrder('qualified').then((ids) => ids.indexOf(card.id))).toBe(1)
@@ -75,7 +85,11 @@ test('Escape puts the card back and saves nothing', async ({ page }) => {
     putBack(card.name, { stageLabel: '제안', position: 2, total: laneOf(board, 'proposal').count }),
   )
   await expect(cardOn(page, card.id)).toBeFocused()
-  await expectShownStart(page, 'proposal', laneOf(board, 'proposal').deals.map((deal) => deal.id))
+  await expectShownStart(
+    page,
+    'proposal',
+    laneOf(board, 'proposal').deals.map((deal) => deal.id),
+  )
   await expect(laneTotal(page, 'qualified')).toHaveText(formatMoney(laneOf(board, 'qualified').value))
   expect(moves).toEqual([])
 })
@@ -95,7 +109,11 @@ test('pressing the mouse puts a picked-up card back, and the board works as befo
   await expect(lane(page, 'qualified').locator(`[data-card-id="${picked.id}"]`)).toBeVisible()
   await page.getByRole('heading', { level: 1 }).click()
   await expect(announcer(page)).toHaveText(back)
-  await expectShownStart(page, 'new', laneOf(board, 'new').deals.map((deal) => deal.id))
+  await expectShownStart(
+    page,
+    'new',
+    laneOf(board, 'new').deals.map((deal) => deal.id),
+  )
   await expect(cardOn(page, picked.id)).not.toBeFocused()
   expect(moves).toEqual([])
 
@@ -183,7 +201,9 @@ test('the card menu moves a card to another stage, up and down', async ({ page }
   await page.getByRole('menuitem', { name: '위로' }).click()
   await expect.poll(() => savedOrder('negotiation').then((ids) => ids.slice(0, 2))).toEqual([card.id, below])
   await page.reload()
-  await expect.poll(() => shownOrder(page, 'negotiation').then((ids) => ids.slice(0, 2))).toEqual([card.id, below])
+  await expect
+    .poll(() => shownOrder(page, 'negotiation').then((ids) => ids.slice(0, 2)))
+    .toEqual([card.id, below])
 })
 
 test('Enter opens the deal, and only Space picks a card up', async ({ page }) => {

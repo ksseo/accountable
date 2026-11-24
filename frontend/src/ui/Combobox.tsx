@@ -1,5 +1,5 @@
 import { ChevronDown } from 'lucide-react'
-import { useEffect, useMemo, useState, type Ref } from 'react'
+import { useMemo, useState, type Ref } from 'react'
 import { Button, ComboBox, FieldError, Input, ListBox, ListBoxItem, Popover } from 'react-aria-components'
 import { matches } from './DataTable/search'
 import { FieldLabel, type FieldProps } from './Field'
@@ -25,14 +25,27 @@ type Props = FieldProps & {
 
 /** Picks one record by typing part of its name, by mouse or keyboard (FORM-3, A11Y-4).
  * Emptying the text clears the choice. */
-export function Combobox({ label, isRequired, error, name, options, value, onChange, onBlur, inputRef, placeholder }: Props) {
+export function Combobox({
+  label,
+  isRequired,
+  error,
+  name,
+  options,
+  value,
+  onChange,
+  onBlur,
+  inputRef,
+  placeholder,
+}: Props) {
   const selected = options.find((option) => option.id === value) ?? null
   const [text, setText] = useState(selected?.name ?? '')
 
   // The value can change from outside, as when a deal's contact fills in the organization.
-  useEffect(() => {
+  const [lastSelected, setLastSelected] = useState(selected)
+  if (selected?.id !== lastSelected?.id || selected?.name !== lastSelected?.name) {
+    setLastSelected(selected)
     setText(selected?.name ?? '')
-  }, [selected?.id, selected?.name])
+  }
 
   const shown = useMemo(() => {
     // While the text is the chosen name, every option shows, as in a list.
@@ -75,7 +88,10 @@ export function Combobox({ label, isRequired, error, name, options, value, onCha
       </div>
       <FieldError className={fieldStyles.error}>{error}</FieldError>
       <Popover className={selectStyles.popover}>
-        <ListBox className={selectStyles.list} renderEmptyState={() => <p className={styles.none}>찾는 항목이 없어요</p>}>
+        <ListBox
+          className={selectStyles.list}
+          renderEmptyState={() => <p className={styles.none}>찾는 항목이 없어요</p>}
+        >
           {(option: ComboboxOption) => (
             <ListBoxItem id={option.id} textValue={option.name} className={selectStyles.option}>
               <span>{option.name}</span>
@@ -98,7 +114,17 @@ type SuggestProps = FieldProps & {
 }
 
 /** Free text with suggestions from values already in use, such as industries. */
-export function SuggestInput({ label, isRequired, error, name, suggestions, value, onChange, onBlur, inputRef }: SuggestProps) {
+export function SuggestInput({
+  label,
+  isRequired,
+  error,
+  name,
+  suggestions,
+  value,
+  onChange,
+  onBlur,
+  inputRef,
+}: SuggestProps) {
   const shown = useMemo(
     () =>
       suggestions

@@ -3,7 +3,11 @@ import { ApiError, unwrap } from './client'
 
 function result(status: number, body: unknown) {
   const response = new Response(JSON.stringify(body), { status })
-  return Promise.resolve({ data: status < 300 ? body : undefined, error: status < 300 ? undefined : body, response })
+  return Promise.resolve({
+    data: status < 300 ? body : undefined,
+    error: status < 300 ? undefined : body,
+    response,
+  })
 }
 
 describe('unwrap', () => {
@@ -25,7 +29,9 @@ describe('unwrap', () => {
   })
 
   it('keeps the message of a 404 or 409', async () => {
-    const error = (await unwrap(result(409, { detail: 'automatic entry' })).catch((e: unknown) => e)) as ApiError
+    const error = (await unwrap(result(409, { detail: 'automatic entry' })).catch(
+      (e: unknown) => e,
+    )) as ApiError
     expect(error.status).toBe(409)
     expect(error.message).toBe('automatic entry')
     expect(error.offline).toBe(false)

@@ -66,7 +66,7 @@ export function ContactForm({ initial, defaults, meta, organizations, onSave, on
   }
 
   return (
-    <form onSubmit={handleSubmit(submit)} onKeyDown={blockComposingEnter} noValidate>
+    <form ref={blockComposingEnter} onSubmit={handleSubmit(submit)} noValidate>
       <FieldStack>
         <Controller
           control={control}

@@ -1,0 +1,12 @@
+# For the scan of the files on this computer (npm run static:gitleaks). It isn't
+# named .gitleaks.toml, so the scan of git's history doesn't use it: a .env
+# that gets committed is still reported.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Files git ignores: .env, where this computer's own keys go, and the installed Python packages"
+paths = [
+  '''^\.env$''',
+  '''^\.venv[\/]''',
+]

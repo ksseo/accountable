@@ -48,8 +48,9 @@ def add_automatic_entry(
     """The only way a stage_change or status_change entry is written."""
     if not is_automatic(kind):
         raise ValueError(f"{kind} isn't an automatic entry")
-    result = conn.execute(
-        insert(activities).values(
+    return conn.execute(
+        insert(activities)
+        .values(
             kind=kind,
             contact_id=contact_id,
             deal_id=deal_id,
@@ -59,5 +60,5 @@ def add_automatic_entry(
             occurred_at=occurred_at or clock.now(),
             follow_up_done=False,
         )
-    )
-    return result.inserted_primary_key[0]
+        .returning(activities.c.id)
+    ).scalar_one()

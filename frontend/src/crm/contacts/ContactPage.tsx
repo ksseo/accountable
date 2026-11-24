@@ -21,7 +21,8 @@ import { contactDeleteMessage } from './deleteMessage'
 /** A contact's page (REC-2). */
 export function ContactPage() {
   const { data, error, refetch } = useContact(recordId(useParams().id))
-  if (!data) return <RecordPending error={error} listPath="/contacts" listLabel="연락처" onRetry={() => refetch()} />
+  if (!data)
+    return <RecordPending error={error} listPath="/contacts" listLabel="연락처" onRetry={() => refetch()} />
   return <ContactRecord contact={data} />
 }
 
@@ -53,8 +54,14 @@ function ContactRecord({ contact }: { contact: ContactDetail }) {
                 { label: '상태', value: <StatusBadge status={contact.status} /> },
                 { label: '직책', value: contact.job_title },
                 { label: '거래처', value: organization },
-                { label: '이메일', value: contact.email ? <a href={`mailto:${contact.email}`}>{contact.email}</a> : null },
-                { label: '전화번호', value: contact.phone ? <a href={`tel:${contact.phone}`}>{contact.phone}</a> : null },
+                {
+                  label: '이메일',
+                  value: contact.email ? <a href={`mailto:${contact.email}`}>{contact.email}</a> : null,
+                },
+                {
+                  label: '전화번호',
+                  value: contact.phone ? <a href={`tel:${contact.phone}`}>{contact.phone}</a> : null,
+                },
               ]}
             />
           </Panel>
@@ -63,7 +70,9 @@ function ContactRecord({ contact }: { contact: ContactDetail }) {
             aside={
               <AddButton
                 label={`${contact.name} 님의 영업 기회 추가`}
-                onPress={() => dealForm.openNew({ contact_id: contact.id, organization_id: contact.organization_id })}
+                onPress={() =>
+                  dealForm.openNew({ contact_id: contact.id, organization_id: contact.organization_id })
+                }
               />
             }
           >

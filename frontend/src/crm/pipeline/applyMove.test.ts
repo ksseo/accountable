@@ -7,6 +7,7 @@ import {
   expectedRevenue,
   isSamePlace,
   neighbours,
+  placeByArrow,
   placementOf,
   type Board,
   type Card,
@@ -16,9 +17,21 @@ import {
 // The same cases the backend's tests read, so both round the same way (RULE-1).
 // The path goes through a variable so Vite doesn't turn it into an asset address.
 const CASES_FILE = '../../../../backend/tests/crm/expected_revenue_cases.json'
-const CASES = JSON.parse(readFileSync(new URL(CASES_FILE, import.meta.url), 'utf8')) as { value: number; probability: number; expected: number; why: string }[]
+const CASES = JSON.parse(readFileSync(new URL(CASES_FILE, import.meta.url), 'utf8')) as {
+  value: number
+  probability: number
+  expected: number
+  why: string
+}[]
 
-const USUAL: Record<StageKey, number> = { new: 10, qualified: 25, proposal: 50, negotiation: 75, won: 100, lost: 0 }
+const USUAL: Record<StageKey, number> = {
+  new: 10,
+  qualified: 25,
+  proposal: 50,
+  negotiation: 75,
+  won: 100,
+  lost: 0,
+}
 const RULES: MoveRules = { today: '2026-11-23', usualProbability: (stage) => USUAL[stage] }
 
 let nextId = 1
@@ -69,7 +82,8 @@ function board(lanes: Partial<Record<StageKey, Card[]>>): Board {
   }
 }
 
-const ids = (at: Board, stage: StageKey) => at.columns.find((column) => column.stage === stage)!.deals.map((deal) => deal.id)
+const ids = (at: Board, stage: StageKey) =>
+  at.columns.find((column) => column.stage === stage)!.deals.map((deal) => deal.id)
 const column = (at: Board, stage: StageKey) => at.columns.find((item) => item.stage === stage)!
 
 describe('expectedRevenue', () => {
@@ -93,8 +107,16 @@ describe('applyMove', () => {
   })
 
   it('puts the card at the top and at the bottom of a lane', () => {
-    expect(ids(applyMove(start, { dealId: c.id, stage: 'new', index: 0 }, RULES), 'new')).toEqual([c.id, a.id, b.id])
-    expect(ids(applyMove(start, { dealId: a.id, stage: 'new', index: 2 }, RULES), 'new')).toEqual([b.id, c.id, a.id])
+    expect(ids(applyMove(start, { dealId: c.id, stage: 'new', index: 0 }, RULES), 'new')).toEqual([
+      c.id,
+      a.id,
+      b.id,
+    ])
+    expect(ids(applyMove(start, { dealId: a.id, stage: 'new', index: 2 }, RULES), 'new')).toEqual([
+      b.id,
+      c.id,
+      a.id,
+    ])
     expect(ids(applyMove(start, { dealId: a.id, stage: 'proposal', index: 2 }, RULES), 'proposal')).toEqual([
       d.id,
       e.id,
@@ -103,8 +125,16 @@ describe('applyMove', () => {
   })
 
   it('moves a card up and down within its lane', () => {
-    expect(ids(applyMove(start, { dealId: b.id, stage: 'new', index: 0 }, RULES), 'new')).toEqual([b.id, a.id, c.id])
-    expect(ids(applyMove(start, { dealId: b.id, stage: 'new', index: 2 }, RULES), 'new')).toEqual([a.id, c.id, b.id])
+    expect(ids(applyMove(start, { dealId: b.id, stage: 'new', index: 0 }, RULES), 'new')).toEqual([
+      b.id,
+      a.id,
+      c.id,
+    ])
+    expect(ids(applyMove(start, { dealId: b.id, stage: 'new', index: 2 }, RULES), 'new')).toEqual([
+      a.id,
+      c.id,
+      b.id,
+    ])
   })
 
   it('puts a card into an empty lane', () => {
@@ -150,6 +180,35 @@ describe('applyMove', () => {
     expect(placementOf(start, b.id)).toEqual({ dealId: b.id, stage: 'new', index: 1 })
     expect(isSamePlace(start, { dealId: b.id, stage: 'new', index: 1 })).toBe(true)
     expect(isSamePlace(start, { dealId: b.id, stage: 'new', index: 0 })).toBe(false)
+  })
+})
+
+describe('placeByArrow (PIPE-9)', () => {
+  const a = card('new', 10_000)
+  const b = card('new', 20_000)
+  const c = card('new', 30_000)
+  const d = card('qualified', 40_000)
+  const e = card('lost', 50_000)
+  const start = board({ new: [a, b, c], qualified: [d], lost: [e] })
+  const press = (key: string, deal: Card) => placeByArrow(start, placementOf(start, deal.id)!, key)
+
+  it('moves up and down the lane', () => {
+    expect(press('ArrowUp', b)).toEqual({ dealId: b.id, stage: 'new', index: 0 })
+    expect(press('ArrowDown', b)).toEqual({ dealId: b.id, stage: 'new', index: 2 })
+  })
+
+  it('moves to the same place in the lane beside it, or the bottom of a shorter one', () => {
+    expect(press('ArrowRight', a)).toEqual({ dealId: a.id, stage: 'qualified', index: 0 })
+    expect(press('ArrowRight', c)).toEqual({ dealId: c.id, stage: 'qualified', index: 1 })
+    expect(press('ArrowRight', d)).toEqual({ dealId: d.id, stage: 'proposal', index: 0 })
+    expect(press('ArrowLeft', d)).toEqual({ dealId: d.id, stage: 'new', index: 0 })
+  })
+
+  it('goes nowhere at the ends of the lane and the board', () => {
+    expect(press('ArrowUp', a)).toBeNull()
+    expect(press('ArrowDown', c)).toBeNull()
+    expect(press('ArrowLeft', a)).toBeNull()
+    expect(press('ArrowRight', e)).toBeNull()
   })
 })
 

@@ -16,6 +16,7 @@ Commands are npm scripts in a `package.json` at the repo root, with `frontend/` 
 - `npm install`, once, installs the Node packages and then the Python packages with `uv sync`
 - `npm run dev` starts the backend and the frontend together, prints the app's address and opens it in the browser
 - `npm test` runs all the tests and fails if any test fails
+- `npm run check` runs the formatting, lint, type and secret checks and then all the tests, and fails if any fails; `npm run check:quick` leaves out the end-to-end tests; `npm run format` fixes the formatting
 - `npm run seed` resets the database to the sample data, after asking
 
 `docs/STATUS.md` says how to run the app. `README.md` is the course's own guide, so leave it as it is.

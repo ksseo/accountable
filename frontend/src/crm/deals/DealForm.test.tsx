@@ -27,15 +27,24 @@ const SAVED = {
 } as Deal
 
 function setup(props: { initial?: Deal; defaults?: DealDefaults } = {}) {
-  const onSave = vi.fn((_body: DealIn) => Promise.resolve())
+  const onSave = vi.fn<(body: DealIn) => Promise<void>>(() => Promise.resolve())
   const view = renderWithApp(
-    <DealForm meta={META} contacts={CONTACTS} organizations={ORGANIZATIONS} onSave={onSave} onCancel={vi.fn()} {...props} />,
+    <DealForm
+      meta={META}
+      contacts={CONTACTS}
+      organizations={ORGANIZATIONS}
+      onSave={onSave}
+      onCancel={vi.fn()}
+      {...props}
+    />,
   )
   const field = (name: string) => screen.getByRole<HTMLInputElement>('textbox', { name })
   /** The date in the 마감일 field as YYYY-MM-DD, or nothing while it's empty. */
   const closeDate = () => {
     const group = within(screen.getByRole('group', { name: '마감일' }))
-    const parts = ['년', '월', '일'].map((unit) => group.getByRole('spinbutton', { name: new RegExp(`^${unit}`) }))
+    const parts = ['년', '월', '일'].map((unit) =>
+      group.getByRole('spinbutton', { name: new RegExp(`^${unit}`) }),
+    )
     if (parts.some((part) => part.hasAttribute('data-placeholder'))) return ''
     return parts.map((part) => part.textContent!.padStart(2, '0')).join('-')
   }
@@ -137,7 +146,9 @@ describe('DealForm', () => {
   })
 
   it('keeps a closed deal’s real date when its stage goes away and back', async () => {
-    const { user, field, closeDate, saved } = setup({ initial: { ...SAVED, stage: 'won', probability: 100, close_date: '2026-10-21' } })
+    const { user, field, closeDate, saved } = setup({
+      initial: { ...SAVED, stage: 'won', probability: 100, close_date: '2026-10-21' },
+    })
     await chooseStage(user, '실주')
     expect(closeDate()).toBe('2026-11-23')
     await chooseStage(user, '제안')
@@ -184,7 +195,12 @@ describe('DealForm', () => {
     const { user, field, onSave } = setup()
     await user.type(field('이름 (필수)'), '포장')
     await user.type(field('금액 (필수)'), '100')
-    const composing = new KeyboardEvent('keydown', { key: 'Enter', isComposing: true, bubbles: true, cancelable: true })
+    const composing = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      isComposing: true,
+      bubbles: true,
+      cancelable: true,
+    })
     fireEvent(field('이름 (필수)'), composing)
     expect(composing.defaultPrevented).toBe(true)
     expect(onSave).not.toHaveBeenCalled()
@@ -199,6 +215,8 @@ describe('dealDeleteMessage', () => {
   })
 
   it('just asks when there are none', () => {
-    expect(dealDeleteMessage('Packaging line upgrade', { activities: 0 })).toBe('‘Packaging line upgrade’을(를) 삭제할까요?')
+    expect(dealDeleteMessage('Packaging line upgrade', { activities: 0 })).toBe(
+      '‘Packaging line upgrade’을(를) 삭제할까요?',
+    )
   })
 })

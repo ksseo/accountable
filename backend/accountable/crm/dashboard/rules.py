@@ -2,12 +2,26 @@
 
 from collections.abc import Iterable, Mapping
 from datetime import date, timedelta
-from typing import Any
+from typing import Any, TypedDict
 
-from accountable.crm.stages import OPEN_STAGE_KEYS, is_open, open_stage_index
+from accountable.crm.stages import OPEN_STAGE_KEYS, StageKey, is_open, open_stage_index
 
 MONTHS_SHOWN = 12
 FOLLOW_UP_DAYS = 14
+
+
+class MonthTotals(TypedDict):
+    month: str
+    won_value: int
+    won_count: int
+    lost_count: int
+
+
+class FunnelTotals(TypedDict):
+    stage: StageKey
+    value: int
+    count: int
+    share: float
 
 
 def month_key(day: date) -> str:
@@ -30,10 +44,10 @@ def window_start(today: date, count: int = MONTHS_SHOWN) -> date:
     return date(int(first[:4]), int(first[5:]), 1)
 
 
-def won_lost_by_month(deals: Iterable[Mapping[str, Any]], today: date) -> list[dict]:
+def won_lost_by_month(deals: Iterable[Mapping[str, Any]], today: date) -> list[MonthTotals]:
     """Won revenue, won count and lost count per month, by close date (RULE-12).
     Months with none are zero."""
-    figures = {
+    figures: dict[str, MonthTotals] = {
         month: {"month": month, "won_value": 0, "won_count": 0, "lost_count": 0}
         for month in last_months(today)
     }
@@ -73,14 +87,15 @@ def reached(deal: Mapping[str, Any], stage: str) -> bool:
     return open_stage_index(deal["furthest_open_stage"]) >= open_stage_index(stage)
 
 
-def funnel(deals: Iterable[Mapping[str, Any]], today: date) -> tuple[list[dict], float]:
+def funnel(deals: Iterable[Mapping[str, Any]], today: date) -> tuple[list[FunnelTotals], float]:
     """Value and number of deals that reached each stage, each value's share of
     New's, and the conversion rate from New to Won by value."""
     counted = [deal for deal in deals if in_funnel(deal, today)]
-    stages = []
+    stages: list[FunnelTotals] = []
     for stage in (*OPEN_STAGE_KEYS, "won"):
         reaching = [deal for deal in counted if reached(deal, stage)]
-        stages.append({"stage": stage, "value": sum(d["value"] for d in reaching), "count": len(reaching)})
+        value = sum(deal["value"] for deal in reaching)
+        stages.append({"stage": stage, "value": value, "count": len(reaching), "share": 0.0})
     new_value = stages[0]["value"]
     for entry in stages:
         entry["share"] = entry["value"] / new_value if new_value else 0.0

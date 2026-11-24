@@ -1,4 +1,11 @@
-import { API_PORT, WEB_PORT, removeTestDatabase, startBackend, startFrontend, stopAll } from './support/servers'
+import {
+  API_PORT,
+  WEB_PORT,
+  removeTestDatabase,
+  startBackend,
+  startFrontend,
+  stopAll,
+} from './support/servers'
 import net from 'node:net'
 
 function portIsFree(port: number): Promise<boolean> {

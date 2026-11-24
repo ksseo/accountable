@@ -31,7 +31,12 @@ const COLUMNS: Column<Deal>[] = [
       </RecordLink>
     ),
   },
-  { key: 'stage', header: '단계', value: (row) => STAGES.indexOf(row.stage), cell: (row) => <StageBadge stage={row.stage} /> },
+  {
+    key: 'stage',
+    header: '단계',
+    value: (row) => STAGES.indexOf(row.stage),
+    cell: (row) => <StageBadge stage={row.stage} />,
+  },
   {
     key: 'organization',
     header: '거래처',
@@ -56,7 +61,14 @@ const COLUMNS: Column<Deal>[] = [
         </RecordLink>
       ) : null,
   },
-  { key: 'value', header: '금액', align: 'end', nowrap: true, value: (row) => row.value, cell: (row) => formatMoney(row.value) },
+  {
+    key: 'value',
+    header: '금액',
+    align: 'end',
+    nowrap: true,
+    value: (row) => row.value,
+    cell: (row) => formatMoney(row.value),
+  },
   {
     key: 'probability',
     header: '확률',
@@ -131,7 +143,11 @@ export function DealsPage() {
     <>
       <PageHeader
         title="영업 기회"
-        summary={data ? `영업 기회 ${count(data.length, 'deal')} · 진행 중 ${count(open, 'deal')} · 지연 ${count(late, 'deal')}` : ' '}
+        summary={
+          data
+            ? `영업 기회 ${count(data.length, 'deal')} · 진행 중 ${count(open, 'deal')} · 지연 ${count(late, 'deal')}`
+            : ' '
+        }
       />
       <Panel>
         <DataTable

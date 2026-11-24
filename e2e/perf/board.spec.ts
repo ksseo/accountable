@@ -5,7 +5,9 @@ import { formatMoney } from '../../frontend/src/lib/money'
 import { expect, resetData, test } from '../support/fixtures'
 import { API_URL, loadBulkData } from '../support/servers'
 
-type Pipeline = { columns: { stage: string; count: number; value: number; deals: { id: number; value: number }[] }[] }
+type Pipeline = {
+  columns: { stage: string; count: number; value: number; deals: { id: number; value: number }[] }[]
+}
 
 test.describe.configure({ mode: 'serial' })
 test.beforeAll(() => loadBulkData())

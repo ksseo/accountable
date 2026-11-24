@@ -54,7 +54,11 @@ test('the status filter shows its counts and keeps its choice in the address', a
   const customers = contacts.filter((c) => c.status === 'customer').length
   await page.goto('/contacts')
   const filter = page.getByRole('radiogroup', { name: '상태' })
-  for (const [label, key] of [['리드', 'lead'], ['적격', 'qualified'], ['고객', 'customer']] as const) {
+  for (const [label, key] of [
+    ['리드', 'lead'],
+    ['적격', 'qualified'],
+    ['고객', 'customer'],
+  ] as const) {
     const n = contacts.filter((c) => c.status === key).length
     await expect(filter.getByRole('radio', { name: `${label} ${n}` })).toBeVisible()
   }
@@ -119,16 +123,23 @@ test('edits a contact from its row menu', async ({ page }) => {
 
 test('deletes a contact, leaving their deals without a main contact', async ({ page }) => {
   const contact = (await apiGet<Contact[]>('/api/contacts')).find((c) => c.name === '박서연')!
-  const impact = await apiGet<{ deals: number; activities: number }>(`/api/contacts/${contact.id}/delete-impact`)
-  const dealIds = (await apiGet<Deal[]>('/api/deals')).filter((d) => d.contact_id === contact.id).map((d) => d.id)
+  const impact = await apiGet<{ deals: number; activities: number }>(
+    `/api/contacts/${contact.id}/delete-impact`,
+  )
+  const dealIds = (await apiGet<Deal[]>('/api/deals'))
+    .filter((d) => d.contact_id === contact.id)
+    .map((d) => d.id)
   expect(dealIds.length).toBeGreaterThan(0)
 
   await page.goto('/contacts')
   await search(page, '연락처 검색', '박서연')
   await rowAction(page, '박서연', '삭제')
   const confirm = page.getByRole('alertdialog', { name: '삭제' })
-  await expect(confirm).toContainText(`‘박서연’ 님을 삭제할까요? 영업 기회 ${impact.deals}건은 그대로 남고 주 연락처가 비워져요.`)
-  if (impact.activities) await expect(confirm).toContainText(`이 연락처에 기록된 활동 ${impact.activities}건은 함께 삭제돼요.`)
+  await expect(confirm).toContainText(
+    `‘박서연’ 님을 삭제할까요? 영업 기회 ${impact.deals}건은 그대로 남고 주 연락처가 비워져요.`,
+  )
+  if (impact.activities)
+    await expect(confirm).toContainText(`이 연락처에 기록된 활동 ${impact.activities}건은 함께 삭제돼요.`)
   await confirm.getByRole('button', { name: '삭제' }).click()
   await expect(page.getByText('‘박서연’과 일치하는 결과가 없어요')).toBeVisible()
 

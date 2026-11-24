@@ -47,6 +47,8 @@ describe('PipelineBand', () => {
     const proposal = within(band).getByRole('link', { name: /^제안\s?9건\s?\$541,500\s?예상 \$270,750$/ })
     expect(proposal).toHaveAttribute('href', '/pipeline')
     expect(band).toHaveTextContent('예상 $567,750')
-    expect(screen.getByText('칸의 너비는 단계별 금액, 아래 막대는 그중 예상 매출의 비율이에요.')).toBeInTheDocument()
+    expect(
+      screen.getByText('칸의 너비는 단계별 금액, 아래 막대는 그중 예상 매출의 비율이에요.'),
+    ).toBeInTheDocument()
   })
 })

@@ -43,15 +43,18 @@ def get_contact(conn: Connection, contact_id: int, today: date) -> dict:
 
 
 def _check_organization(conn: Connection, organization_id: int | None) -> None:
-    if organization_id is not None and conn.scalar(
-        select(organizations.c.id).where(organizations.c.id == organization_id)
-    ) is None:
-        raise field_error("organization_id", f"organization_id {organization_id} doesn't exist", "missing_link")
+    if (
+        organization_id is not None
+        and conn.scalar(select(organizations.c.id).where(organizations.c.id == organization_id)) is None
+    ):
+        raise field_error(
+            "organization_id", f"organization_id {organization_id} doesn't exist", "missing_link"
+        )
 
 
 def create_contact(conn: Connection, data: Mapping[str, Any]) -> dict:
     _check_organization(conn, data.get("organization_id"))
-    contact_id = conn.execute(insert(contacts).values(**data)).inserted_primary_key[0]
+    contact_id = conn.execute(insert(contacts).values(**data).returning(contacts.c.id)).scalar_one()
     return _get(conn, contact_id)
 
 

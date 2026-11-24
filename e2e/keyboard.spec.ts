@@ -117,7 +117,9 @@ test('logging an activity and marking a follow-up done', async ({ page }) => {
   await tabTo(page, form.getByRole('button', { name: '기록' }))
   await page.keyboard.press('Enter')
   await expect(page.getByRole('status').getByText('기록했어요')).toBeVisible()
-  await expect(page.getByRole('list', { name: '타임라인' }).getByRole('listitem').first()).toContainText('키보드로 남긴 통화 기록')
+  await expect(page.getByRole('list', { name: '타임라인' }).getByRole('listitem').first()).toContainText(
+    '키보드로 남긴 통화 기록',
+  )
 
   await page.goto('/')
   const list = page.getByRole('list', { name: '후속 조치' })

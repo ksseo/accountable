@@ -53,6 +53,8 @@ export type Column<T> = {
   nowrap?: boolean
 }
 
+type Sort = { key: string; direction: SortDirection }
+
 type Props<T extends RowData> = {
   /** Read out as the table's name. */
   caption: string
@@ -68,7 +70,7 @@ type Props<T extends RowData> = {
   rowName: (row: T) => string
   searchLabel: string
   searchPlaceholder: string
-  defaultSort: { key: string; direction: SortDirection }
+  defaultSort: Sort
   /** Filters shown beside the search field. */
   toolbar?: ReactNode
   onEdit: (row: T) => void
@@ -77,6 +79,13 @@ type Props<T extends RowData> = {
   empty: { message: string; action?: ReactNode }
   /** What it says when the page's filters leave nothing and there's no search. */
   noMatchMessage?: string
+}
+
+/** The sort the address asks for, or the table's own if it asks for none it can do. */
+function sortFrom<T>(params: URLSearchParams, columns: Column<T>[], defaultSort: Sort): Sort {
+  const requested = columns.find((column) => column.key === params.get('sort') && column.value)
+  if (!requested) return defaultSort
+  return { key: requested.key, direction: params.get('dir') === 'desc' ? 'desc' : 'asc' }
 }
 
 /** A table that searches, sorts and pages its rows in the browser, 50 to a
@@ -104,16 +113,7 @@ export function DataTable<T extends RowData>({
   const navigate = useNavigate()
 
   const query = params.get('q') ?? ''
-  const requestedKey = params.get('sort')
-  const sortColumn =
-    columns.find((column) => column.key === requestedKey && column.value) ??
-    columns.find((column) => column.key === defaultSort.key)
-  const direction: SortDirection =
-    requestedKey && sortColumn?.key === requestedKey
-      ? params.get('dir') === 'desc'
-        ? 'desc'
-        : 'asc'
-      : defaultSort.direction
+  const { key: sortKey, direction } = sortFrom(params, columns, defaultSort)
 
   // The address can ask for a page that isn't there, such as after a delete.
   const [lastPage, setLastPage] = useState(Infinity)
@@ -144,15 +144,15 @@ export function DataTable<T extends RowData>({
               id: key,
               accessorFn: (row) => emptyAsUndefined(value(row)),
               enableGlobalFilter: searchable,
-              sortFn: (a, b, id) => compareValues(a.getValue<string | number>(id), b.getValue<string | number>(id)),
+              sortFn: (a, b, id) =>
+                compareValues(a.getValue<string | number>(id), b.getValue<string | number>(id)),
               sortUndefined: 'last',
             }
           : { id: key },
       ),
     [columns],
   )
-  const sortKey = sortColumn?.key
-  const sorting = useMemo(() => (sortKey ? [{ id: sortKey, desc: direction === 'desc' }] : []), [sortKey, direction])
+  const sorting = useMemo(() => [{ id: sortKey, desc: direction === 'desc' }], [sortKey, direction])
   const pagination = useMemo(() => ({ pageIndex: page - 1, pageSize: PAGE_SIZE }), [page])
 
   const table = useTable({
@@ -257,7 +257,10 @@ export function DataTable<T extends RowData>({
                     {columns.map((column) => (
                       <td
                         key={column.key}
-                        className={[column.align === 'end' ? styles.end : '', column.nowrap ? styles.nowrap : '']
+                        className={[
+                          column.align === 'end' ? styles.end : '',
+                          column.nowrap ? styles.nowrap : '',
+                        ]
                           .filter(Boolean)
                           .join(' ')}
                       >
@@ -269,7 +272,12 @@ export function DataTable<T extends RowData>({
                         label={`${rowName(row)} 메뉴`}
                         items={[
                           { key: 'edit', label: '수정', icon: <Pencil size={16} aria-hidden="true" /> },
-                          { key: 'delete', label: '삭제', icon: <Trash2 size={16} aria-hidden="true" />, danger: true },
+                          {
+                            key: 'delete',
+                            label: '삭제',
+                            icon: <Trash2 size={16} aria-hidden="true" />,
+                            danger: true,
+                          },
                         ]}
                         onAction={(key) => (key === 'edit' ? onEdit(row) : onDelete(row))}
                       />
@@ -281,7 +289,11 @@ export function DataTable<T extends RowData>({
           </div>
 
           {shownCount === 0 ? (
-            <EmptyState message={query ? `${quoted(query.trim(), withParticle)} 일치하는 결과가 없어요` : noMatchMessage} />
+            <EmptyState
+              message={
+                query ? `${quoted(query.trim(), withParticle)} 일치하는 결과가 없어요` : noMatchMessage
+              }
+            />
           ) : (
             <nav className={styles.pager} aria-label="페이지">
               <span className={styles.range}>

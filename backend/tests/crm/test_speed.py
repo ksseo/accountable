@@ -6,6 +6,7 @@ import time
 from collections.abc import Iterator
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import event
 
@@ -49,6 +50,7 @@ def _slowest_ms(client: TestClient, path: str) -> float:
 
 def _plans(client: TestClient, path: str) -> list[tuple[str, list[str]]]:
     """Each query the request runs, with SQLite's plan for it."""
+    assert isinstance(client.app, FastAPI)
     engine = client.app.state.engine
     statements: list[tuple[str, tuple]] = []
 

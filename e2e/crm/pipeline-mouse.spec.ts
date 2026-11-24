@@ -26,7 +26,11 @@ test.beforeEach(() => resetData())
 test('shows six lanes with their counts and totals, and the open totals above', async ({ page }) => {
   const board = await pipeline()
   await page.goto('/pipeline')
-  await expect(page.getByText(`진행 중 ${formatMoney(board.open_value)}, 예상 매출 ${formatMoney(board.open_expected_revenue)}.`)).toBeVisible()
+  await expect(
+    page.getByText(
+      `진행 중 ${formatMoney(board.open_value)}, 예상 매출 ${formatMoney(board.open_expected_revenue)}.`,
+    ),
+  ).toBeVisible()
   for (const column of board.columns) {
     const section = lane(page, column.stage)
     await expect(section.getByRole('heading', { level: 2 })).toHaveText(STAGE_LABELS[column.stage])
@@ -44,7 +48,9 @@ test('Won and Lost show only the last 30 days', async ({ page }) => {
     const recent = deals.filter((deal) => deal.stage === stage && deal.close_date! >= board.window_start)
     expect(deals.filter((deal) => deal.stage === stage).length).toBeGreaterThan(recent.length)
     await page.goto('/pipeline')
-    await expect.poll(() => shownOrder(page, stage).then((ids) => ids.sort())).toEqual(recent.map((deal) => deal.id).sort())
+    await expect
+      .poll(() => shownOrder(page, stage).then((ids) => ids.sort()))
+      .toEqual(recent.map((deal) => deal.id).sort())
   }
 })
 
@@ -76,7 +82,9 @@ test('dragging to another lane changes the stage and probability, kept after a r
   await expect(row).toContainText('50%')
 })
 
-test('dropping lower, higher and between two cards in its own lane stays after a refresh', async ({ page }) => {
+test('dropping lower, higher and between two cards in its own lane stays after a refresh', async ({
+  page,
+}) => {
   const before = await savedOrder('new')
   expect(before.length).toBeGreaterThanOrEqual(4)
   const [a, b, c, ...rest] = before
@@ -130,7 +138,9 @@ test('the totals change before a slow save finishes', async ({ page }) => {
   await dragTo(page, cardOn(page, moved.id), cardOn(page, target.id), 'top')
 
   const negotiation = laneOf(board, 'negotiation')
-  await expect(laneTotal(page, 'negotiation')).toHaveText(formatMoney(negotiation.value + moved.value), { timeout: 1_000 })
+  await expect(laneTotal(page, 'negotiation')).toHaveText(formatMoney(negotiation.value + moved.value), {
+    timeout: 1_000,
+  })
   await expect(laneTotal(page, 'new')).toHaveText(formatMoney(laneOf(board, 'new').value - moved.value))
   await expect(page.getByText(`진행 중 ${formatMoney(board.open_value)}, 예상 매출 `)).toBeVisible()
   expect(saved).toBe(false)
@@ -156,13 +166,18 @@ test.describe('when the save fails', () => {
   })
 })
 
-test('moving to Won sets today as the close date, makes the contact a customer and says so', async ({ page }) => {
+test('moving to Won sets today as the close date, makes the contact a customer and says so', async ({
+  page,
+}) => {
   const contacts = await apiGet<Contact[]>('/api/contacts')
   const board = await pipeline()
   const moved = board.columns
     .filter((column) => column.stage === 'negotiation' || column.stage === 'proposal')
     .flatMap((column) => column.deals)
-    .find((deal) => contacts.find((contact) => contact.id === deal.contact_id)?.status !== 'customer' && deal.contact_id)!
+    .find(
+      (deal) =>
+        contacts.find((contact) => contact.id === deal.contact_id)?.status !== 'customer' && deal.contact_id,
+    )!
   await bringToTop(moved.id)
   const won = laneOf(board, 'won').deals[0]
   await page.goto('/pipeline')
@@ -203,7 +218,10 @@ test('the names on a card link to their own pages (UI-7)', async ({ page }) => {
   const deal = laneOf(await pipeline(), 'qualified').deals.find((item) => item.organization_id !== null)!
   await page.goto('/pipeline')
   const card = cardOn(page, deal.id)
-  await expect(card.getByRole('link', { name: deal.name, exact: true })).toHaveAttribute('href', `/deals/${deal.id}`)
+  await expect(card.getByRole('link', { name: deal.name, exact: true })).toHaveAttribute(
+    'href',
+    `/deals/${deal.id}`,
+  )
   await card.getByRole('link', { name: deal.organization_name!, exact: true }).click()
   await expect(page).toHaveURL(`/organizations/${deal.organization_id}`)
 })

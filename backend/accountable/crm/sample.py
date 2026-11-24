@@ -13,7 +13,7 @@ from sqlalchemy import Connection, insert
 from accountable.core import clock
 from accountable.crm import sample_data as data
 from accountable.crm.deals.rules import POSITION_STEP, usual_probability
-from accountable.crm.stages import CLOSED_STAGE_KEYS, OPEN_STAGE_KEYS
+from accountable.crm.stages import CLOSED_STAGE_KEYS, OPEN_STAGE_KEYS, StageKey
 from accountable.crm.tables import activities, contacts, deals, organizations
 
 WORKDAY_START = 9 * 60
@@ -24,7 +24,7 @@ def has_hangul(text: str) -> bool:
     return any("가" <= char <= "힣" for char in text)
 
 
-def stage_path(deal: data.Deal) -> list[str]:
+def stage_path(deal: data.Deal) -> list[StageKey]:
     """The stages a deal went through, from the one it was added at."""
     if deal.stage in OPEN_STAGE_KEYS:
         furthest = deal.stage
@@ -84,7 +84,8 @@ class _Loader:
         for index, org in enumerate(data.ORGANIZATIONS):
             created = self.at(-420 + index, 540)
             self.org_ids[org.name] = self.conn.execute(
-                insert(organizations).values(
+                insert(organizations)
+                .values(
                     name=org.name,
                     website=f"https://{org.website}",
                     industry=org.industry,
@@ -92,13 +93,15 @@ class _Loader:
                     created_at=created,
                     updated_at=created,
                 )
-            ).inserted_primary_key[0]
+                .returning(organizations.c.id)
+            ).scalar_one()
 
     def load_contacts(self) -> None:
         for index, person in enumerate(data.CONTACTS):
             created = self.at(-400 + index, 600)
             self.contact_ids[person.name] = self.conn.execute(
-                insert(contacts).values(
+                insert(contacts)
+                .values(
                     name=person.name,
                     email=person.email,
                     phone=person.phone,
@@ -108,7 +111,8 @@ class _Loader:
                     created_at=created,
                     updated_at=created,
                 )
-            ).inserted_primary_key[0]
+                .returning(contacts.c.id)
+            ).scalar_one()
 
     def load_deals(self) -> None:
         next_position: dict[str, float] = {}
@@ -128,7 +132,8 @@ class _Loader:
             position = next_position.get(deal.stage, POSITION_STEP)
             next_position[deal.stage] = position + POSITION_STEP
             deal_id = self.conn.execute(
-                insert(deals).values(
+                insert(deals)
+                .values(
                     name=deal.name,
                     organization_id=self.org_ids[deal.org] if deal.org else None,
                     contact_id=self.contact_ids[deal.contact] if deal.contact else None,
@@ -141,7 +146,8 @@ class _Loader:
                     created_at=created,
                     updated_at=moments[-1] if moments else created,
                 )
-            ).inserted_primary_key[0]
+                .returning(deals.c.id)
+            ).scalar_one()
             self.deal_ids[deal.name] = deal_id
 
             for step, moment in enumerate(moments):
@@ -174,7 +180,9 @@ class _Loader:
                 from_value="qualified",
                 to_value="customer",
                 description=won.name if won else None,
-                occurred_at=self.won_at[won.name] if won else self.at(-self.rng.randint(60, 200), self.work_minute()),
+                occurred_at=self.won_at[won.name]
+                if won
+                else self.at(-self.rng.randint(60, 200), self.work_minute()),
             )
 
     def load_logged_activities(self) -> None:
@@ -186,17 +194,22 @@ class _Loader:
                 contact_id=self.contact_ids[item.on_contact] if item.on_contact else None,
                 description=item.description,
                 occurred_at=self.at(-item.days_ago, self.work_minute()),
-                follow_up_date=None if item.follow_up is None else self.today + timedelta(days=item.follow_up),
+                follow_up_date=None
+                if item.follow_up is None
+                else self.today + timedelta(days=item.follow_up),
                 follow_up_done=item.done,
             )
 
-        targets = [("deal", deal) for deal in data.DEALS] + [("contact", person) for person in data.CONTACTS]
+        targets = [*data.DEALS, *data.CONTACTS]
         for _ in range(data.RANDOM_ACTIVITIES):
-            kind_of_record, record = self.rng.choice(targets)
-            if kind_of_record == "deal":
+            record = self.rng.choice(targets)
+            if isinstance(record, data.Deal):
                 korean = has_hangul(record.org or record.name)
-                closed = record.stage in CLOSED_STAGE_KEYS
-                days = (record.close - self.rng.randint(3, 40)) if closed else -self.rng.randint(1, 120)
+                if record.stage in CLOSED_STAGE_KEYS:
+                    assert record.close is not None
+                    days = record.close - self.rng.randint(3, 40)
+                else:
+                    days = -self.rng.randint(1, 120)
                 link = {"deal_id": self.deal_ids[record.name]}
             else:
                 korean = has_hangul(org_of[record.name] or record.name)

@@ -84,7 +84,15 @@ def test_follow_ups_overdue_first_then_today_then_the_next_14_days():
             "occurred_at": datetime(2026, 11, 1),
         }
 
-    items = [item(1, 3), item(2, -2), item(3, 0), item(4, 14), item(5, 15), item(6, -5, done=True), item(7, 40)]
+    items = [
+        item(1, 3),
+        item(2, -2),
+        item(3, 0),
+        item(4, 14),
+        item(5, 15),
+        item(6, -5, done=True),
+        item(7, 40),
+    ]
     shown, later = follow_up_window(items, TODAY)
     assert [i["id"] for i in shown] == [2, 3, 1, 4]
     assert later == 2
@@ -121,7 +129,9 @@ def small_dataset(client, make_org, make_contact, make_deal, make_activity):
         [("+14", 14), ("+3", 3), ("today", 0), ("-5", -5), ("+15", 15), ("+30", 30), ("done", -2)], start=10
     ):
         target = {"contact_id": contact["id"]} if label in ("today", "+3") else {"deal_id": ids["A"]}
-        entry = make_activity(f"follow-up {label}", follow_up_date=_on(days), occurred_at=ago(minutes), **target)
+        entry = make_activity(
+            f"follow-up {label}", follow_up_date=_on(days), occurred_at=ago(minutes), **target
+        )
         follow_ups[label] = entry["id"]
     client.patch(f"/api/activities/{follow_ups['done']}", json={"follow_up_done": True})
     for minutes in (100, 200, 300):
@@ -184,14 +194,20 @@ def test_follow_ups_in_order_with_the_14_day_window_and_later_count(small_datase
     ]
     assert small_dataset["follow_ups_later"] == 2
     contact, deal = items[1]["record"], items[0]["record"]
-    assert (contact["kind"], contact["name"], contact["organization_name"]) == ("contact", "박서연", "한빛정밀")
+    assert (contact["kind"], contact["name"], contact["organization_name"]) == (
+        "contact",
+        "박서연",
+        "한빛정밀",
+    )
     assert (deal["kind"], deal["name"], deal["organization_name"]) == ("deal", "A", "한빛정밀")
 
 
 def test_a_record_names_its_organization_with_its_id(client, small_dataset):
     org_id = client.get("/api/organizations").json()[0]["id"]
     records = [item["record"] for item in small_dataset["follow_ups"] + small_dataset["recent"]]
-    assert {record["organization_id"] for record in records if record["organization_name"] == "한빛정밀"} == {org_id}
+    assert {record["organization_id"] for record in records if record["organization_name"] == "한빛정밀"} == {
+        org_id
+    }
     assert {record["organization_id"] for record in records if record["organization_name"] is None} <= {None}
 
 

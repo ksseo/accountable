@@ -62,7 +62,11 @@ function DealDialog({ target, onClose }: { target: Target; onClose: () => void }
   )
 
   return (
-    <Dialog title={editing ? '영업 기회 수정' : '영업 기회 추가'} isOpen onOpenChange={(isOpen) => !isOpen && onClose()}>
+    <Dialog
+      title={editing ? '영업 기회 수정' : '영업 기회 추가'}
+      isOpen
+      onOpenChange={(isOpen) => !isOpen && onClose()}
+    >
       {meta && contacts && organizations ? (
         <DealForm
           initial={editing}

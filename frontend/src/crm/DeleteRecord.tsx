@@ -17,7 +17,15 @@ type Props<Impact> = {
 }
 
 /** Asks first, with what will happen to linked records, then deletes (DEL-1, DEL-2). */
-export function DeleteRecord<Impact>({ target, onClose, kind, loadImpact, message, remove, onDeleted }: Props<Impact>) {
+export function DeleteRecord<Impact>({
+  target,
+  onClose,
+  kind,
+  loadImpact,
+  message,
+  remove,
+  onDeleted,
+}: Props<Impact>) {
   const queryClient = useQueryClient()
   // The counts are read once when the dialog opens. As a query they'd be
   // fetched again with everything else after the delete, and get a 404.

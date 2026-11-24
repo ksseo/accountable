@@ -37,9 +37,9 @@ def list_organizations(conn: Connection) -> list[dict]:
             func.coalesce(open_deals.c.open_deal_value, 0).label("open_deal_value"),
         )
         .select_from(
-            organizations.outerjoin(contact_counts, contact_counts.c.organization_id == organizations.c.id).outerjoin(
-                open_deals, open_deals.c.organization_id == organizations.c.id
-            )
+            organizations.outerjoin(
+                contact_counts, contact_counts.c.organization_id == organizations.c.id
+            ).outerjoin(open_deals, open_deals.c.organization_id == organizations.c.id)
         )
         .order_by(organizations.c.id)
     )
@@ -77,7 +77,9 @@ def get_organization(conn: Connection, organization_id: int, today: date) -> dic
 
 
 def create_organization(conn: Connection, data: Mapping[str, Any]) -> dict:
-    organization_id = conn.execute(insert(organizations).values(**data)).inserted_primary_key[0]
+    organization_id = conn.execute(
+        insert(organizations).values(**data).returning(organizations.c.id)
+    ).scalar_one()
     return _get(conn, organization_id)
 
 
@@ -90,7 +92,7 @@ def update_organization(conn: Connection, organization_id: int, changes: Mapping
 
 def delete_impact(conn: Connection, organization_id: int) -> dict:
     _get(conn, organization_id)
-    count = lambda table: conn.scalar(  # noqa: E731
+    count = lambda table: conn.scalar(
         select(func.count()).select_from(table).where(table.c.organization_id == organization_id)
     )
     return {"contacts": count(contacts), "deals": count(deals)}

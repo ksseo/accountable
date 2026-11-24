@@ -7,7 +7,16 @@ async function screens(): Promise<string[]> {
   const [organization] = await apiGet<{ id: number }[]>('/api/organizations')
   const [contact] = await apiGet<{ id: number }[]>('/api/contacts')
   const [deal] = await apiGet<{ id: number }[]>('/api/deals')
-  return ['/', '/organizations', '/contacts', '/deals', '/pipeline', `/organizations/${organization.id}`, `/contacts/${contact.id}`, `/deals/${deal.id}`]
+  return [
+    '/',
+    '/organizations',
+    '/contacts',
+    '/deals',
+    '/pipeline',
+    `/organizations/${organization.id}`,
+    `/contacts/${contact.id}`,
+    `/deals/${deal.id}`,
+  ]
 }
 
 async function open(page: Page, path: string) {
@@ -36,7 +45,9 @@ test('at 1280px the six lanes fit without scrolling', async ({ page }) => {
   const overflow = await board.evaluate((element) => element.scrollWidth - element.clientWidth)
   expect(overflow).toBeLessThanOrEqual(0)
   for (const lane of ['신규', '적격', '제안', '협상', '수주', '실주']) {
-    await expect(board.getByRole('heading', { level: 2, name: lane, exact: true })).toBeInViewport({ ratio: 1 })
+    await expect(board.getByRole('heading', { level: 2, name: lane, exact: true })).toBeInViewport({
+      ratio: 1,
+    })
   }
 })
 

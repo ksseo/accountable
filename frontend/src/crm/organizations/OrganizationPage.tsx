@@ -11,7 +11,16 @@ import { LateBadge, StageBadge, StatusBadge } from '../badges'
 import { DeleteRecord } from '../DeleteRecord'
 import { useContactForm, useDealForm } from '../openForms'
 import { recordId, RecordPending } from '../RecordMissing'
-import { AddButton, Details, Figures, Joined, LinkedList, LinkedRow, RecordActions, WebsiteLink } from '../RecordParts'
+import {
+  AddButton,
+  Details,
+  Figures,
+  Joined,
+  LinkedList,
+  LinkedRow,
+  RecordActions,
+  WebsiteLink,
+} from '../RecordParts'
 import styles from '../records.module.css'
 import { deleteOrganization, organizationImpact, useOrganization, type OrganizationDetail } from './api'
 import { organizationDeleteMessage } from './deleteMessage'
@@ -20,7 +29,10 @@ import { OrganizationDialog } from './OrganizationDialog'
 /** An organization's page (REC-1). */
 export function OrganizationPage() {
   const { data, error, refetch } = useOrganization(recordId(useParams().id))
-  if (!data) return <RecordPending error={error} listPath="/organizations" listLabel="거래처" onRetry={() => refetch()} />
+  if (!data)
+    return (
+      <RecordPending error={error} listPath="/organizations" listLabel="거래처" onRetry={() => refetch()} />
+    )
   return <OrganizationRecord organization={data} />
 }
 
@@ -53,7 +65,10 @@ function OrganizationRecord({ organization }: { organization: OrganizationDetail
             <Details
               items={[
                 { label: '업종', value: organization.industry },
-                { label: '웹사이트', value: organization.website ? <WebsiteLink url={organization.website} /> : null },
+                {
+                  label: '웹사이트',
+                  value: organization.website ? <WebsiteLink url={organization.website} /> : null,
+                },
                 { label: '비고', value: organization.notes },
               ]}
             />
@@ -98,7 +113,11 @@ function OrganizationRecord({ organization }: { organization: OrganizationDetail
                   value: formatMoney(organization.open_deal_value),
                   note: `영업 기회 ${count(organization.open_deal_count, 'deal')}`,
                 },
-                { label: '수주 매출', value: formatMoney(organization.won_value), note: `수주 ${count(wonCount, 'deal')}` },
+                {
+                  label: '수주 매출',
+                  value: formatMoney(organization.won_value),
+                  note: `수주 ${count(wonCount, 'deal')}`,
+                },
               ]}
             />
           </Panel>

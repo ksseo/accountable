@@ -12,7 +12,9 @@ const ORGANIZATIONS = [
 
 function setup() {
   const onSave = vi.fn(() => Promise.resolve())
-  const view = renderWithApp(<ContactForm meta={META} organizations={ORGANIZATIONS} onSave={onSave} onCancel={vi.fn()} />)
+  const view = renderWithApp(
+    <ContactForm meta={META} organizations={ORGANIZATIONS} onSave={onSave} onCancel={vi.fn()} />,
+  )
   return { ...view, onSave, name: screen.getByRole('textbox', { name: '이름 (필수)' }) }
 }
 
@@ -66,7 +68,12 @@ describe('ContactForm', () => {
   it('does not submit on Enter while a Korean letter is being typed', async () => {
     const { user, name, onSave } = setup()
     await user.type(name, '김민')
-    const composing = new KeyboardEvent('keydown', { key: 'Enter', keyCode: 229, bubbles: true, cancelable: true })
+    const composing = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      keyCode: 229,
+      bubbles: true,
+      cancelable: true,
+    })
     fireEvent(name, composing)
     expect(composing.defaultPrevented).toBe(true)
     expect(onSave).not.toHaveBeenCalled()
@@ -81,6 +88,8 @@ describe('contactDeleteMessage', () => {
   })
 
   it('leaves out what has none', () => {
-    expect(contactDeleteMessage('Sarah Kim', { deals: 0, activities: 0 })).toBe('‘Sarah Kim’ 님을 삭제할까요?')
+    expect(contactDeleteMessage('Sarah Kim', { deals: 0, activities: 0 })).toBe(
+      '‘Sarah Kim’ 님을 삭제할까요?',
+    )
   })
 })

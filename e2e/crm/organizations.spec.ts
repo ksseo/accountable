@@ -26,7 +26,10 @@ test('adds an organization, which is still there after a refresh', async ({ page
   await expect(rows).toHaveCount(1)
   await expect(rows.first()).toContainText('새한포장')
   await expect(rows.first()).toContainText('포장재')
-  await expect(rows.first().getByRole('link', { name: 'saehan.example' })).toHaveAttribute('href', 'https://saehan.example')
+  await expect(rows.first().getByRole('link', { name: 'saehan.example' })).toHaveAttribute(
+    'href',
+    'https://saehan.example',
+  )
 })
 
 test('a name is required, said in Korean under the field', async ({ page }) => {
@@ -63,7 +66,10 @@ test('searches and sorts, kept in the address', async ({ page }) => {
   await expect(page.getByRole('columnheader', { name: /이름/ })).toHaveAttribute('aria-sort', 'descending')
   await expect(rows.first().getByRole('link').first()).toHaveText(sorted[sorted.length - 1])
 
-  await page.getByRole('columnheader', { name: /연락처 수/ }).getByRole('button').click()
+  await page
+    .getByRole('columnheader', { name: /연락처 수/ })
+    .getByRole('button')
+    .click()
   const fewest = Math.min(...orgs.map((org) => org.contact_count))
   await expect(rows.first()).toContainText(`${fewest}명`)
 })
@@ -85,9 +91,15 @@ test('edits an organization from its row menu', async ({ page }) => {
 
 test('deletes an organization, leaving its contacts and deals without it', async ({ page }) => {
   const org = (await apiGet<Org[]>('/api/organizations')).find((item) => item.name === '한빛정밀')!
-  const impact = await apiGet<{ contacts: number; deals: number }>(`/api/organizations/${org.id}/delete-impact`)
-  const contactIds = (await apiGet<Contact[]>('/api/contacts')).filter((c) => c.organization_id === org.id).map((c) => c.id)
-  const dealIds = (await apiGet<Deal[]>('/api/deals')).filter((d) => d.organization_id === org.id).map((d) => d.id)
+  const impact = await apiGet<{ contacts: number; deals: number }>(
+    `/api/organizations/${org.id}/delete-impact`,
+  )
+  const contactIds = (await apiGet<Contact[]>('/api/contacts'))
+    .filter((c) => c.organization_id === org.id)
+    .map((c) => c.id)
+  const dealIds = (await apiGet<Deal[]>('/api/deals'))
+    .filter((d) => d.organization_id === org.id)
+    .map((d) => d.id)
   expect(contactIds).toHaveLength(impact.contacts)
 
   await page.goto('/organizations')

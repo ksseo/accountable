@@ -18,16 +18,39 @@
     "test:backend": "uv run pytest",
     "test:frontend": "npm run test --workspace frontend",
     "test:e2e": "playwright test",
-    "api:types": "node scripts/api-types.mjs"
+    "api:types": "node scripts/api-types.mjs",
+    "check": "npm run check:quick && npm run test:e2e",
+    "check:quick": "npm run check:static && npm run test:backend && npm run test:frontend",
+    "check:static": "concurrently --group \"npm:static:*\"",
+    "static:prettier": "prettier --check .",
+    "static:eslint": "eslint . --max-warnings 0",
+    "static:tsc": "npm run test:types",
+    "static:ruff-format": "uv run ruff format --check backend",
+    "static:ruff": "uv run ruff check backend",
+    "static:ty": "uv run ty check backend --error-on-warning",
+    "static:gitleaks": "gitleaks git . --no-banner --redact && gitleaks dir . --config .gitleaks-files.toml --no-banner --redact",
+    "format": "prettier --write . && uv run ruff format backend"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.14.0",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.65.1",
     "@types/node": "^26.6.6",
     "concurrently": "^10.0.7",
+    "eslint": "^10.15.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.14.0",
     "open": "^11.0.4",
     "openapi-typescript": "^7.13.0",
+    "prettier": "^3.10.1",
     "tree-kill": "^1.2.2",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.74.0"
+  },
+  "overrides": {
+    "eslint-plugin-jsx-a11y": {
+      "eslint": "$eslint"
+    }
   }
 }

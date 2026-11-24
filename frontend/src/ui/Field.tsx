@@ -7,7 +7,12 @@ export function FieldLabel({ children, isRequired }: { children: ReactNode; isRe
   return (
     <Label className={styles.label}>
       {children}
-      {isRequired ? <> <span className={styles.required}>(필수)</span></> : null}
+      {isRequired ? (
+        <>
+          {' '}
+          <span className={styles.required}>(필수)</span>
+        </>
+      ) : null}
     </Label>
   )
 }
@@ -71,7 +76,12 @@ export function TextInput({
     >
       <FieldLabel isRequired={isRequired}>{label}</FieldLabel>
       {multiline ? (
-        <TextArea ref={inputRef} className={`${styles.input} ${styles.textarea}`} placeholder={placeholder} rows={4} />
+        <TextArea
+          ref={inputRef}
+          className={`${styles.input} ${styles.textarea}`}
+          placeholder={placeholder}
+          rows={4}
+        />
       ) : (
         <div className={styles.inputRow}>
           <Input ref={inputRef} className={styles.input} placeholder={placeholder} />

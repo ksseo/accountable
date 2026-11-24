@@ -2,7 +2,15 @@ import type { CSSProperties } from 'react'
 import styles from './Skeleton.module.css'
 
 /** A panel's shape in a muted color while its data loads, instead of a spinner (UI-5). */
-export function Skeleton({ width = '100%', height = 16, style }: { width?: string | number; height?: number; style?: CSSProperties }) {
+export function Skeleton({
+  width = '100%',
+  height = 16,
+  style,
+}: {
+  width?: string | number
+  height?: number
+  style?: CSSProperties
+}) {
   return <span className={styles.block} style={{ width, height, ...style }} aria-hidden="true" />
 }
 

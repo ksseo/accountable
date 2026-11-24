@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect, useId, useState } from 'react'
-import { Controller, useForm } from 'react-hook-form'
+import { Controller, useForm, useWatch } from 'react-hook-form'
 import { ToggleButton, ToggleButtonGroup } from 'react-aria-components'
 import { z } from 'zod'
 import { blockComposingEnter } from '../../lib/ime'
@@ -85,9 +85,9 @@ export function ActivityForm({ mode, initial, onSave, onCancel }: Props) {
       follow_up_done: initial?.follow_up_done ?? false,
     },
   })
-  const { control, handleSubmit, formState, watch } = form
+  const { control, handleSubmit, formState } = form
   useUnsaved(formState.isDirty)
-  const followUp = watch('follow_up_date')
+  const followUp = useWatch({ control, name: 'follow_up_date' })
 
   // Until it's changed, the time is now, and it stays now while the page is open.
   const [isNow, setIsNow] = useState(mode === 'log')
@@ -116,14 +116,20 @@ export function ActivityForm({ mode, initial, onSave, onCancel }: Props) {
     }
     if (mode === 'log') {
       setIsNow(true)
-      form.reset({ kind: values.kind, description: '', occurred_at: now(), follow_up_date: null, follow_up_done: false })
+      form.reset({
+        kind: values.kind,
+        description: '',
+        occurred_at: now(),
+        follow_up_date: null,
+        follow_up_done: false,
+      })
     }
   }
 
   return (
     <form
+      ref={blockComposingEnter}
       onSubmit={handleSubmit(submit)}
-      onKeyDown={blockComposingEnter}
       noValidate
       aria-label={mode === 'log' ? '활동 기록' : undefined}
     >

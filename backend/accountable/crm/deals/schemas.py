@@ -2,9 +2,9 @@
 
 from datetime import date, datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from accountable.crm.fields import Money, Name, Probability
+from accountable.crm.fields import Money, Name, Probability, omittable
 from accountable.crm.stages import OpenStageKey, StageKey
 
 
@@ -23,11 +23,11 @@ class DealPatch(BaseModel):
     in this save, so a probability or close date sent with a new stage is kept
     (RULE-3). Name, stage and value can't be emptied."""
 
-    name: Name = Field(default=None)
+    name: Name = omittable()
     organization_id: int | None = None
     contact_id: int | None = None
-    stage: StageKey = Field(default=None)
-    value: Money = Field(default=None)
+    stage: StageKey = omittable()
+    value: Money = omittable()
     probability: Probability | None = None
     close_date: date | None = None
 

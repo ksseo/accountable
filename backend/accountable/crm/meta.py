@@ -10,8 +10,8 @@ from accountable.core import clock
 from accountable.core.db import Conn
 from accountable.crm.stages import (
     AUTOMATIC_KIND_KEYS,
-    LOGGED_KINDS,
     AUTOMATIC_KINDS,
+    LOGGED_KINDS,
     STAGES,
     STATUSES,
     ActivityKind,

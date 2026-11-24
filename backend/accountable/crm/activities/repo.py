@@ -87,14 +87,18 @@ def create_activity(conn: Connection, data: Mapping[str, Any], today: date) -> d
     contact_id, deal_id = data.get("contact_id"), data.get("deal_id")
     if (contact_id is None) == (deal_id is None):
         raise field_error("deal_id", "Log an activity on either a contact or a deal", "one_record")
-    if contact_id is not None and conn.scalar(select(contacts.c.id).where(contacts.c.id == contact_id)) is None:
+    if (
+        contact_id is not None
+        and conn.scalar(select(contacts.c.id).where(contacts.c.id == contact_id)) is None
+    ):
         raise field_error("contact_id", f"contact_id {contact_id} doesn't exist", "missing_link")
     if deal_id is not None and conn.scalar(select(deals.c.id).where(deals.c.id == deal_id)) is None:
         raise field_error("deal_id", f"deal_id {deal_id} doesn't exist", "missing_link")
     occurred_at = data.get("occurred_at") or clock.now()
     _check_not_future(occurred_at)
     activity_id = conn.execute(
-        insert(activities).values(
+        insert(activities)
+        .values(
             kind=data["kind"],
             contact_id=contact_id,
             deal_id=deal_id,
@@ -103,7 +107,8 @@ def create_activity(conn: Connection, data: Mapping[str, Any], today: date) -> d
             follow_up_date=data.get("follow_up_date"),
             follow_up_done=False,
         )
-    ).inserted_primary_key[0]
+        .returning(activities.c.id)
+    ).scalar_one()
     return _get(conn, activity_id, today)
 
 

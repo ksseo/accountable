@@ -8,14 +8,14 @@ from collections.abc import Mapping
 from datetime import date
 from typing import Any
 
-from accountable.crm.stages import CLOSED_STAGE_KEYS, STAGE_BY_KEY, is_open, open_stage_index
+from accountable.crm.stages import CLOSED_STAGE_KEYS, STAGE_BY_KEY, StageKey, is_open, open_stage_index
 
 # A card's place in its column. A new column starts at 1024 and steps by 1024,
 # and the top of a column is the smallest number minus 1024 (PIPE-6).
 POSITION_STEP = 1024.0
 
 
-def usual_probability(stage: str) -> int:
+def usual_probability(stage: StageKey) -> int:
     return STAGE_BY_KEY[stage].probability
 
 
@@ -31,7 +31,9 @@ def further_open_stage(current: str, new_stage: str) -> str:
     return current
 
 
-def stage_change_fields(current: Mapping[str, Any], new_stage: str, given: Mapping[str, Any], today: date) -> dict:
+def stage_change_fields(
+    current: Mapping[str, Any], new_stage: StageKey, given: Mapping[str, Any], today: date
+) -> dict:
     """What a change of stage sets, unless the same save sets it by hand (RULE-3, RULE-5).
 
     - the probability becomes the new stage's usual one;

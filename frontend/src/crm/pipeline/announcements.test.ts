@@ -15,7 +15,9 @@ describe('board announcements (PIPE-9)', () => {
   })
 
   it('says where the card was dropped', () => {
-    expect(dropped('물류센터 자동화 부품', spot)).toBe('‘물류센터 자동화 부품’을 제안 단계, 9건 중 3번째 자리에 놓았어요.')
+    expect(dropped('물류센터 자동화 부품', spot)).toBe(
+      '‘물류센터 자동화 부품’을 제안 단계, 9건 중 3번째 자리에 놓았어요.',
+    )
   })
 
   it('says the card went back to its place', () => {

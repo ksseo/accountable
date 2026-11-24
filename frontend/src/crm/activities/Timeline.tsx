@@ -17,7 +17,14 @@ import { useRefreshAll } from '../forms'
 import { kindLabel, useMeta, type Meta } from '../meta'
 import { ActivityEditDialog } from './ActivityEditDialog'
 import { ActivityForm, type ActivityValues } from './ActivityForm'
-import { deleteActivity, logActivity, updateActivity, useTimeline, type Owner, type TimelineEntry } from './api'
+import {
+  deleteActivity,
+  logActivity,
+  updateActivity,
+  useTimeline,
+  type Owner,
+  type TimelineEntry,
+} from './api'
 import styles from './Activities.module.css'
 import { automaticText, KIND_ICONS } from './kinds'
 
@@ -145,7 +152,10 @@ function Entry({ entry, owner, meta, onEdit, onDelete, onDone }: EntryProps) {
   const when = formatDateTime(entry.occurred_at)
   return (
     <li className={styles.entry}>
-      <span className={entry.automatic ? `${styles.icon} ${styles.automatic}` : styles.icon} aria-hidden="true">
+      <span
+        className={entry.automatic ? `${styles.icon} ${styles.automatic}` : styles.icon}
+        aria-hidden="true"
+      >
         <Icon size={16} />
       </span>
       <div className={styles.body}>
@@ -181,13 +191,23 @@ function Entry({ entry, owner, meta, onEdit, onDelete, onDone }: EntryProps) {
 }
 
 /** A follow-up's date with a box to mark it done; overdue ones say how many days, in Raspberry (RULE-10). */
-function FollowUp({ entry, today, onDone }: { entry: TimelineEntry; today: string | undefined; onDone: (done: boolean) => void }) {
+function FollowUp({
+  entry,
+  today,
+  onDone,
+}: {
+  entry: TimelineEntry
+  today: string | undefined
+  onDone: (done: boolean) => void
+}) {
   const date = entry.follow_up_date!
   const state = entry.follow_up_state
   return (
     <div className={styles.followUp}>
       <Checkbox isSelected={entry.follow_up_done} onChange={onDone}>
-        <span className={entry.follow_up_done ? styles.doneText : undefined}>후속 조치 {formatDateWithWeekday(date)}</span>
+        <span className={entry.follow_up_done ? styles.doneText : undefined}>
+          후속 조치 {formatDateWithWeekday(date)}
+        </span>
       </Checkbox>
       {state === 'overdue' && today ? (
         <span className={styles.overdue}>{daysBetween(date, today)}일 지남</span>

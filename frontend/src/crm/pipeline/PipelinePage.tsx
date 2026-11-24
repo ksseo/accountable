@@ -23,11 +23,20 @@ import { dealDeleteMessage } from '../deals/deleteMessage'
 import { MOVE_FAILED, moveDeal } from '../deals/move'
 import { DeleteRecord } from '../DeleteRecord'
 import { useRefreshAll } from '../forms'
-import { stageLabel, STAGES, useMeta, usualProbability, type Meta, type StageKey } from '../meta'
+import { stageLabel, useMeta, usualProbability, type Meta, type StageKey } from '../meta'
 import { useDealForm } from '../openForms'
 import { BOARD_HELP, dropped, movedTo, pickedUp, putBack, type Spot } from './announcements'
 import { usePipeline } from './api'
-import { applyMove, isSamePlace, neighbours, placementOf, type Board, type MoveRules, type Placement } from './applyMove'
+import {
+  applyMove,
+  isSamePlace,
+  neighbours,
+  placeByArrow,
+  placementOf,
+  type Board,
+  type MoveRules,
+  type Placement,
+} from './applyMove'
 import styles from './Board.module.css'
 import type { CardAction } from './CardMenu'
 import { BOARD_HELP_ID, BoardActionsContext, CardBody, type BoardActions } from './DealCard'
@@ -136,7 +145,10 @@ function PipelineBoard({ board, meta }: { board: Board; meta: Meta }) {
     const seq = ++seqRef.current
     setPending({ board: next, seq })
     try {
-      const saved = await moveDeal(placement.dealId, { stage: placement.stage, ...neighbours(next, placement.dealId) })
+      const saved = await moveDeal(placement.dealId, {
+        stage: placement.stage,
+        ...neighbours(next, placement.dealId),
+      })
       toast(
         card.stage === placement.stage
           ? `${quoted(card.name, objectParticle)} ${placement.index < placementOf(start, card.id)!.index ? '위로' : '아래로'} 옮겼어요`
@@ -161,13 +173,18 @@ function PipelineBoard({ board, meta }: { board: Board; meta: Meta }) {
     if (!dragRef.current) focusRef.current = null
   })
 
-  /** Puts a card picked up by keyboard back where it was, leaving focus alone. */
+  /** Puts a card picked up by keyboard back where it was. */
+  function putCardBack({ dealId, start }: Drag) {
+    setDrag(null)
+    setAnnouncement(putBack(cardOf(start, dealId)!.name, spotOf(start, dealId)))
+  }
+
+  /** Puts back the card picked up by keyboard, if there is one, leaving focus alone. */
   function dropPickedUp() {
     const current = dragRef.current
     if (current?.mode !== 'keyboard') return
-    setDrag(null)
+    putCardBack(current)
     focusRef.current = null
-    setAnnouncement(putBack(cardOf(current.start, current.dealId)!.name, spotOf(current.start, current.dealId)))
   }
 
   function onKey(event: KeyboardEvent<HTMLElement>, dealId: number) {
@@ -194,38 +211,36 @@ function PipelineBoard({ board, meta }: { board: Board; meta: Meta }) {
 
   /** Space drops, Escape puts back, the arrows move between lanes and up and down (PIPE-9). */
   function moveByKey(event: KeyboardEvent<HTMLElement>, current: Drag) {
-    const { dealId, start, draft } = current
-    const name = cardOf(start, dealId)!.name
-    const at = placementOf(draft, dealId)!
     if (event.key === ' ' || event.key === 'Enter') {
       event.preventDefault()
-      setDrag(null)
-      focusRef.current = dealId
-      setAnnouncement(isSamePlace(start, at) ? putBack(name, spotOf(start, dealId)) : dropped(name, spotOf(draft, dealId)))
-      void commit(start, at)
-      return
+      dropCard(current)
+    } else if (event.key === 'Escape') {
+      event.preventDefault()
+      putCardBack(current)
+      focusRef.current = current.dealId
+    } else if (event.key === 'Tab') {
+      // Tab still moves on, so its default stays.
+      putCardBack(current)
+    } else if (event.key.startsWith('Arrow')) {
+      event.preventDefault()
+      moveByArrow(event.key, current)
     }
-    if (event.key === 'Escape' || event.key === 'Tab') {
-      if (event.key === 'Escape') event.preventDefault()
-      setDrag(null)
-      if (event.key === 'Escape') focusRef.current = dealId
-      setAnnouncement(putBack(name, spotOf(start, dealId)))
-      return
-    }
-    const lane = draft.columns.find((column) => column.stage === at.stage)!
-    const stageIndex = STAGES.indexOf(at.stage)
-    let placement: Placement | null = null
-    if (event.key === 'ArrowUp' && at.index > 0) placement = { ...at, index: at.index - 1 }
-    if (event.key === 'ArrowDown' && at.index < lane.deals.length - 1) placement = { ...at, index: at.index + 1 }
-    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-      const stage = STAGES[stageIndex + (event.key === 'ArrowLeft' ? -1 : 1)]
-      if (stage) {
-        const target = draft.columns.find((column) => column.stage === stage)!
-        placement = { dealId, stage, index: Math.min(at.index, target.deals.length) }
-      }
-    }
-    if (!event.key.startsWith('Arrow')) return
-    event.preventDefault()
+  }
+
+  function dropCard({ dealId, start, draft }: Drag) {
+    const { name } = cardOf(start, dealId)!
+    const at = placementOf(draft, dealId)!
+    setDrag(null)
+    focusRef.current = dealId
+    setAnnouncement(
+      isSamePlace(start, at) ? putBack(name, spotOf(start, dealId)) : dropped(name, spotOf(draft, dealId)),
+    )
+    void commit(start, at)
+  }
+
+  function moveByArrow(key: string, current: Drag) {
+    const { dealId, start, draft } = current
+    const placement = placeByArrow(draft, placementOf(draft, dealId)!, key)
     if (!placement) return
     const next = applyMove(start, placement, rules)
     setDrag({ ...current, draft: next })
@@ -247,16 +262,17 @@ function PipelineBoard({ board, meta }: { board: Board; meta: Meta }) {
 
   // The functions cards call go through a ref, so the context value never
   // changes and cards don't draw again when the board does.
-  const handlers = useRef({ onKey, onMenu, open: (_: number) => {}, add: (_: StageKey) => {}, label, dropPickedUp })
+  const latest = {
+    onKey,
+    onMenu,
+    open: (dealId: number) => navigate(`/deals/${dealId}`),
+    add: (stage: StageKey) => dealForm.openNew({ stage }),
+    label,
+    dropPickedUp,
+  }
+  const handlers = useRef(latest)
   useLayoutEffect(() => {
-    handlers.current = {
-      onKey,
-      onMenu,
-      label,
-      open: (dealId) => navigate(`/deals/${dealId}`),
-      add: (stage) => dealForm.openNew({ stage }),
-      dropPickedUp,
-    }
+    handlers.current = latest
   })
 
   // On the window, before the cards and their links: dnd-kit only holds clicks
@@ -359,7 +375,9 @@ function PipelineBoard({ board, meta }: { board: Board; meta: Meta }) {
             />
           ))}
         </div>
-        <DragOverlay dropAnimation={null}>{overlayCard ? <CardBody deal={overlayCard} overlay lifted /> : null}</DragOverlay>
+        <DragOverlay dropAnimation={null}>
+          {overlayCard ? <CardBody deal={overlayCard} overlay lifted /> : null}
+        </DragOverlay>
       </DndContext>
       <DeleteRecord
         target={deleting}

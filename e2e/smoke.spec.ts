@@ -58,7 +58,9 @@ test('losing the internet while the app is open changes nothing (APP-4)', async 
   await page.keyboard.press('Space')
   await page.keyboard.press('ArrowRight')
   await page.keyboard.press('Space')
-  await expect.poll(() => apiGet<{ stage: string }>(`/api/deals/${id}`).then((deal) => deal.stage)).toBe('qualified')
+  await expect
+    .poll(() => apiGet<{ stage: string }>(`/api/deals/${id}`).then((deal) => deal.stage))
+    .toBe('qualified')
   await expect(page.getByRole('status').getByText('적격 단계로 옮겼어요')).toBeVisible()
   await expect(page.locator(`section[aria-labelledby="lane-qualified"] [data-card-id="${id}"]`)).toBeVisible()
 })
@@ -81,7 +83,9 @@ test('every section has the sample data in it', async ({ page }) => {
 
   await page.goto('/pipeline')
   for (const lane of ['신규', '적격', '제안', '협상', '수주', '실주']) {
-    const section = page.locator('section', { has: page.getByRole('heading', { level: 2, name: lane, exact: true }) })
+    const section = page.locator('section', {
+      has: page.getByRole('heading', { level: 2, name: lane, exact: true }),
+    })
     await expect(section.locator('[data-card-id]').first(), lane).toBeVisible()
   }
 })

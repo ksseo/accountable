@@ -23,7 +23,21 @@ from accountable.crm.tables import activities, contacts, deals, organizations
 TARGET = 1000
 SEED = 1000
 
-ORG_FIRST = ["한강", "새빛", "동방", "태성", "금호", "미래", "청운", "Blue", "North", "Pacific", "Alpine", "Delta", "Summit"]
+ORG_FIRST = [
+    "한강",
+    "새빛",
+    "동방",
+    "태성",
+    "금호",
+    "미래",
+    "청운",
+    "Blue",
+    "North",
+    "Pacific",
+    "Alpine",
+    "Delta",
+    "Summit",
+]
 ORG_SECOND = ["산업", "물산", "정밀", "상사", "테크", "Trading", "Industries", "Supply", "Foods", "Logistics"]
 INDUSTRIES = ["제조", "식품", "화장품", "물류", "유통", "의료기기", "IT"]
 SURNAMES = ["김", "이", "박", "최", "정", "강", "조", "윤", "장", "임"]
@@ -36,7 +50,7 @@ LOST_SHARE = 0.1
 
 
 def _count(conn: Connection, table) -> int:
-    return conn.scalar(select(func.count()).select_from(table))
+    return conn.execute(select(func.count()).select_from(table)).scalar_one()
 
 
 def add_bulk(conn: Connection) -> None:

@@ -2,6 +2,7 @@
 
 from collections import Counter
 from datetime import date, timedelta
+from itertools import pairwise
 
 import pytest
 from sqlalchemy import func, insert, select
@@ -68,7 +69,8 @@ def test_one_won_deal_closes_today_and_the_board_has_recent_wins_and_losses(samp
 def test_three_or_four_deals_are_late(sample_engine):
     today = clock.today()
     late = [
-        d for d in _all(sample_engine, deals)
+        d
+        for d in _all(sample_engine, deals)
         if d["stage"] in OPEN_STAGE_KEYS and d["close_date"] and d["close_date"] < today
     ]
     assert 3 <= len(late) <= 4
@@ -101,7 +103,7 @@ def test_stage_entries_follow_each_deals_path(sample_engine):
         if not steps:
             assert deal["furthest_open_stage"] == deal["stage"]
             continue
-        for before, after in zip(steps, steps[1:], strict=False):
+        for before, after in pairwise(steps):
             assert before["to_value"] == after["from_value"], deal["name"]
         assert steps[-1]["to_value"] == deal["stage"], deal["name"]
         reached = [s for e in steps for s in (e["from_value"], e["to_value"]) if s in OPEN_STAGE_KEYS]
@@ -111,18 +113,23 @@ def test_stage_entries_follow_each_deals_path(sample_engine):
 
 def test_every_customer_has_a_status_entry_and_every_won_contact_is_a_customer(sample_engine):
     entries = _all(sample_engine, activities)
-    with_entry = {e["contact_id"] for e in entries if e["kind"] == "status_change" and e["to_value"] == "customer"}
+    with_entry = {
+        e["contact_id"] for e in entries if e["kind"] == "status_change" and e["to_value"] == "customer"
+    }
     people = _all(sample_engine, contacts)
     customers = {c["id"] for c in people if c["status"] == "customer"}
     assert customers == with_entry
-    won_contacts = {d["contact_id"] for d in _all(sample_engine, deals) if d["stage"] == "won" and d["contact_id"]}
+    won_contacts = {
+        d["contact_id"] for d in _all(sample_engine, deals) if d["stage"] == "won" and d["contact_id"]
+    }
     assert won_contacts <= customers
 
 
 def test_the_follow_ups(sample_engine):
     today = clock.today()
     open_follow_ups = [
-        e["follow_up_date"] for e in _all(sample_engine, activities)
+        e["follow_up_date"]
+        for e in _all(sample_engine, activities)
         if e["follow_up_date"] is not None and not e["follow_up_done"]
     ]
     assert 3 <= sum(day < today for day in open_follow_ups) <= 4
@@ -201,10 +208,10 @@ def test_the_bulk_helper_loads_about_1000_of_each():
         bulk.load(conn)
     with engine.connect() as conn:
         for table in (organizations, contacts, deals, activities):
-            count = conn.scalar(select(func.count()).select_from(table))
+            count = conn.execute(select(func.count()).select_from(table)).scalar_one()
             assert 950 <= count <= 1050, table.name
         largest_lane = max(
-            conn.scalar(select(func.count()).select_from(deals).where(deals.c.stage == stage))
+            conn.execute(select(func.count()).select_from(deals).where(deals.c.stage == stage)).scalar_one()
             for stage in OPEN_STAGE_KEYS
         )
     engine.dispose()

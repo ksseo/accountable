@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { Button } from './Button'
-import { Dialog, DialogActions } from './Dialog'
+import { Dialog, DialogActions, SafeButton } from './Dialog'
 import { Skeleton } from './Skeleton'
 import styles from './ConfirmDelete.module.css'
 
@@ -39,9 +39,7 @@ export function ConfirmDelete({ isOpen, onOpenChange, message, onConfirm }: Prop
         )}
       </div>
       <DialogActions>
-        <Button variant="page" autoFocus onPress={() => onOpenChange(false)}>
-          취소
-        </Button>
+        <SafeButton onPress={() => onOpenChange(false)}>취소</SafeButton>
         <Button variant="danger" isDisabled={message === null || pending} onPress={confirm}>
           삭제
         </Button>

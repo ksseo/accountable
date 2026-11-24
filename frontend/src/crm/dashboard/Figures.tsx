@@ -17,7 +17,8 @@ export function wonChange(thisMonth: number, lastMonth: number): { text: string;
 /** The four figures: open pipeline, expected revenue, won this month and late
  * deals, which opens the deals table showing only late ones (DASH-3 to DASH-6). */
 export function Figures({ figures }: { figures: DashboardFigures }) {
-  const expectedShare = figures.open_value > 0 ? Math.round((figures.expected_revenue / figures.open_value) * 100) : 0
+  const expectedShare =
+    figures.open_value > 0 ? Math.round((figures.expected_revenue / figures.open_value) * 100) : 0
   const change = wonChange(figures.won_this_month_value, figures.won_last_month_value)
   const late = figures.late_count > 0
   return (
@@ -36,7 +37,8 @@ export function Figures({ figures }: { figures: DashboardFigures }) {
         <p className={styles.figureLabel}>이번 달 수주</p>
         <p className={styles.figureValue}>{formatMoney(figures.won_this_month_value)}</p>
         <p className={styles.figureSub}>
-          수주 {count(figures.won_this_month_count, 'deal')} · <span className={change.up ? styles.up : undefined}>{change.text}</span>
+          수주 {count(figures.won_this_month_count, 'deal')} ·{' '}
+          <span className={change.up ? styles.up : undefined}>{change.text}</span>
         </p>
       </div>
       <Link to="/deals?late=1" className={late ? `${styles.figureLink} ${styles.late}` : styles.figureLink}>

@@ -1,5 +1,13 @@
 import { ArrowRightLeft, FileText, Mail, Phone, UserCheck, type LucideIcon } from 'lucide-react'
-import { kindLabel, stageLabel, statusLabel, type ActivityKind, type Meta, type StageKey, type StatusKey } from '../meta'
+import {
+  kindLabel,
+  stageLabel,
+  statusLabel,
+  type ActivityKind,
+  type Meta,
+  type StageKey,
+  type StatusKey,
+} from '../meta'
 import type { LoggedKind, TimelineEntry } from './api'
 
 export const LOGGED_KINDS: readonly LoggedKind[] = ['note', 'call', 'email']

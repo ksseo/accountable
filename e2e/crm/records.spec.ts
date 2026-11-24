@@ -78,8 +78,12 @@ async function openEntryMenu(page: Page, entry: Locator, action: '수정' | '삭
 
 test.beforeEach(() => resetData())
 
-test('an organization page shows its details, figures, contacts and deals, each name a link', async ({ page }) => {
-  const rows = (await apiGet<OrganizationRow[]>('/api/organizations')).sort((a, b) => b.contact_count - a.contact_count)
+test('an organization page shows its details, figures, contacts and deals, each name a link', async ({
+  page,
+}) => {
+  const rows = (await apiGet<OrganizationRow[]>('/api/organizations')).sort(
+    (a, b) => b.contact_count - a.contact_count,
+  )
   let organization: OrganizationDetail | undefined
   for (const row of rows) {
     const detail = await apiGet<OrganizationDetail>(`/api/organizations/${row.id}`)
@@ -96,16 +100,24 @@ test('an organization page shows its details, figures, contacts and deals, each 
   const website = page.getByRole('link', { name: /새 탭에서 열림/ })
   await expect(website).toHaveAttribute('href', org.website!)
   await expect(website).toHaveAttribute('target', '_blank')
-  await expect(page.locator('dl').filter({ hasText: '진행 중 파이프라인' })).toContainText(formatMoney(org.open_deal_value))
+  await expect(page.locator('dl').filter({ hasText: '진행 중 파이프라인' })).toContainText(
+    formatMoney(org.open_deal_value),
+  )
   await expect(page.locator('dl').filter({ hasText: '수주 매출' })).toContainText(formatMoney(org.won_value))
 
   const contacts = page.getByRole('list', { name: `연락처 ${org.contacts.length}명` })
   for (const contact of org.contacts) {
-    await expect(contacts.getByRole('link', { name: contact.name, exact: true })).toHaveAttribute('href', `/contacts/${contact.id}`)
+    await expect(contacts.getByRole('link', { name: contact.name, exact: true })).toHaveAttribute(
+      'href',
+      `/contacts/${contact.id}`,
+    )
   }
   const deals = page.getByRole('list', { name: `영업 기회 ${org.deals.length}건` })
   for (const deal of org.deals) {
-    await expect(deals.getByRole('link', { name: deal.name, exact: true })).toHaveAttribute('href', `/deals/${deal.id}`)
+    await expect(deals.getByRole('link', { name: deal.name, exact: true })).toHaveAttribute(
+      'href',
+      `/deals/${deal.id}`,
+    )
   }
 
   await contacts.getByRole('link', { name: org.contacts[0].name, exact: true }).click()
@@ -113,7 +125,9 @@ test('an organization page shows its details, figures, contacts and deals, each 
   await expect(page.getByRole('heading', { level: 1, name: org.contacts[0].name })).toBeVisible()
 })
 
-test('a deal moved by its stage selector shows on its main contact’s timeline, with links both ways', async ({ page }) => {
+test('a deal moved by its stage selector shows on its main contact’s timeline, with links both ways', async ({
+  page,
+}) => {
   const deal = (await apiGet<Deal[]>('/api/deals')).find(
     (d) => d.stage === 'proposal' && d.contact_id !== null && d.organization_id !== null,
   )!
@@ -121,13 +135,17 @@ test('a deal moved by its stage selector shows on its main contact’s timeline,
 
   await page.goto(`/contacts/${contact.id}`)
   await expect(page.getByRole('heading', { level: 1, name: contact.name })).toBeVisible()
-  if (contact.email) await expect(page.getByRole('link', { name: contact.email })).toHaveAttribute('href', `mailto:${contact.email}`)
-  await expect(page.getByRole('main').getByRole('link', { name: contact.organization_name!, exact: true }).first()).toHaveAttribute(
-    'href',
-    `/organizations/${contact.organization_id}`,
-  )
+  if (contact.email)
+    await expect(page.getByRole('link', { name: contact.email })).toHaveAttribute(
+      'href',
+      `mailto:${contact.email}`,
+    )
+  await expect(
+    page.getByRole('main').getByRole('link', { name: contact.organization_name!, exact: true }).first(),
+  ).toHaveAttribute('href', `/organizations/${contact.organization_id}`)
   const deals = page.getByRole('list', { name: /^주 연락처로 있는 영업 기회/ })
-  for (const item of contact.deals) await expect(deals.getByRole('link', { name: item.name, exact: true })).toBeVisible()
+  for (const item of contact.deals)
+    await expect(deals.getByRole('link', { name: item.name, exact: true })).toBeVisible()
   await deals.getByRole('link', { name: deal.name, exact: true }).click()
 
   await expect(page).toHaveURL(`/deals/${deal.id}`)
@@ -153,7 +171,9 @@ test('a deal moved by its stage selector shows on its main contact’s timeline,
   await expect(page).toHaveURL(`/deals/${deal.id}`)
 })
 
-test('logs a note, a call with a follow-up and an email, newest first, and keeps them after a refresh', async ({ page }) => {
+test('logs a note, a call with a follow-up and an email, newest first, and keeps them after a refresh', async ({
+  page,
+}) => {
   const contact = (await apiGet<{ id: number }[]>('/api/contacts'))[0]
   const followUp = addDays(await today(), 3)
   await page.goto(`/contacts/${contact.id}`)
@@ -235,7 +255,9 @@ test('edits an activity, marks its follow-up done, and deletes it', async ({ pag
   await expect(call).not.toContainText('지남')
   await page.reload()
   await expect(call.getByRole('checkbox')).toBeChecked()
-  const saved = (await apiGet<TimelinePage>(`/api/deals/${deal.id}/timeline`)).items.find((entry) => entry.id === created.id)!
+  const saved = (await apiGet<TimelinePage>(`/api/deals/${deal.id}/timeline`)).items.find(
+    (entry) => entry.id === created.id,
+  )!
   expect([saved.kind, saved.description, saved.follow_up_done]).toEqual(['call', '샘플 발송 일정 통화', true])
 
   await openEntryMenu(page, call, '삭제')
@@ -322,7 +344,11 @@ test('stage and status changes have no edit or delete; notes, calls and emails d
   for (const contact of contacts.filter((c) => c.status === 'customer')) {
     const page1 = await apiGet<TimelinePage>(`/api/contacts/${contact.id}/timeline`)
     const kinds = new Set(page1.items.map((entry) => entry.kind))
-    if (kinds.has('status_change') && kinds.has('stage_change') && page1.items.some((entry) => !entry.automatic)) {
+    if (
+      kinds.has('status_change') &&
+      kinds.has('stage_change') &&
+      page1.items.some((entry) => !entry.automatic)
+    ) {
       chosen = { id: contact.id, entries: page1.items }
       break
     }
@@ -332,7 +358,9 @@ test('stage and status changes have no edit or delete; notes, calls and emails d
   await page.goto(`/contacts/${chosen!.id}`)
   await expect(timeline(page)).toHaveCount(chosen!.entries.length)
   for (const [index, entry] of chosen!.entries.entries()) {
-    await expect(timeline(page).nth(index).getByRole('button', { name: /메뉴$/ })).toHaveCount(entry.automatic ? 0 : 1)
+    await expect(timeline(page).nth(index).getByRole('button', { name: /메뉴$/ })).toHaveCount(
+      entry.automatic ? 0 : 1,
+    )
   }
 })
 
@@ -359,9 +387,27 @@ test('shows the 50 newest entries, then the rest with 더 보기', async ({ page
 })
 
 const deletions = [
-  { kind: '거래처', page: 'an organization', list: '/organizations', record: (id: number) => `/organizations/${id}`, ids: '/api/organizations' },
-  { kind: '연락처', page: 'a contact', list: '/contacts', record: (id: number) => `/contacts/${id}`, ids: '/api/contacts' },
-  { kind: '영업 기회', page: 'a deal', list: '/deals', record: (id: number) => `/deals/${id}`, ids: '/api/deals' },
+  {
+    kind: '거래처',
+    page: 'an organization',
+    list: '/organizations',
+    record: (id: number) => `/organizations/${id}`,
+    ids: '/api/organizations',
+  },
+  {
+    kind: '연락처',
+    page: 'a contact',
+    list: '/contacts',
+    record: (id: number) => `/contacts/${id}`,
+    ids: '/api/contacts',
+  },
+  {
+    kind: '영업 기회',
+    page: 'a deal',
+    list: '/deals',
+    record: (id: number) => `/deals/${id}`,
+    ids: '/api/deals',
+  },
 ] as const
 
 for (const target of deletions) {

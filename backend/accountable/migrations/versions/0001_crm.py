@@ -50,9 +50,7 @@ def upgrade() -> None:
             name="fk_contacts_organization_id_organizations",
             ondelete="SET NULL",
         ),
-        sa.CheckConstraint(
-            "status IN ('lead', 'qualified', 'customer')", name="ck_contacts_status"
-        ),
+        sa.CheckConstraint("status IN ('lead', 'qualified', 'customer')", name="ck_contacts_status"),
     )
     op.create_index("ix_contacts_organization_id", "contacts", ["organization_id"])
 
@@ -91,9 +89,7 @@ def upgrade() -> None:
             name="ck_deals_furthest_open_stage",
         ),
         sa.CheckConstraint("value >= 0 AND value <= 1000000000", name="ck_deals_value"),
-        sa.CheckConstraint(
-            "probability >= 0 AND probability <= 100", name="ck_deals_probability"
-        ),
+        sa.CheckConstraint("probability >= 0 AND probability <= 100", name="ck_deals_probability"),
         sa.CheckConstraint(
             "NOT (stage IN ('won', 'lost')) OR close_date IS NOT NULL",
             name="ck_deals_closed_has_close_date",
@@ -134,9 +130,7 @@ def upgrade() -> None:
             "kind IN ('note', 'call', 'email', 'stage_change', 'status_change')",
             name="ck_activities_kind",
         ),
-        sa.CheckConstraint(
-            "(contact_id IS NULL) <> (deal_id IS NULL)", name="ck_activities_one_record"
-        ),
+        sa.CheckConstraint("(contact_id IS NULL) <> (deal_id IS NULL)", name="ck_activities_one_record"),
     )
     op.create_index("ix_activities_contact_id_occurred_at", "activities", ["contact_id", "occurred_at"])
     op.create_index("ix_activities_deal_id_occurred_at", "activities", ["deal_id", "occurred_at"])

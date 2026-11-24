@@ -25,7 +25,8 @@ import { MOVE_FAILED, moveDeal } from './move'
 export function DealPage() {
   const id = recordId(useParams().id)
   const { data, error, refetch } = useDeal(id)
-  if (!data) return <RecordPending error={error} listPath="/deals" listLabel="영업 기회" onRetry={() => refetch()} />
+  if (!data)
+    return <RecordPending error={error} listPath="/deals" listLabel="영업 기회" onRetry={() => refetch()} />
   return <DealRecord deal={data} />
 }
 

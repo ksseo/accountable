@@ -1,7 +1,15 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Clock } from 'lucide-react'
-import { createContext, memo, useCallback, useContext, type KeyboardEvent, type MouseEvent } from 'react'
+import {
+  createContext,
+  memo,
+  useCallback,
+  useContext,
+  type KeyboardEvent,
+  type MouseEvent,
+  type ReactNode,
+} from 'react'
 import { formatDate } from '../../lib/dates'
 import { formatMoney, formatPercent } from '../../lib/money'
 import { RecordLink } from '../../ui/RecordLink'
@@ -30,6 +38,54 @@ function useBoardActions(): BoardActions {
   return actions
 }
 
+type FaceProps = {
+  deal: Card
+  /** Whether the names link to their own pages. */
+  linked: boolean
+  menu: ReactNode
+}
+
+/** What a card shows: name, organization, value, close date and probability,
+ * and the "지연 N일" chip on a late deal (PIPE-2). */
+function CardFace({ deal, linked, menu }: FaceProps) {
+  return (
+    <>
+      {deal.is_late ? (
+        <p className={styles.lateChip}>
+          <Clock size={18} aria-hidden="true" />
+          지연 {deal.days_late}일
+        </p>
+      ) : null}
+      <h3 className={styles.cardName}>
+        {linked ? (
+          <RecordLink kind="deal" id={deal.id} tabIndex={-1}>
+            {deal.name}
+          </RecordLink>
+        ) : (
+          deal.name
+        )}
+      </h3>
+      {deal.organization_id !== null ? (
+        <p className={styles.cardOrg}>
+          {linked ? (
+            <RecordLink kind="organization" id={deal.organization_id} quiet>
+              {deal.organization_name}
+            </RecordLink>
+          ) : (
+            deal.organization_name
+          )}
+        </p>
+      ) : null}
+      {menu}
+      <p className={styles.cardValue}>{formatMoney(deal.value)}</p>
+      <p className={deal.is_late ? `${styles.cardFoot} ${styles.lateFoot}` : styles.cardFoot}>
+        <span>{deal.close_date ? formatDate(deal.close_date) : '마감일 없음'}</span>
+        <span className={styles.cardProbability}>{formatPercent(deal.probability)}</span>
+      </p>
+    </>
+  )
+}
+
 type BodyProps = {
   deal: Card
   /** Lifted: picked up by keyboard, or the copy that follows the pointer. */
@@ -40,8 +96,8 @@ type BodyProps = {
   overlay?: boolean
 }
 
-/** A card: name, organization, value, close date and probability, and the
- * "지연 N일" chip on a late deal (PIPE-2). */
+/** A card, which opens its deal and takes the board's keys (PIPE-5, PIPE-9), or
+ * the copy of one that follows the pointer. */
 export const CardBody = memo(function CardBody({
   deal,
   lifted = false,
@@ -50,7 +106,9 @@ export const CardBody = memo(function CardBody({
   overlay = false,
 }: BodyProps) {
   const actions = useBoardActions()
-  const classes = [styles.card, lifted ? styles.lifted : '', overlay ? styles.overlay : ''].filter(Boolean).join(' ')
+  const classes = [styles.card, lifted ? styles.lifted : '', overlay ? styles.overlay : '']
+    .filter(Boolean)
+    .join(' ')
 
   const onName = (event: MouseEvent<HTMLElement>) => (event.target as HTMLElement).closest('a') !== null
 
@@ -79,49 +137,24 @@ export const CardBody = memo(function CardBody({
       onClick={overlay ? undefined : openCard}
       onKeyDown={overlay ? undefined : (event) => actions.onKey(event, deal.id)}
     >
-      {deal.is_late ? (
-        <p className={styles.lateChip}>
-          <Clock size={18} aria-hidden="true" />
-          지연 {deal.days_late}일
-        </p>
-      ) : null}
-      <h3 className={styles.cardName}>
-        {overlay ? (
-          deal.name
-        ) : (
-          <RecordLink kind="deal" id={deal.id} tabIndex={-1}>
-            {deal.name}
-          </RecordLink>
-        )}
-      </h3>
-      {deal.organization_id !== null ? (
-        <p className={styles.cardOrg}>
-          {overlay ? (
-            deal.organization_name
-          ) : (
-            <RecordLink kind="organization" id={deal.organization_id} quiet>
-              {deal.organization_name}
-            </RecordLink>
-          )}
-        </p>
-      ) : null}
-      {overlay ? null : (
-        <div className={styles.cardMenu}>
-          <CardMenu
-            name={deal.name}
-            stage={deal.stage}
-            stageLabel={actions.stageLabel}
-            canMoveUp={canMoveUp}
-            canMoveDown={canMoveDown}
-            onAction={(action) => actions.onMenu(deal.id, action)}
-          />
-        </div>
-      )}
-      <p className={styles.cardValue}>{formatMoney(deal.value)}</p>
-      <p className={deal.is_late ? `${styles.cardFoot} ${styles.lateFoot}` : styles.cardFoot}>
-        <span>{deal.close_date ? formatDate(deal.close_date) : '마감일 없음'}</span>
-        <span className={styles.cardProbability}>{formatPercent(deal.probability)}</span>
-      </p>
+      <CardFace
+        deal={deal}
+        linked={!overlay}
+        menu={
+          overlay ? null : (
+            <div className={styles.cardMenu}>
+              <CardMenu
+                name={deal.name}
+                stage={deal.stage}
+                stageLabel={actions.stageLabel}
+                canMoveUp={canMoveUp}
+                canMoveDown={canMoveDown}
+                onAction={(action) => actions.onMenu(deal.id, action)}
+              />
+            </div>
+          )
+        }
+      />
     </article>
   )
 })

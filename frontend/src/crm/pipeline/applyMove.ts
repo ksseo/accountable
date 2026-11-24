@@ -4,7 +4,7 @@
 
 import type { Schemas } from '../../api/client'
 import { daysBetween } from '../../lib/dates'
-import { isClosed, OPEN_STAGES, type StageKey } from '../meta'
+import { isClosed, OPEN_STAGES, STAGES, type StageKey } from '../meta'
 
 export type Board = Schemas['Pipeline']
 export type Card = Schemas['Deal']
@@ -28,7 +28,9 @@ const OPEN_ORDER: readonly string[] = OPEN_STAGES
 
 function furthest(current: Card['furthest_open_stage'], stage: StageKey): Card['furthest_open_stage'] {
   if (isClosed(stage)) return current
-  return OPEN_ORDER.indexOf(stage) > OPEN_ORDER.indexOf(current) ? (stage as Card['furthest_open_stage']) : current
+  return OPEN_ORDER.indexOf(stage) > OPEN_ORDER.indexOf(current)
+    ? (stage as Card['furthest_open_stage'])
+    : current
 }
 
 /** The card after a change of stage (RULE-3): the stage's usual probability,
@@ -69,6 +71,37 @@ export function placementOf(board: Board, dealId: number): Placement | null {
   return null
 }
 
+/** One place up (-1) or down (1) a card's lane. */
+function placeAlongLane(board: Board, at: Placement, step: -1 | 1): Placement | null {
+  const lane = board.columns.find((column) => column.stage === at.stage)!
+  const index = at.index + step
+  return index >= 0 && index < lane.deals.length ? { ...at, index } : null
+}
+
+/** The same place in the lane to the left (-1) or right (1), or the bottom of a shorter one. */
+function placeInNextLane(board: Board, at: Placement, step: -1 | 1): Placement | null {
+  const stage = STAGES[STAGES.indexOf(at.stage) + step]
+  if (!stage) return null
+  const lane = board.columns.find((column) => column.stage === stage)!
+  return { ...at, stage, index: Math.min(at.index, lane.deals.length) }
+}
+
+/** Where an arrow key takes a card, or null at the end of its lane or the board (PIPE-9). */
+export function placeByArrow(board: Board, at: Placement, key: string): Placement | null {
+  switch (key) {
+    case 'ArrowUp':
+      return placeAlongLane(board, at, -1)
+    case 'ArrowDown':
+      return placeAlongLane(board, at, 1)
+    case 'ArrowLeft':
+      return placeInNextLane(board, at, -1)
+    case 'ArrowRight':
+      return placeInNextLane(board, at, 1)
+    default:
+      return null
+  }
+}
+
 /** The board with one card moved: the card in its new place, its lane's and
  * the old lane's totals, and the open totals above the board. */
 export function applyMove(board: Board, placement: Placement, rules: MoveRules): Board {
@@ -98,7 +131,10 @@ export function applyMove(board: Board, placement: Placement, rules: MoveRules):
 }
 
 /** The cards above and below a card in its lane, which the backend places it between (PIPE-6). */
-export function neighbours(board: Board, dealId: number): { after_id: number | null; before_id: number | null } {
+export function neighbours(
+  board: Board,
+  dealId: number,
+): { after_id: number | null; before_id: number | null } {
   const at = placementOf(board, dealId)
   if (!at) return { after_id: null, before_id: null }
   const deals = board.columns.find((column) => column.stage === at.stage)!.deals

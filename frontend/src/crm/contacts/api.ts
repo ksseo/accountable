@@ -6,7 +6,8 @@ export type ContactDetail = Schemas['ContactDetail']
 export type ContactIn = Schemas['ContactIn']
 export type ContactImpact = Schemas['ContactImpact']
 
-export const useContacts = () => useQuery({ queryKey: ['contacts'], queryFn: () => unwrap(api.GET('/api/contacts')) })
+export const useContacts = () =>
+  useQuery({ queryKey: ['contacts'], queryFn: () => unwrap(api.GET('/api/contacts')) })
 
 export const useContact = (id: number) =>
   useQuery({

@@ -26,10 +26,19 @@ export function PipelineBand({ band }: { band: readonly BandStage[] }) {
           const label = stageLabel(meta, stage.stage)
           const expectedShare = stage.value > 0 ? (stage.expected_revenue / stage.value) * 100 : 0
           return (
-            <li key={stage.stage} className={styles.bandItem} style={{ flexGrow: widths[index] }} data-stage={stage.stage}>
+            <li
+              key={stage.stage}
+              className={styles.bandItem}
+              style={{ flexGrow: widths[index] }}
+              data-stage={stage.stage}
+            >
               {/* The name comes from the text shown, so speech input can say what's
                   on the block (WCAG 2.5.3); the expected revenue under it is added for screen readers. */}
-              <Link to="/pipeline" className={styles.bandBlock} style={{ background: colors.badge, color: colors.on }}>
+              <Link
+                to="/pipeline"
+                className={styles.bandBlock}
+                style={{ background: colors.badge, color: colors.on }}
+              >
                 <span className={styles.bandName}>
                   <span>{label}</span>
                   <span className={styles.bandCount}>{count(stage.count, 'deal')}</span>

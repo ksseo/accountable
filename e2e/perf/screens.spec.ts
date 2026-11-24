@@ -31,7 +31,9 @@ function openFromNav(page: Page, label: string, ready: string): Promise<number> 
         const check = () => {
           // The new page's own heading, so the last page's rows don't count.
           const arrived = document.querySelector('h1')?.textContent === label
-          const loading = document.querySelector('[role="status"][aria-label="불러오는 중"], [aria-busy="true"]')
+          const loading = document.querySelector(
+            '[role="status"][aria-label="불러오는 중"], [aria-busy="true"]',
+          )
           if (arrived && document.querySelector(ready) && !loading) resolve(performance.now() - started)
           else requestAnimationFrame(check)
         }
@@ -42,12 +44,19 @@ function openFromNav(page: Page, label: string, ready: string): Promise<number> 
 }
 
 /** Runs `act` and times it until the table's rows first change. */
-async function timeTableChange(page: Page, act: () => Promise<void>, event: 'input' | 'click'): Promise<number> {
+async function timeTableChange(
+  page: Page,
+  act: () => Promise<void>,
+  event: 'input' | 'click',
+): Promise<number> {
   await page.evaluate((event) => {
     const state = window as unknown as { __started?: number; __changed?: number }
     delete state.__started
     delete state.__changed
-    document.addEventListener(event, () => (state.__started ??= performance.now()), { capture: true, once: true })
+    document.addEventListener(event, () => (state.__started ??= performance.now()), {
+      capture: true,
+      once: true,
+    })
     const body = document.querySelector('table tbody')!
     const observer = new MutationObserver(() => {
       state.__changed ??= performance.now()

@@ -11,8 +11,16 @@ export type Owner = { kind: 'contact' | 'deal'; id: number }
 
 function fetchPage(owner: Owner, offset: number) {
   return owner.kind === 'contact'
-    ? unwrap(api.GET('/api/contacts/{contact_id}/timeline', { params: { path: { contact_id: owner.id }, query: { offset } } }))
-    : unwrap(api.GET('/api/deals/{deal_id}/timeline', { params: { path: { deal_id: owner.id }, query: { offset } } }))
+    ? unwrap(
+        api.GET('/api/contacts/{contact_id}/timeline', {
+          params: { path: { contact_id: owner.id }, query: { offset } },
+        }),
+      )
+    : unwrap(
+        api.GET('/api/deals/{deal_id}/timeline', {
+          params: { path: { deal_id: owner.id }, query: { offset } },
+        }),
+      )
 }
 
 /** A record's timeline, newest first, 50 at a time (RULE-9, REC-4). */
@@ -21,7 +29,8 @@ export const useTimeline = (owner: Owner) =>
     queryKey: ['timeline', owner.kind, owner.id],
     queryFn: ({ pageParam }) => fetchPage(owner, pageParam),
     initialPageParam: 0,
-    getNextPageParam: (last) => (last.offset + last.items.length < last.total ? last.offset + last.limit : undefined),
+    getNextPageParam: (last) =>
+      last.offset + last.items.length < last.total ? last.offset + last.limit : undefined,
   })
 
 export const logActivity = (body: ActivityIn) => unwrap(api.POST('/api/activities', { body }))

@@ -34,7 +34,9 @@ def get_organization(organization_id: int, conn: Conn) -> OrganizationDetail:
 
 @router.patch("/{organization_id}")
 def update_organization(organization_id: int, body: OrganizationPatch, conn: Conn) -> Organization:
-    return Organization(**repo.update_organization(conn, organization_id, body.model_dump(exclude_unset=True)))
+    return Organization(
+        **repo.update_organization(conn, organization_id, body.model_dump(exclude_unset=True))
+    )
 
 
 @router.get("/{organization_id}/delete-impact")

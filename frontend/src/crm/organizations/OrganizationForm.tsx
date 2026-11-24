@@ -54,7 +54,7 @@ export function OrganizationForm({ initial, industries, onSave, onCancel }: Prop
   }
 
   return (
-    <form onSubmit={handleSubmit(submit)} onKeyDown={blockComposingEnter} noValidate>
+    <form ref={blockComposingEnter} onSubmit={handleSubmit(submit)} noValidate>
       <FieldStack>
         <Controller
           control={control}

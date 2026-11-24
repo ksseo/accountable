@@ -10,6 +10,8 @@ real dates when it loads the data.
 
 from typing import NamedTuple
 
+from accountable.crm.stages import StageKey
+
 
 class Org(NamedTuple):
     name: str
@@ -31,7 +33,7 @@ class Deal(NamedTuple):
     name: str
     org: str | None
     contact: str | None
-    stage: str
+    stage: StageKey
     value: int
     close: int | None  # days from today
     start: str = "new"  # the stage it was added at
@@ -49,7 +51,12 @@ class FollowUp(NamedTuple):
 
 
 ORGANIZATIONS = [
-    Org("한빛정밀", "제조", "hanbit-precision.example", "2019년부터 거래. 포장재와 정밀 부품을 함께 구매하는 핵심 고객."),
+    Org(
+        "한빛정밀",
+        "제조",
+        "hanbit-precision.example",
+        "2019년부터 거래. 포장재와 정밀 부품을 함께 구매하는 핵심 고객.",
+    ),
     Org("대성기계공업", "제조", "daesung-mech.example", "창원 공장. 연간 단가 계약을 선호함."),
     Org("세원오토텍", "제조", "sewon-autotech.example", "자동차 부품 1차 협력사. 품질 감사가 까다로움."),
     Org("한결테크", "IT", "hangyeol-tech.example", "반도체 장비 유지보수 업체."),
@@ -66,7 +73,9 @@ ORGANIZATIONS = [
     Org("Sakura Precision Co.", "제조", "sakura-precision.example", "Japan. Long-term spare parts partner."),
     Org("Brightwater Foods", "식품", "brightwater-foods.example", "USA. Two plants, Ohio and Oregon."),
     Org("Northwind Market", "유통", "northwind-market.example", "USA. Regional grocery chain."),
-    Org("Kessler Verpackung GmbH", "제조", "kessler-verpackung.example", "Germany. Packaging machinery maker."),
+    Org(
+        "Kessler Verpackung GmbH", "제조", "kessler-verpackung.example", "Germany. Packaging machinery maker."
+    ),
     Org("Saigon Fresh Logistics", "물류", "saigon-fresh.example", "Vietnam. Cold chain for exporters."),
     Org("Pacific Harbor Foods", "식품", "pacific-harbor.example", "Australia. Seafood processing."),
     Org("Maison Lys", "화장품", "maison-lys.example", "France. Premium skincare."),
@@ -77,29 +86,107 @@ ORGANIZATIONS = [
 ]
 
 CONTACTS = [
-    Person("한빛정밀", "박서연", "구매팀장", "seoyeon.park@hanbit-precision.example", "010-2841-7730", "customer"),
-    Person("한빛정밀", "김도현", "생산관리 과장", "dohyun.kim@hanbit-precision.example", "031-778-2210", "qualified"),
+    Person(
+        "한빛정밀", "박서연", "구매팀장", "seoyeon.park@hanbit-precision.example", "010-2841-7730", "customer"
+    ),
+    Person(
+        "한빛정밀",
+        "김도현",
+        "생산관리 과장",
+        "dohyun.kim@hanbit-precision.example",
+        "031-778-2210",
+        "qualified",
+    ),
     Person("한빛정밀", "이지원", "구매 담당", "jiwon.lee@hanbit-precision.example", "010-4410-9921", "lead"),
-    Person("대성기계공업", "최준호", "자재팀 부장", "junho.choi@daesung-mech.example", "055-281-4400", "customer"),
-    Person("대성기계공업", "정하은", "구매 대리", "haeun.jung@daesung-mech.example", "010-7725-1043", "customer"),
-    Person("대성기계공업", "윤성민", "공무팀 과장", "sungmin.yoon@daesung-mech.example", "010-3318-2287", "lead"),
-    Person("세원오토텍", "김도윤", "구매본부장", "doyun.kim@sewon-autotech.example", "010-9012-4471", "customer"),
-    Person("세원오토텍", "오민지", "협력사관리 대리", "minji.oh@sewon-autotech.example", "031-490-7712", "qualified"),
-    Person("세원오토텍", "한승재", "품질팀 과장", "seungjae.han@sewon-autotech.example", "010-6620-3391", "lead"),
+    Person(
+        "대성기계공업", "최준호", "자재팀 부장", "junho.choi@daesung-mech.example", "055-281-4400", "customer"
+    ),
+    Person(
+        "대성기계공업", "정하은", "구매 대리", "haeun.jung@daesung-mech.example", "010-7725-1043", "customer"
+    ),
+    Person(
+        "대성기계공업", "윤성민", "공무팀 과장", "sungmin.yoon@daesung-mech.example", "010-3318-2287", "lead"
+    ),
+    Person(
+        "세원오토텍", "김도윤", "구매본부장", "doyun.kim@sewon-autotech.example", "010-9012-4471", "customer"
+    ),
+    Person(
+        "세원오토텍",
+        "오민지",
+        "협력사관리 대리",
+        "minji.oh@sewon-autotech.example",
+        "031-490-7712",
+        "qualified",
+    ),
+    Person(
+        "세원오토텍", "한승재", "품질팀 과장", "seungjae.han@sewon-autotech.example", "010-6620-3391", "lead"
+    ),
     Person("한결테크", "이하린", "구매팀장", "harin.lee@hangyeol-tech.example", "010-5530-8812", "customer"),
-    Person("한결테크", "장우석", "설비팀 차장", "wooseok.jang@hangyeol-tech.example", "031-8039-5520", "qualified"),
+    Person(
+        "한결테크",
+        "장우석",
+        "설비팀 차장",
+        "wooseok.jang@hangyeol-tech.example",
+        "031-8039-5520",
+        "qualified",
+    ),
     Person("한결테크", "서예린", "구매 사원", "yerin.seo@hangyeol-tech.example", "010-2290-6614", "lead"),
-    Person("해담푸드", "강지민", "구매팀 과장", "jimin.kang@haedam-food.example", "010-8843-2205", "customer"),
-    Person("해담푸드", "정민호", "품질팀 대리", "minho.jung@haedam-food.example", "043-210-7781", "qualified"),
+    Person(
+        "해담푸드", "강지민", "구매팀 과장", "jimin.kang@haedam-food.example", "010-8843-2205", "customer"
+    ),
+    Person(
+        "해담푸드", "정민호", "품질팀 대리", "minho.jung@haedam-food.example", "043-210-7781", "qualified"
+    ),
     Person("해담푸드", "임태훈", "생산팀장", "taehoon.lim@haedam-food.example", "010-4471-0098", "lead"),
-    Person("루미에르코스메틱", "송유나", "패키지개발 팀장", "yuna.song@lumiere-cosmetic.example", "02-3442-1180", "customer"),
-    Person("루미에르코스메틱", "배준영", "구매 대리", "junyoung.bae@lumiere-cosmetic.example", "010-3307-5512", "qualified"),
-    Person("루미에르코스메틱", "김서현", "마케팅 과장", "seohyun.kim@lumiere-cosmetic.example", "010-6654-2290", "lead"),
-    Person("메디온헬스케어", "신동혁", "구매부장", "donghyuk.shin@medion-health.example", "010-2215-7764", "qualified"),
-    Person("메디온헬스케어", "이준표", "생산팀장", "junpyo.lee@medion-health.example", "033-742-1130", "qualified"),
-    Person("메디온헬스케어", "권나연", "RA팀 과장", "nayeon.kwon@medion-health.example", "010-9981-3307", "lead"),
-    Person("우진로지스", "조현태", "운영팀장", "hyuntae.cho@woojin-logis.example", "010-4120-6638", "customer"),
-    Person("우진로지스", "문소희", "구매 대리", "sohee.moon@woojin-logis.example", "031-645-9902", "qualified"),
+    Person(
+        "루미에르코스메틱",
+        "송유나",
+        "패키지개발 팀장",
+        "yuna.song@lumiere-cosmetic.example",
+        "02-3442-1180",
+        "customer",
+    ),
+    Person(
+        "루미에르코스메틱",
+        "배준영",
+        "구매 대리",
+        "junyoung.bae@lumiere-cosmetic.example",
+        "010-3307-5512",
+        "qualified",
+    ),
+    Person(
+        "루미에르코스메틱",
+        "김서현",
+        "마케팅 과장",
+        "seohyun.kim@lumiere-cosmetic.example",
+        "010-6654-2290",
+        "lead",
+    ),
+    Person(
+        "메디온헬스케어",
+        "신동혁",
+        "구매부장",
+        "donghyuk.shin@medion-health.example",
+        "010-2215-7764",
+        "qualified",
+    ),
+    Person(
+        "메디온헬스케어",
+        "이준표",
+        "생산팀장",
+        "junpyo.lee@medion-health.example",
+        "033-742-1130",
+        "qualified",
+    ),
+    Person(
+        "메디온헬스케어", "권나연", "RA팀 과장", "nayeon.kwon@medion-health.example", "010-9981-3307", "lead"
+    ),
+    Person(
+        "우진로지스", "조현태", "운영팀장", "hyuntae.cho@woojin-logis.example", "010-4120-6638", "customer"
+    ),
+    Person(
+        "우진로지스", "문소희", "구매 대리", "sohee.moon@woojin-logis.example", "031-645-9902", "qualified"
+    ),
     Person("우진로지스", "박준기", "IT팀 과장", "junki.park@woojin-logis.example", "010-7734-0215", "lead"),
     Person("그린팩유통", "황민석", "MD 팀장", "minseok.hwang@greenpack.example", "02-6012-4471", "qualified"),
     Person("그린팩유통", "안수빈", "MD", "subin.ahn@greenpack.example", "010-5528-1196", "lead"),
@@ -107,38 +194,230 @@ CONTACTS = [
     Person("바른식품", "홍다은", "품질관리 대리", "daeun.hong@bareun-food.example", "041-552-3380", "lead"),
     Person("바른식품", "최유나", "마케팅 대리", "yuna.choi@bareun-food.example", "010-8126-4459", "lead"),
     Person("소담화장품", "유지호", "대표", "jiho.yoo@sodam-cosmetics.example", "010-2047-6631", "customer"),
-    Person("소담화장품", "남궁선", "생산 실장", "sun.namgung@sodam-cosmetics.example", "010-9318-2274", "qualified"),
-    Person("동해물류", "고은비", "물류센터장", "eunbi.ko@donghae-logistics.example", "033-530-8814", "qualified"),
-    Person("동해물류", "노현석", "구매 과장", "hyunseok.noh@donghae-logistics.example", "010-6609-1172", "lead"),
-    Person("동해물류", "김태은", "운영 대리", "taeeun.kim@donghae-logistics.example", "010-1148-3306", "lead"),
+    Person(
+        "소담화장품",
+        "남궁선",
+        "생산 실장",
+        "sun.namgung@sodam-cosmetics.example",
+        "010-9318-2274",
+        "qualified",
+    ),
+    Person(
+        "동해물류", "고은비", "물류센터장", "eunbi.ko@donghae-logistics.example", "033-530-8814", "qualified"
+    ),
+    Person(
+        "동해물류", "노현석", "구매 과장", "hyunseok.noh@donghae-logistics.example", "010-6609-1172", "lead"
+    ),
+    Person(
+        "동해물류", "김태은", "운영 대리", "taeeun.kim@donghae-logistics.example", "010-1148-3306", "lead"
+    ),
     Person("새롬메디칼", "류정민", "구매팀장", "jungmin.ryu@saerom-medical.example", "010-7203-5548", "lead"),
-    Person("새롬메디칼", "백승희", "영업기획 대리", "seunghee.baek@saerom-medical.example", "02-415-6627", "lead"),
-    Person("Osaka Kogyo Co.", "Kenji Watanabe", "Purchasing Manager", "k.watanabe@osaka-kogyo.example", "+81 6-6345-2210", "customer"),
-    Person("Osaka Kogyo Co.", "Yuki Tanaka", "Production Engineer", "y.tanaka@osaka-kogyo.example", "+81 6-6345-2234", "qualified"),
-    Person("Osaka Kogyo Co.", "Hiroshi Mori", "Plant Manager", "h.mori@osaka-kogyo.example", "+81 6-6345-2201", "lead"),
-    Person("Sakura Precision Co.", "Aiko Suzuki", "Procurement Lead", "aiko.suzuki@sakura-precision.example", "+81 52-551-7810", "customer"),
-    Person("Sakura Precision Co.", "Takeshi Ito", "Quality Manager", "t.ito@sakura-precision.example", "+81 52-551-7822", "lead"),
-    Person("Brightwater Foods", "Michael Turner", "Operations Director", "mturner@brightwater-foods.example", "+1 614-555-0142", "customer"),
-    Person("Brightwater Foods", "Jessica Moore", "Buyer", "jmoore@brightwater-foods.example", "+1 614-555-0177", "customer"),
-    Person("Brightwater Foods", "Daniel Brooks", "Warehouse Manager", "dbrooks@brightwater-foods.example", "+1 503-555-0119", "lead"),
-    Person("Northwind Market", "Sarah Kim", "Category Manager", "sarah.kim@northwind-market.example", "+1 206-555-0163", "customer"),
-    Person("Northwind Market", "Ryan Cooper", "Store Development Lead", "ryan.cooper@northwind-market.example", "+1 206-555-0188", "lead"),
-    Person("Kessler Verpackung GmbH", "Lukas Becker", "Head of Purchasing", "l.becker@kessler-verpackung.example", "+49 711 555 3120", "customer"),
-    Person("Kessler Verpackung GmbH", "Anna Schmidt", "Project Engineer", "a.schmidt@kessler-verpackung.example", "+49 711 555 3147", "qualified"),
-    Person("Saigon Fresh Logistics", "Nguyen Thi Mai", "Supply Chain Manager", "mai.nguyen@saigon-fresh.example", "+84 28 5555 0181", "customer"),
-    Person("Saigon Fresh Logistics", "Tran Van Duc", "Operations Lead", "duc.tran@saigon-fresh.example", "+84 28 5555 0194", "qualified"),
-    Person("Pacific Harbor Foods", "Emma Clarke", "Procurement Manager", "emma.clarke@pacific-harbor.example", "+61 2 5550 1182", "qualified"),
-    Person("Pacific Harbor Foods", "Liam Walker", "Packaging Engineer", "liam.walker@pacific-harbor.example", "+61 2 5550 1190", "lead"),
-    Person("Maison Lys", "Claire Dubois", "Packaging Director", "c.dubois@maison-lys.example", "+33 1 55 55 21 40", "qualified"),
-    Person("Maison Lys", "Julien Martin", "Buyer", "j.martin@maison-lys.example", "+33 1 55 55 21 52", "lead"),
-    Person("Hanoi Medical Supply", "Pham Minh Anh", "Purchasing Head", "anh.pham@hanoi-medsupply.example", "+84 24 5555 0123", "lead"),
-    Person("Hanoi Medical Supply", "Le Quang Huy", "Regulatory Lead", "huy.le@hanoi-medsupply.example", "+84 24 5555 0156", "lead"),
-    Person("Rhein Logistik GmbH", "Jonas Weber", "Fleet Manager", "j.weber@rhein-logistik.example", "+49 221 555 7710", "qualified"),
-    Person("Rhein Logistik GmbH", "Mia Fischer", "Buyer", "m.fischer@rhein-logistik.example", "+49 221 555 7733", "lead"),
-    Person("Summit Retail Group", "Olivia Bennett", "Private Label Manager", "o.bennett@summit-retail.example", "+1 312-555-0105", "customer"),
-    Person("Summit Retail Group", "Ethan Hayes", "Buyer", "e.hayes@summit-retail.example", "+1 312-555-0131", "qualified"),
-    Person("Tokyo Data Systems", "Haruto Kobayashi", "IT Manager", "h.kobayashi@tokyo-data.example", "+81 3-5555-8120", "qualified"),
-    Person("Tokyo Data Systems", "Mei Yamamoto", "Procurement", "m.yamamoto@tokyo-data.example", "+81 3-5555-8144", "lead"),
+    Person(
+        "새롬메디칼", "백승희", "영업기획 대리", "seunghee.baek@saerom-medical.example", "02-415-6627", "lead"
+    ),
+    Person(
+        "Osaka Kogyo Co.",
+        "Kenji Watanabe",
+        "Purchasing Manager",
+        "k.watanabe@osaka-kogyo.example",
+        "+81 6-6345-2210",
+        "customer",
+    ),
+    Person(
+        "Osaka Kogyo Co.",
+        "Yuki Tanaka",
+        "Production Engineer",
+        "y.tanaka@osaka-kogyo.example",
+        "+81 6-6345-2234",
+        "qualified",
+    ),
+    Person(
+        "Osaka Kogyo Co.",
+        "Hiroshi Mori",
+        "Plant Manager",
+        "h.mori@osaka-kogyo.example",
+        "+81 6-6345-2201",
+        "lead",
+    ),
+    Person(
+        "Sakura Precision Co.",
+        "Aiko Suzuki",
+        "Procurement Lead",
+        "aiko.suzuki@sakura-precision.example",
+        "+81 52-551-7810",
+        "customer",
+    ),
+    Person(
+        "Sakura Precision Co.",
+        "Takeshi Ito",
+        "Quality Manager",
+        "t.ito@sakura-precision.example",
+        "+81 52-551-7822",
+        "lead",
+    ),
+    Person(
+        "Brightwater Foods",
+        "Michael Turner",
+        "Operations Director",
+        "mturner@brightwater-foods.example",
+        "+1 614-555-0142",
+        "customer",
+    ),
+    Person(
+        "Brightwater Foods",
+        "Jessica Moore",
+        "Buyer",
+        "jmoore@brightwater-foods.example",
+        "+1 614-555-0177",
+        "customer",
+    ),
+    Person(
+        "Brightwater Foods",
+        "Daniel Brooks",
+        "Warehouse Manager",
+        "dbrooks@brightwater-foods.example",
+        "+1 503-555-0119",
+        "lead",
+    ),
+    Person(
+        "Northwind Market",
+        "Sarah Kim",
+        "Category Manager",
+        "sarah.kim@northwind-market.example",
+        "+1 206-555-0163",
+        "customer",
+    ),
+    Person(
+        "Northwind Market",
+        "Ryan Cooper",
+        "Store Development Lead",
+        "ryan.cooper@northwind-market.example",
+        "+1 206-555-0188",
+        "lead",
+    ),
+    Person(
+        "Kessler Verpackung GmbH",
+        "Lukas Becker",
+        "Head of Purchasing",
+        "l.becker@kessler-verpackung.example",
+        "+49 711 555 3120",
+        "customer",
+    ),
+    Person(
+        "Kessler Verpackung GmbH",
+        "Anna Schmidt",
+        "Project Engineer",
+        "a.schmidt@kessler-verpackung.example",
+        "+49 711 555 3147",
+        "qualified",
+    ),
+    Person(
+        "Saigon Fresh Logistics",
+        "Nguyen Thi Mai",
+        "Supply Chain Manager",
+        "mai.nguyen@saigon-fresh.example",
+        "+84 28 5555 0181",
+        "customer",
+    ),
+    Person(
+        "Saigon Fresh Logistics",
+        "Tran Van Duc",
+        "Operations Lead",
+        "duc.tran@saigon-fresh.example",
+        "+84 28 5555 0194",
+        "qualified",
+    ),
+    Person(
+        "Pacific Harbor Foods",
+        "Emma Clarke",
+        "Procurement Manager",
+        "emma.clarke@pacific-harbor.example",
+        "+61 2 5550 1182",
+        "qualified",
+    ),
+    Person(
+        "Pacific Harbor Foods",
+        "Liam Walker",
+        "Packaging Engineer",
+        "liam.walker@pacific-harbor.example",
+        "+61 2 5550 1190",
+        "lead",
+    ),
+    Person(
+        "Maison Lys",
+        "Claire Dubois",
+        "Packaging Director",
+        "c.dubois@maison-lys.example",
+        "+33 1 55 55 21 40",
+        "qualified",
+    ),
+    Person(
+        "Maison Lys", "Julien Martin", "Buyer", "j.martin@maison-lys.example", "+33 1 55 55 21 52", "lead"
+    ),
+    Person(
+        "Hanoi Medical Supply",
+        "Pham Minh Anh",
+        "Purchasing Head",
+        "anh.pham@hanoi-medsupply.example",
+        "+84 24 5555 0123",
+        "lead",
+    ),
+    Person(
+        "Hanoi Medical Supply",
+        "Le Quang Huy",
+        "Regulatory Lead",
+        "huy.le@hanoi-medsupply.example",
+        "+84 24 5555 0156",
+        "lead",
+    ),
+    Person(
+        "Rhein Logistik GmbH",
+        "Jonas Weber",
+        "Fleet Manager",
+        "j.weber@rhein-logistik.example",
+        "+49 221 555 7710",
+        "qualified",
+    ),
+    Person(
+        "Rhein Logistik GmbH",
+        "Mia Fischer",
+        "Buyer",
+        "m.fischer@rhein-logistik.example",
+        "+49 221 555 7733",
+        "lead",
+    ),
+    Person(
+        "Summit Retail Group",
+        "Olivia Bennett",
+        "Private Label Manager",
+        "o.bennett@summit-retail.example",
+        "+1 312-555-0105",
+        "customer",
+    ),
+    Person(
+        "Summit Retail Group",
+        "Ethan Hayes",
+        "Buyer",
+        "e.hayes@summit-retail.example",
+        "+1 312-555-0131",
+        "qualified",
+    ),
+    Person(
+        "Tokyo Data Systems",
+        "Haruto Kobayashi",
+        "IT Manager",
+        "h.kobayashi@tokyo-data.example",
+        "+81 3-5555-8120",
+        "qualified",
+    ),
+    Person(
+        "Tokyo Data Systems",
+        "Mei Yamamoto",
+        "Procurement",
+        "m.yamamoto@tokyo-data.example",
+        "+81 3-5555-8144",
+        "lead",
+    ),
     Person(None, "김지후", "프리랜서 바이어", "jihu.kim@mail.example", "010-3381-2209", "lead"),
     Person(None, "이서윤", "수입 대행", None, "010-5172-8840", "lead"),
     Person(None, "박민재", "포장 컨설턴트", "minjae.park@mail.example", None, "qualified"),
@@ -166,7 +445,15 @@ DEALS = [
     Deal("의료기기 멸균 파우치", "메디온헬스케어", "신동혁", "qualified", 29000, -9),
     Deal("Retail display packaging", "Northwind Market", "Ryan Cooper", "qualified", 36000, 60),
     Deal("소형 가전 포장 리뉴얼", "그린팩유통", "안수빈", "qualified", 27000, 45),
-    Deal("Medical cart casters", "Hanoi Medical Supply", "Pham Minh Anh", "qualified", 33500, 70, start="qualified"),
+    Deal(
+        "Medical cart casters",
+        "Hanoi Medical Supply",
+        "Pham Minh Anh",
+        "qualified",
+        33500,
+        70,
+        start="qualified",
+    ),
     Deal("서버랙 부품 공급", "한결테크", "장우석", "qualified", 58000, 38),
     Deal("Store fixture hardware", "Summit Retail Group", "Ethan Hayes", "qualified", 41000, 82),
     Deal("친환경 포장 샘플 제작", None, None, "qualified", 4800, 30),
@@ -209,7 +496,9 @@ DEALS = [
     Deal("Private label caps", "Summit Retail Group", "Olivia Bennett", "won", 33000, -151),
     Deal("반도체 클린룸 소모품", "한결테크", "이하린", "won", 58500, -160, start="proposal"),
     Deal("명절 선물세트 포장", "바른식품", "전재원", "won", 39000, -172),
-    Deal("Cold chain boxes", "Saigon Fresh Logistics", "Nguyen Thi Mai", "won", 27500, -183, start="proposal"),
+    Deal(
+        "Cold chain boxes", "Saigon Fresh Logistics", "Nguyen Thi Mai", "won", 27500, -183, start="proposal"
+    ),
     Deal("포장재 연간 공급 2026", "한빛정밀", "박서연", "won", 115000, -195),
     Deal("Display hooks", "Northwind Market", "Sarah Kim", "won", 8500, -206, start="proposal"),
     Deal("화장품 펌프 디스펜서", "루미에르코스메틱", "송유나", "won", 25000, -218),
@@ -222,17 +511,33 @@ DEALS = [
     Deal("기프트 박스 시범", "소담화장품", "유지호", "won", 7000, -340, start="qualified"),
     # Lost, newest first
     Deal("친환경 완충재 입찰", "그린팩유통", "황민석", "lost", 58000, -9, furthest="proposal"),
-    Deal("Display stand project", "Northwind Market", "Ryan Cooper", "lost", 12000, -25, furthest="qualified"),
+    Deal(
+        "Display stand project", "Northwind Market", "Ryan Cooper", "lost", 12000, -25, furthest="qualified"
+    ),
     Deal("의료용 트레이 시제품", "새롬메디칼", "백승희", "lost", 8000, -44, furthest="new"),
-    Deal("Pallet wrap tender", "Rhein Logistik GmbH", "Jonas Weber", "lost", 26000, -67, furthest="negotiation"),
+    Deal(
+        "Pallet wrap tender", "Rhein Logistik GmbH", "Jonas Weber", "lost", 26000, -67, furthest="negotiation"
+    ),
     Deal("화장품 쇼핑백", "소담화장품", "남궁선", "lost", 5500, -88, furthest="qualified"),
-    Deal("Sensor housing RFQ", "Tokyo Data Systems", "Mei Yamamoto", "lost", 31000, -111, furthest="proposal"),
+    Deal(
+        "Sensor housing RFQ", "Tokyo Data Systems", "Mei Yamamoto", "lost", 31000, -111, furthest="proposal"
+    ),
     Deal("대형마트 진열대", "그린팩유통", "안수빈", "lost", 44000, -135, furthest="proposal"),
-    Deal("Retort pouch trial", "Pacific Harbor Foods", "Emma Clarke", "lost", 17500, -158, furthest="qualified"),
+    Deal(
+        "Retort pouch trial", "Pacific Harbor Foods", "Emma Clarke", "lost", 17500, -158, furthest="qualified"
+    ),
     Deal("공장 자동화 컨베이어", "대성기계공업", "윤성민", "lost", 132000, -180, furthest="negotiation"),
     Deal("Cosmetic jar tender", "Maison Lys", "Julien Martin", "lost", 22000, -203, furthest="proposal"),
     Deal("수출 포장 컨설팅", None, "박민재", "lost", 3000, -226, furthest="new"),
-    Deal("Medical pouch tender", "Hanoi Medical Supply", "Le Quang Huy", "lost", 39000, -252, furthest="proposal"),
+    Deal(
+        "Medical pouch tender",
+        "Hanoi Medical Supply",
+        "Le Quang Huy",
+        "lost",
+        39000,
+        -252,
+        furthest="proposal",
+    ),
     Deal("냉동 창고 랙", "동해물류", "고은비", "lost", 61000, -280, furthest="qualified"),
     Deal("Store signage kit", "Summit Retail Group", "Ethan Hayes", "lost", 9000, -308, furthest="new"),
     Deal("배터리 부품 케이스", "세원오토텍", "오민지", "lost", 85000, -345, furthest="negotiation"),
@@ -255,9 +560,20 @@ FOLLOW_UPS = [
     FollowUp(None, "Jonas Weber", "call", "Check budget for next year", 8, 30),
     FollowUp("Data center cable trays", None, "email", "Confirm installation schedule", 4, 38),
     FollowUp(None, "고은비", "call", "신규 물류센터 오픈 일정 확인", 15, 47),
-    FollowUp("2027 포장재 공급", None, "email", "2027년 물량 계획서 받음, 다음 주 제안서 준비", 10, -3, done=True),
-    FollowUp(None, "Nguyen Thi Mai", "call", "Trial order of 2,000 trays confirmed for December", 7, -1, done=True),
-    FollowUp("Packaging line upgrade", None, "email", "Asked for delivery in two batches, January and March", 3, None),
+    FollowUp(
+        "2027 포장재 공급", None, "email", "2027년 물량 계획서 받음, 다음 주 제안서 준비", 10, -3, done=True
+    ),
+    FollowUp(
+        None, "Nguyen Thi Mai", "call", "Trial order of 2,000 trays confirmed for December", 7, -1, done=True
+    ),
+    FollowUp(
+        "Packaging line upgrade",
+        None,
+        "email",
+        "Asked for delivery in two batches, January and March",
+        3,
+        None,
+    ),
     FollowUp("친환경 완충재 입찰", None, "note", "실주 사유: 경쟁사와 단가 8% 차이", 8, None),
     FollowUp(None, "김도윤", "call", "납기 일정 확정, 계약서 초안은 이번 주에 보내기로 함", 0, None),
 ]

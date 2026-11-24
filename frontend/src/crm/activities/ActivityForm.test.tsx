@@ -16,10 +16,11 @@ afterEach(() => {
 })
 
 function setup(props: Partial<Parameters<typeof ActivityForm>[0]> = {}) {
-  const onSave = vi.fn((_values: { occurred_at?: string }) => Promise.resolve())
+  const onSave = vi.fn<(values: { occurred_at?: string }) => Promise<void>>(() => Promise.resolve())
   const view = renderWithApp(<ActivityForm mode="log" onSave={onSave} {...props} />)
   const when = within(screen.getByRole('group', { name: /^언제/ }))
-  const time = () => ['시', '분'].map((unit) => when.getByRole('spinbutton', { name: new RegExp(`^${unit}`) }).textContent)
+  const time = () =>
+    ['시', '분'].map((unit) => when.getByRole('spinbutton', { name: new RegExp(`^${unit}`) }).textContent)
   const write = async (text: string) => {
     await view.user.type(screen.getByRole('textbox', { name: '내용 (필수)' }), text)
   }
@@ -100,5 +101,27 @@ describe('ActivityForm', () => {
     await write(' 다시 확인')
     await save()
     expect(sent().occurred_at).toBe('2026-11-20T01:02:33.456Z')
+  })
+
+  it('has a done box only while there is a follow-up date (REC-6)', async () => {
+    const initial = {
+      id: 1,
+      kind: 'note',
+      description: '견적 요청',
+      occurred_at: '2026-11-20T01:02:33.456Z',
+      follow_up_date: '2026-12-01',
+      follow_up_done: true,
+    } as TimelineEntry
+    const { user, save, sent } = setup({ mode: 'edit', initial })
+    expect(screen.getByRole('checkbox', { name: '후속 조치 완료' })).toBeChecked()
+
+    const followUp = within(screen.getByRole('group', { name: '후속 조치' }))
+    for (const part of followUp.getAllByRole('spinbutton')) {
+      part.focus()
+      await user.keyboard('{Backspace}{Backspace}{Backspace}{Backspace}')
+    }
+    expect(screen.queryByRole('checkbox', { name: '후속 조치 완료' })).not.toBeInTheDocument()
+    await save()
+    expect(sent()).toMatchObject({ follow_up_date: null, follow_up_done: false })
   })
 })

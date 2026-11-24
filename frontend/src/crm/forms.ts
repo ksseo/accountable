@@ -15,7 +15,10 @@ export const requiredName = z
   .max(200, '이름은 200자까지 입력할 수 있어요')
 
 export const optionalText = (max: number, what: string) =>
-  z.string().trim().max(max, `${what}${topicParticle(what)} ${max.toLocaleString('ko-KR')}자까지 입력할 수 있어요`)
+  z
+    .string()
+    .trim()
+    .max(max, `${what}${topicParticle(what)} ${max.toLocaleString('ko-KR')}자까지 입력할 수 있어요`)
 
 export const optionalEmail = z
   .string()
@@ -44,14 +47,22 @@ export function showSaveError<T extends FieldValues>(error: unknown, form: UseFo
   if (error instanceof ApiError && error.status === 422) {
     const names = Object.keys(error.fields).filter((name) => name in form.getValues())
     for (const name of names) {
-      form.setError(name as Path<T>, { type: 'server', message: SERVER_MESSAGES[error.fields[name]] ?? '값을 확인해 주세요' })
+      form.setError(name as Path<T>, {
+        type: 'server',
+        message: SERVER_MESSAGES[error.fields[name]] ?? '값을 확인해 주세요',
+      })
     }
     if (names.length) {
       form.setFocus(names[0] as Path<T>)
       return
     }
   }
-  toast(error instanceof ApiError && error.offline ? '서버에 연결할 수 없어 저장하지 못했어요.' : '저장하지 못했어요. 다시 시도해 주세요.', 'error')
+  toast(
+    error instanceof ApiError && error.offline
+      ? '서버에 연결할 수 없어 저장하지 못했어요.'
+      : '저장하지 못했어요. 다시 시도해 주세요.',
+    'error',
+  )
 }
 
 /** After any save, the record, its lists, the pipeline and the dashboard are

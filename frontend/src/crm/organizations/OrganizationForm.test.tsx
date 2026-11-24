@@ -6,7 +6,9 @@ import { organizationDeleteMessage } from './deleteMessage'
 import { OrganizationForm } from './OrganizationForm'
 
 function setup(onSave = vi.fn(() => Promise.resolve())) {
-  const view = renderWithApp(<OrganizationForm industries={['제조', '물류']} onSave={onSave} onCancel={vi.fn()} />)
+  const view = renderWithApp(
+    <OrganizationForm industries={['제조', '물류']} onSave={onSave} onCancel={vi.fn()} />,
+  )
   return { ...view, onSave, name: screen.getByRole('textbox', { name: '이름 (필수)' }) }
 }
 
@@ -41,13 +43,23 @@ describe('OrganizationForm', () => {
     await user.type(name, '  한빛정밀  ')
     await user.type(screen.getByRole('textbox', { name: '웹사이트' }), 'hanbit.example')
     await user.click(screen.getByRole('button', { name: '저장' }))
-    expect(onSave).toHaveBeenCalledWith({ name: '한빛정밀', industry: null, website: 'hanbit.example', notes: null })
+    expect(onSave).toHaveBeenCalledWith({
+      name: '한빛정밀',
+      industry: null,
+      website: 'hanbit.example',
+      notes: null,
+    })
   })
 
   it('does not submit on Enter while a Korean letter is being typed', async () => {
     const { user, name, onSave } = setup()
     await user.type(name, '한빛')
-    const composing = new KeyboardEvent('keydown', { key: 'Enter', isComposing: true, bubbles: true, cancelable: true })
+    const composing = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      isComposing: true,
+      bubbles: true,
+      cancelable: true,
+    })
     fireEvent(name, composing)
     expect(composing.defaultPrevented).toBe(true)
     expect(onSave).not.toHaveBeenCalled()

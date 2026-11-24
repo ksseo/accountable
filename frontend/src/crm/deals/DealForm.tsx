@@ -25,12 +25,18 @@ const schema = z
       .trim()
       .min(1, '금액을 입력해 주세요')
       .refine((text) => parseMoney(text) !== null, '금액은 숫자로 입력해 주세요. 예: 12,500')
-      .refine((text) => (parseMoney(text) ?? 0) <= MAX_VALUE, `금액은 ${formatMoney(MAX_VALUE)}까지 입력할 수 있어요`),
+      .refine(
+        (text) => (parseMoney(text) ?? 0) <= MAX_VALUE,
+        `금액은 ${formatMoney(MAX_VALUE)}까지 입력할 수 있어요`,
+      ),
     stage: z.enum(['new', 'qualified', 'proposal', 'negotiation', 'won', 'lost']),
     probability: z
       .string()
       .trim()
-      .refine((text) => /^\d{1,3}$/.test(text) && Number(text) <= 100, '확률은 0에서 100 사이의 숫자로 입력해 주세요'),
+      .refine(
+        (text) => /^\d{1,3}$/.test(text) && Number(text) <= 100,
+        '확률은 0에서 100 사이의 숫자로 입력해 주세요',
+      ),
     close_date: z.string().nullable(),
     contact_id: z.number().nullable(),
     organization_id: z.number().nullable(),
@@ -54,24 +60,42 @@ type Props = {
   onCancel: () => void
 }
 
+/** What the form starts with for a saved deal. */
+function savedValues(deal: Deal): Values {
+  return {
+    name: deal.name,
+    value: formatMoney(deal.value),
+    stage: deal.stage,
+    probability: String(deal.probability),
+    close_date: deal.close_date,
+    contact_id: deal.contact_id,
+    organization_id: deal.organization_id,
+  }
+}
+
+/** What it starts with for a new one, filled in for its stage as choosing that
+ * stage would be (FORM-4). */
+function newValues(meta: Meta, { stage = 'new', contact_id, organization_id }: DealDefaults = {}): Values {
+  return {
+    name: '',
+    value: '',
+    stage,
+    probability: String(usualProbability(meta, stage) ?? 0),
+    close_date: isClosed(stage) ? meta.today : null,
+    contact_id: contact_id ?? null,
+    organization_id: organization_id ?? null,
+  }
+}
+
 /** Adding or editing a deal. Choosing a contact fills in their organization if
  * it's empty; changing the stage fills in its probability, and Won or Lost
  * today's close date. All of them can still be changed, and going back gives
  * back what was there (FORM-4). */
 export function DealForm({ initial, defaults, meta, contacts, organizations, onSave, onCancel }: Props) {
-  const stage = initial?.stage ?? defaults?.stage ?? 'new'
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     mode: 'onTouched',
-    defaultValues: {
-      name: initial?.name ?? '',
-      value: initial ? formatMoney(initial.value) : '',
-      stage,
-      probability: String(initial?.probability ?? usualProbability(meta, stage) ?? 0),
-      close_date: initial?.close_date ?? (isClosed(stage) ? meta.today : null),
-      contact_id: initial?.contact_id ?? defaults?.contact_id ?? null,
-      organization_id: initial?.organization_id ?? defaults?.organization_id ?? null,
-    },
+    defaultValues: initial ? savedValues(initial) : newValues(meta, defaults),
   })
   const { control, handleSubmit, formState, getValues, setValue } = form
   useUnsaved(formState.isDirty)
@@ -81,7 +105,7 @@ export function DealForm({ initial, defaults, meta, contacts, organizations, onS
   const replaced = useRef({
     probability: getValues('probability'),
     closeDate: initial?.close_date ?? null,
-    filledToday: !initial && isClosed(stage),
+    filledToday: !initial && isClosed(getValues('stage')),
   })
 
   function chooseContact(contactId: number | null) {
@@ -103,7 +127,10 @@ export function DealForm({ initial, defaults, meta, contacts, organizations, onS
     const usual = String(usualProbability(meta, next) ?? 0)
     setValue('stage', next, { shouldDirty: true })
     setValue('probability', isSaved ? kept.probability : usual, { shouldDirty: true, shouldValidate: true })
-    setValue('close_date', kept.filledToday ? meta.today : kept.closeDate, { shouldDirty: true, shouldValidate: true })
+    setValue('close_date', kept.filledToday ? meta.today : kept.closeDate, {
+      shouldDirty: true,
+      shouldValidate: true,
+    })
   }
 
   async function submit(values: Values) {
@@ -123,7 +150,7 @@ export function DealForm({ initial, defaults, meta, contacts, organizations, onS
   }
 
   return (
-    <form onSubmit={handleSubmit(submit)} onKeyDown={blockComposingEnter} noValidate>
+    <form ref={blockComposingEnter} onSubmit={handleSubmit(submit)} noValidate>
       <FieldStack>
         <Controller
           control={control}

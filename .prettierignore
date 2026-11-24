@@ -1,0 +1,12 @@
+# Not the app's TypeScript, JavaScript, CSS, HTML and JSON
+.claude/
+backend/
+community_contributions/
+course/
+docs/
+*.md
+
+# Generated
+package-lock.json
+frontend/src/api/openapi.json
+frontend/src/api/schema.d.ts

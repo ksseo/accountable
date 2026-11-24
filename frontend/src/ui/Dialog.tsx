@@ -59,9 +59,7 @@ export function Dialog({ title, isOpen, onOpenChange, role = 'dialog', size = 'm
       >
         <p>입력한 내용이 사라져요.</p>
         <DialogActions>
-          <Button variant="page" autoFocus onPress={() => setIsAsking(false)}>
-            계속 입력
-          </Button>
+          <SafeButton onPress={() => setIsAsking(false)}>계속 입력</SafeButton>
           <Button variant="danger" onPress={close}>
             버리기
           </Button>
@@ -107,4 +105,18 @@ function Frame({ title, isOpen, onEscape, onClose, role, size, children }: Frame
 /** The row of buttons at the bottom of a dialog. */
 export function DialogActions({ children }: { children: ReactNode }) {
   return <div className={styles.actions}>{children}</div>
+}
+
+/** The answer to a question that loses nothing. Focus starts on it when the
+ * question opens (FORM-1, DEL-1). */
+export function SafeButton({ onPress, children }: { onPress: () => void; children: ReactNode }) {
+  const ref = useRef<HTMLButtonElement>(null)
+  // A child's effects run first, so React Aria's dialog finds focus already
+  // inside it and doesn't take it for itself.
+  useEffect(() => ref.current?.focus({ preventScroll: true }), [])
+  return (
+    <Button ref={ref} variant="page" onPress={onPress}>
+      {children}
+    </Button>
+  )
 }

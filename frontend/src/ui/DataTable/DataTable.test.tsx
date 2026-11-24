@@ -41,7 +41,10 @@ function table(rows: Row[] | undefined, path = '/items', onRetry?: () => void) {
   )
 }
 
-const bodyRows = () => within(screen.getByRole('table', { name: '품목 목록' })).getAllByRole('row').slice(1)
+const bodyRows = () =>
+  within(screen.getByRole('table', { name: '품목 목록' }))
+    .getAllByRole('row')
+    .slice(1)
 const firstCell = (row: HTMLElement) => within(row).getAllByRole('cell')[0].textContent
 
 describe('DataTable', () => {
@@ -91,7 +94,18 @@ describe('DataTable', () => {
   it('reads search, sort and page from the address', () => {
     table(ROWS, '/items?q=%ED%92%88%EB%AA%A9%2001&sort=name&dir=desc')
     expect(screen.getByRole('searchbox', { name: '품목 검색' })).toHaveValue('품목 01')
-    expect(bodyRows().map(firstCell)).toEqual(['품목 019', '품목 018', '품목 017', '품목 016', '품목 015', '품목 014', '품목 013', '품목 012', '품목 011', '품목 010'])
+    expect(bodyRows().map(firstCell)).toEqual([
+      '품목 019',
+      '품목 018',
+      '품목 017',
+      '품목 016',
+      '품목 015',
+      '품목 014',
+      '품목 013',
+      '품목 012',
+      '품목 011',
+      '품목 010',
+    ])
   })
 
   it('says when a search finds nothing', () => {
@@ -120,7 +134,11 @@ describe('DataTable', () => {
     const { user } = table(ROWS)
     await user.click(screen.getByRole('button', { name: '품목 001 메뉴' }))
     const menu = screen.getByRole('menu')
-    expect(within(menu).getAllByRole('menuitem').map((item) => item.textContent)).toEqual(['수정', '삭제'])
+    expect(
+      within(menu)
+        .getAllByRole('menuitem')
+        .map((item) => item.textContent),
+    ).toEqual(['수정', '삭제'])
   })
 
   it('says when its rows could not be loaded, and tries again', async () => {
@@ -169,17 +187,57 @@ const shownIds = () => bodyRows().map((row) => Number(firstCell(row)))
 describe('DataTable sorting (TBL-3)', () => {
   const cases: { what: string; values: CellValue[]; direction: SortDirection; ids: number[] }[] = [
     // Korean order, as Intl.Collator('ko') gives it: Hangul before Latin letters.
-    { what: 'text in Korean order', values: ['박서연', null, '김민준', '', '이지은', 'Acme'], direction: 'asc', ids: [3, 1, 5, 6, 2, 4] },
-    { what: 'text in reverse, empty still last', values: ['박서연', null, '김민준', '', '이지은', 'Acme'], direction: 'desc', ids: [6, 5, 1, 3, 2, 4] },
+    {
+      what: 'text in Korean order',
+      values: ['박서연', null, '김민준', '', '이지은', 'Acme'],
+      direction: 'asc',
+      ids: [3, 1, 5, 6, 2, 4],
+    },
+    {
+      what: 'text in reverse, empty still last',
+      values: ['박서연', null, '김민준', '', '이지은', 'Acme'],
+      direction: 'desc',
+      ids: [6, 5, 1, 3, 2, 4],
+    },
     { what: 'numbers as numbers', values: [10, null, 2, 0], direction: 'asc', ids: [4, 3, 1, 2] },
-    { what: 'numbers in reverse, empty still last', values: [10, null, 2, 0], direction: 'desc', ids: [1, 3, 4, 2] },
-    { what: 'a column whose first rows are empty', values: [null, undefined, '', '나', '가'], direction: 'asc', ids: [5, 4, 1, 2, 3] },
-    { what: 'a column whose first rows are empty, in reverse', values: [null, undefined, '', '나', '가'], direction: 'desc', ids: [4, 5, 1, 2, 3] },
-    { what: 'dates written as YYYY-MM-DD', values: ['2026-12-01', null, '2026-11-23'], direction: 'asc', ids: [3, 1, 2] },
+    {
+      what: 'numbers in reverse, empty still last',
+      values: [10, null, 2, 0],
+      direction: 'desc',
+      ids: [1, 3, 4, 2],
+    },
+    {
+      what: 'a column whose first rows are empty',
+      values: [null, undefined, '', '나', '가'],
+      direction: 'asc',
+      ids: [5, 4, 1, 2, 3],
+    },
+    {
+      what: 'a column whose first rows are empty, in reverse',
+      values: [null, undefined, '', '나', '가'],
+      direction: 'desc',
+      ids: [4, 5, 1, 2, 3],
+    },
+    {
+      what: 'dates written as YYYY-MM-DD',
+      values: ['2026-12-01', null, '2026-11-23'],
+      direction: 'asc',
+      ids: [3, 1, 2],
+    },
     { what: 'numbers inside text in number order', values: ['10번', '2번'], direction: 'asc', ids: [2, 1] },
     { what: 'equal values in their own order', values: ['나', '가', '나'], direction: 'asc', ids: [2, 1, 3] },
-    { what: 'equal values in their own order, in reverse', values: ['나', '가', '나'], direction: 'desc', ids: [1, 3, 2] },
-    { what: 'letters that differ only in case as equal', values: ['b', 'A', 'a', 'B'], direction: 'desc', ids: [1, 4, 2, 3] },
+    {
+      what: 'equal values in their own order, in reverse',
+      values: ['나', '가', '나'],
+      direction: 'desc',
+      ids: [1, 3, 2],
+    },
+    {
+      what: 'letters that differ only in case as equal',
+      values: ['b', 'A', 'a', 'B'],
+      direction: 'desc',
+      ids: [1, 4, 2, 3],
+    },
   ]
 
   it.each(cases)('sorts $what ($direction)', ({ values, direction, ids }) => {
@@ -205,7 +263,9 @@ describe('DataTable sorting (TBL-3)', () => {
   })
 
   it('sorts by one column when a heading is clicked with Shift', async () => {
-    const { user, router } = renderWithApp(<ItemTable items={itemsOf([2, 1, 2])} />, { path: '/items?sort=value&dir=asc' })
+    const { user, router } = renderWithApp(<ItemTable items={itemsOf([2, 1, 2])} />, {
+      path: '/items?sort=value&dir=asc',
+    })
     await user.keyboard('{Shift>}')
     await user.click(within(screen.getByRole('columnheader', { name: /번호/ })).getByRole('button'))
     await user.keyboard('{/Shift}')
@@ -251,13 +311,16 @@ describe('DataTable searching (TBL-2)', () => {
   })
 
   it('sorts what it found', () => {
-    renderWithApp(<ItemTable items={itemsOf(['나 공장', '본사', '가 공장'])} />, { path: '/items?q=%EA%B3%B5%EC%9E%A5&sort=value&dir=asc' })
+    renderWithApp(<ItemTable items={itemsOf(['나 공장', '본사', '가 공장'])} />, {
+      path: '/items?q=%EA%B3%B5%EC%9E%A5&sort=value&dir=asc',
+    })
     expect(shownIds()).toEqual([3, 1])
   })
 })
 
 describe('DataTable paging (TBL-1, TBL-6)', () => {
-  const numbered = (total: number): Item[] => itemsOf(Array.from({ length: total }, (_, index) => `품목 ${index + 1}`))
+  const numbered = (total: number): Item[] =>
+    itemsOf(Array.from({ length: total }, (_, index) => `품목 ${index + 1}`))
 
   /** A table whose rows load again, as after a save or a delete. */
   function Reloading({ before, after }: { before: Item[]; after: Item[] }) {
@@ -274,7 +337,9 @@ describe('DataTable paging (TBL-1, TBL-6)', () => {
 
   it('stays on its page when the rows load again', async () => {
     const after = numbered(120).map((item) => (item.id === 60 ? { ...item, value: '고친 품목' } : item))
-    const { user, router } = renderWithApp(<Reloading before={numbered(120)} after={after} />, { path: '/items?page=2' })
+    const { user, router } = renderWithApp(<Reloading before={numbered(120)} after={after} />, {
+      path: '/items?page=2',
+    })
     await user.click(screen.getByRole('button', { name: '다시 읽기' }))
     expect(screen.getByText('고친 품목')).toBeInTheDocument()
     expect(shownIds()[0]).toBe(51)
@@ -282,7 +347,9 @@ describe('DataTable paging (TBL-1, TBL-6)', () => {
   })
 
   it('shows the last page when the one it was on is gone', async () => {
-    const { user } = renderWithApp(<Reloading before={numbered(101)} after={numbered(100)} />, { path: '/items?page=3' })
+    const { user } = renderWithApp(<Reloading before={numbered(101)} after={numbered(100)} />, {
+      path: '/items?page=3',
+    })
     expect(shownIds()).toEqual([101])
     await user.click(screen.getByRole('button', { name: '다시 읽기' }))
     expect(shownIds()).toHaveLength(50)

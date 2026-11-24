@@ -2,10 +2,10 @@
 
 from datetime import date, datetime
 
-from pydantic import AwareDatetime, BaseModel, Field
+from pydantic import AwareDatetime, BaseModel
 
 from accountable.crm.activities.rules import FollowUpState
-from accountable.crm.fields import Description
+from accountable.crm.fields import Description, omittable
 from accountable.crm.stages import ActivityKind, LoggedKind
 
 
@@ -21,11 +21,11 @@ class ActivityIn(BaseModel):
 
 
 class ActivityPatch(BaseModel):
-    kind: LoggedKind = Field(default=None)
-    description: Description = Field(default=None)
-    occurred_at: AwareDatetime = Field(default=None)
+    kind: LoggedKind = omittable()
+    description: Description = omittable()
+    occurred_at: AwareDatetime = omittable()
     follow_up_date: date | None = None
-    follow_up_done: bool = Field(default=None)
+    follow_up_done: bool = omittable()
 
 
 class TimelineEntry(BaseModel):

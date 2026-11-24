@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from sqlalchemy import Connection, Engine, Table, insert
 
@@ -43,13 +44,10 @@ def _guarded_connect(database, *args, **kwargs):
 @pytest.fixture(autouse=True, scope="session")
 def guard_real_database() -> Iterator[None]:
     """Every SQLite connection goes through sqlite3's connect, so guard it there."""
-    sqlite3.dbapi2.connect = _guarded_connect
-    sqlite3.connect = _guarded_connect
-    try:
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(sqlite3.dbapi2, "connect", _guarded_connect)
+        patch.setattr(sqlite3, "connect", _guarded_connect)
         yield
-    finally:
-        sqlite3.dbapi2.connect = _real_connect
-        sqlite3.connect = _real_connect
 
 
 @pytest.fixture(autouse=True)
@@ -84,6 +82,7 @@ def sample_client() -> Iterator[TestClient]:
 
 @pytest.fixture
 def engine(client: TestClient) -> Engine:
+    assert isinstance(client.app, FastAPI)
     return client.app.state.engine
 
 
@@ -105,7 +104,7 @@ def add(conn: Connection) -> Callable[..., int]:
             values.setdefault("probability", 10)
             values.setdefault("position", 1024.0)
             values.setdefault("furthest_open_stage", "new")
-        return conn.execute(insert(table).values(**values)).inserted_primary_key[0]
+        return conn.execute(insert(table).values(**values).returning(table.c.id)).scalar_one()
 
     return insert_row
 

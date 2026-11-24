@@ -47,7 +47,9 @@ def _column(conn, stage):
 def column(conn, add):
     """Three cards in Proposal, A, B, C from the top, and one in New."""
     ids = {
-        name: add(deals, name=name, stage="proposal", position=1024.0 * (index + 1), furthest_open_stage="proposal")
+        name: add(
+            deals, name=name, stage="proposal", position=1024.0 * (index + 1), furthest_open_stage="proposal"
+        )
         for index, name in enumerate("ABC")
     }
     ids["N"] = add(deals, name="N", stage="new", position=1024.0)
@@ -93,13 +95,21 @@ def test_many_drops_in_the_same_gap_stay_in_order(conn, column):
     for index in range(30):
         new_id = conn.execute(
             deals.insert().values(
-                name=f"X{index}", stage="new", value=1, probability=10, position=5000.0 + index,
+                name=f"X{index}",
+                stage="new",
+                value=1,
+                probability=10,
+                position=5000.0 + index,
                 furthest_open_stage="new",
             )
         ).inserted_primary_key[0]
         above = conn.execute(
             select(deals.c.id)
-            .where(deals.c.stage == "proposal", deals.c.position < select(deals.c.position).where(deals.c.id == column["B"]).scalar_subquery())
+            .where(
+                deals.c.stage == "proposal",
+                deals.c.position
+                < select(deals.c.position).where(deals.c.id == column["B"]).scalar_subquery(),
+            )
             .order_by(deals.c.position.desc())
             .limit(1)
         ).scalar()
@@ -112,7 +122,6 @@ def test_many_drops_in_the_same_gap_stay_in_order(conn, column):
 
 
 def test_a_neighbor_from_another_column_is_refused(conn, column):
-    with pytest.raises(HTTPException) as error:
+    with pytest.raises(HTTPException, match=r"'loc': \['body', 'after_id'\]") as error:
         move_deal(conn, column["A"], "proposal", column["N"], None, TODAY)
     assert error.value.status_code == 422
-    assert error.value.detail[0]["loc"] == ["body", "after_id"]

@@ -1,4 +1,12 @@
-import { ArrowDown, ArrowRightLeft, ArrowUp, ChevronRight, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import {
+  ArrowDown,
+  ArrowRightLeft,
+  ArrowUp,
+  ChevronRight,
+  MoreHorizontal,
+  Pencil,
+  Trash2,
+} from 'lucide-react'
 import { Menu, MenuItem, MenuTrigger, Popover, SubmenuTrigger } from 'react-aria-components'
 import { Button } from '../../ui/Button'
 import menuStyles from '../../ui/RowMenu.module.css'

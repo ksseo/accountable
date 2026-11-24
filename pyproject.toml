@@ -23,8 +23,20 @@ module-name = "accountable"
 [tool.pytest.ini_options]
 testpaths = ["backend/tests"]
 
+[tool.ruff]
+line-length = 110
+src = ["backend"]
+
+[tool.ruff.lint]
+extend-select = ["C901"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 15
+
 [dependency-groups]
 dev = [
     "httpx2>=2.16.2",
     "pytest>=9.2.0",
+    "ruff>=0.17.6",
+    "ty>=0.0.109",
 ]

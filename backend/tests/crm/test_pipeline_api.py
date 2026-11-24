@@ -35,9 +35,20 @@ def test_six_columns_in_stage_order_with_open_only_totals(client, make_deal):
     make_deal("D", value=80_000, stage="won")
     make_deal("E", value=160_000, stage="lost")
     board = client.get("/api/pipeline").json()
-    assert [column["stage"] for column in board["columns"]] == ["new", "qualified", "proposal", "negotiation", "won", "lost"]
+    assert [column["stage"] for column in board["columns"]] == [
+        "new",
+        "qualified",
+        "proposal",
+        "negotiation",
+        "won",
+        "lost",
+    ]
     columns = {column["stage"]: column for column in board["columns"]}
-    assert (columns["proposal"]["count"], columns["proposal"]["value"], columns["proposal"]["expected_revenue"]) == (1, 20_000, 10_000)
+    assert (
+        columns["proposal"]["count"],
+        columns["proposal"]["value"],
+        columns["proposal"]["expected_revenue"],
+    ) == (1, 20_000, 10_000)
     assert (columns["qualified"]["count"], columns["qualified"]["value"]) == (0, 0)
     assert (columns["won"]["count"], columns["won"]["value"]) == (1, 80_000)
     assert (board["open_count"], board["open_value"], board["open_expected_revenue"]) == (3, 70_000, 41_000)
@@ -66,7 +77,8 @@ def test_a_move_changes_stage_and_place(client, make_deal):
     above = make_deal("above", stage="proposal")
     moving = make_deal("moving", stage="new")
     saved = client.post(
-        f"/api/deals/{moving['id']}/move", json={"stage": "proposal", "after_id": above["id"], "before_id": below["id"]}
+        f"/api/deals/{moving['id']}/move",
+        json={"stage": "proposal", "after_id": above["id"], "before_id": below["id"]},
     )
     assert saved.status_code == 200
     card = saved.json()
@@ -97,7 +109,9 @@ def test_a_move_to_won_makes_a_customer(client, make_contact, make_deal):
 def test_a_wrong_move_is_refused(client, make_deal):
     deal = make_deal(stage="new")
     elsewhere = make_deal("elsewhere", stage="proposal")
-    response = client.post(f"/api/deals/{deal['id']}/move", json={"stage": "new", "after_id": elsewhere["id"]})
+    response = client.post(
+        f"/api/deals/{deal['id']}/move", json={"stage": "new", "after_id": elsewhere["id"]}
+    )
     assert response.status_code == 422
     assert response.json()["detail"][0]["loc"][-1] == "after_id"
     assert client.post(f"/api/deals/{deal['id']}/move", json={"stage": "closed"}).status_code == 422

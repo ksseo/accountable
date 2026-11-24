@@ -3,7 +3,12 @@
 // rule holds when the card enters a lane and while it moves within one, so
 // what the board shows during the drag is where the card is dropped (PIPE-3).
 
-import { pointerWithin, rectIntersection, type CollisionDetection, type UniqueIdentifier } from '@dnd-kit/core'
+import {
+  pointerWithin,
+  rectIntersection,
+  type CollisionDetection,
+  type UniqueIdentifier,
+} from '@dnd-kit/core'
 import type { StageKey } from '../meta'
 
 export const laneId = (stage: string) => `lane:${stage}`
@@ -21,7 +26,8 @@ type CardSpot = { index: number; middle: number }
  * place comes from the drawn cards' own places.
  */
 export function dropIndex(middle: number, cards: readonly CardSpot[], draggedIndex: number | null): number {
-  const withoutDragged = (index: number) => (draggedIndex !== null && draggedIndex < index ? index - 1 : index)
+  const withoutDragged = (index: number) =>
+    draggedIndex !== null && draggedIndex < index ? index - 1 : index
   const others = cards.filter((card) => card.index !== draggedIndex)
   if (others.length === 0) return 0
   const above = others.filter((card) => card.middle < middle)
@@ -46,8 +52,7 @@ export const boardCollision: CollisionDetection = (args) => {
   const cards: CardSpot[] = []
   for (const container of args.droppableContainers) {
     const sortable = container.data.current?.sortable as
-      | { containerId: UniqueIdentifier; index: number; items: UniqueIdentifier[] }
-      | undefined
+      { containerId: UniqueIdentifier; index: number; items: UniqueIdentifier[] } | undefined
     const rect = args.droppableRects.get(container.id)
     if (!sortable || sortable.containerId !== stage || !rect) continue
     items = sortable.items

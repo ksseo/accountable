@@ -135,10 +135,9 @@ def test_a_deal_created_straight_into_won_gets_today(conn):
 
 def test_a_closed_deal_needs_a_close_date(conn):
     deal_id = _new_deal(conn, stage="lost")
-    with pytest.raises(HTTPException) as error:
+    with pytest.raises(HTTPException, match=r"'loc': \['body', 'close_date'\]") as error:
         repo.update_deal(conn, deal_id, {"close_date": None}, TODAY)
     assert error.value.status_code == 422
-    assert error.value.detail[0]["loc"] == ["body", "close_date"]
 
 
 def test_the_furthest_stage_is_kept_when_moving_back(conn):
@@ -169,7 +168,11 @@ def test_won_makes_the_main_contact_a_customer(conn, add):
     assert promoted == {"id": contact_id, "name": "김민준"}
     assert conn.scalar(select(contacts.c.status).where(contacts.c.id == contact_id)) == "customer"
     [entry] = _entries(conn, contact_id=contact_id)
-    assert (entry["kind"], entry["from_value"], entry["to_value"]) == ("status_change", "qualified", "customer")
+    assert (entry["kind"], entry["from_value"], entry["to_value"]) == (
+        "status_change",
+        "qualified",
+        "customer",
+    )
     assert entry["description"] == "2027 포장재 공급"
 
 
@@ -185,7 +188,9 @@ def test_the_status_entry_keeps_the_deals_name_at_that_moment(conn, add):
 def test_a_deal_created_straight_into_won_makes_a_customer(conn, add):
     contact_id = add(contacts, name="Sarah Kim", status="lead")
     _, promoted = repo.create_deal(
-        conn, {"name": "Shrink sleeve labels", "stage": "won", "value": 18_000, "contact_id": contact_id}, TODAY
+        conn,
+        {"name": "Shrink sleeve labels", "stage": "won", "value": 18_000, "contact_id": contact_id},
+        TODAY,
     )
     assert promoted == {"id": contact_id, "name": "Sarah Kim"}
 
@@ -223,7 +228,6 @@ def test_a_changed_stage_goes_to_the_top_of_its_new_column(conn):
 
 
 def test_links_to_missing_records_name_the_field(conn):
-    with pytest.raises(HTTPException) as error:
+    with pytest.raises(HTTPException, match=r"'loc': \['body', 'organization_id'\]") as error:
         _new_deal(conn, organization_id=999)
     assert error.value.status_code == 422
-    assert error.value.detail[0]["loc"] == ["body", "organization_id"]

@@ -1,6 +1,14 @@
 import { ChevronDown } from 'lucide-react'
 import type { ReactNode, Ref } from 'react'
-import { Button, FieldError, ListBox, ListBoxItem, Popover, Select as AriaSelect, SelectValue } from 'react-aria-components'
+import {
+  Button,
+  FieldError,
+  ListBox,
+  ListBoxItem,
+  Popover,
+  Select as AriaSelect,
+  SelectValue,
+} from 'react-aria-components'
 import { FieldLabel, type FieldProps } from './Field'
 import fieldStyles from './Field.module.css'
 import styles from './Select.module.css'

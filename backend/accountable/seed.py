@@ -7,6 +7,7 @@ Run with: uv run python -m accountable.seed [--yes]
 """
 
 import argparse
+import io
 import sys
 from collections.abc import Callable
 
@@ -42,7 +43,7 @@ def main(argv: list[str] | None = None, ask: Callable[[str], str] = input) -> in
     args = parser.parse_args(argv)
 
     for stream in (sys.stdout, sys.stderr):
-        if hasattr(stream, "reconfigure"):
+        if isinstance(stream, io.TextIOWrapper):
             stream.reconfigure(encoding="utf-8")
 
     if not args.yes:

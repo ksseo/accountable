@@ -66,7 +66,11 @@ def test_the_list_has_contact_counts_and_open_pipeline(client, make_org, make_co
     make_deal("B", value=5_000, stage="new", organization_id=org["id"])
     make_deal("C", value=99_000, stage="won", organization_id=org["id"])
     rows = {row["name"]: row for row in client.get("/api/organizations").json()}
-    assert (rows["한빛정밀"]["contact_count"], rows["한빛정밀"]["open_deal_count"], rows["한빛정밀"]["open_deal_value"]) == (2, 2, 15_000)
+    assert (
+        rows["한빛정밀"]["contact_count"],
+        rows["한빛정밀"]["open_deal_count"],
+        rows["한빛정밀"]["open_deal_value"],
+    ) == (2, 2, 15_000)
     assert (rows["대성기계공업"]["contact_count"], rows["대성기계공업"]["open_deal_value"]) == (0, 0)
     assert other["id"] in {row["id"] for row in rows.values()}
 

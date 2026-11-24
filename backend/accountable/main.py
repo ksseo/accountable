@@ -6,7 +6,7 @@ the sample data.
 Run with: uv run uvicorn accountable.main:app --host 127.0.0.1 --port 8000
 """
 
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -25,7 +25,7 @@ class Health(BaseModel):
 
 def create_app() -> FastAPI:
     @asynccontextmanager
-    async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    async def lifespan(app: FastAPI) -> AsyncGenerator[None]:
         engine = make_engine(db_path())
         migrate(engine, on_create=load_samples)
         app.state.engine = engine

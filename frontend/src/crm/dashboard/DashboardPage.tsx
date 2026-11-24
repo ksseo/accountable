@@ -19,7 +19,9 @@ import { WonRevenueChart } from './WonRevenueChart'
 export function headline(today: string, figures: DashboardFigures): string {
   const date = formatDateWithWeekday(today)
   const parts = [
-    figures.overdue_follow_up_count > 0 ? `기한 지난 후속 조치 ${count(figures.overdue_follow_up_count, 'followUp')}` : null,
+    figures.overdue_follow_up_count > 0
+      ? `기한 지난 후속 조치 ${count(figures.overdue_follow_up_count, 'followUp')}`
+      : null,
     figures.late_count > 0 ? `지연된 영업 기회 ${count(figures.late_count, 'deal')}` : null,
   ].filter((part): part is string => part !== null)
   if (parts.length === 0) return `${date}. 기한 지난 후속 조치와 지연된 영업 기회가 없어요.`

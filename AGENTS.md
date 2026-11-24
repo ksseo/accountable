@@ -11,6 +11,8 @@ Read `docs/spec.md` first. It describes the whole product as it stands today.
 - `docs/STATUS.md`: what's done so far
 - `docs/changes/<branch name>/`: one folder for each change, with its `intent.md` and `plan.md`. Read only the current change's folder, the one named after the branch you're on. The others are history
 
-Run `npm test` before you finish a piece of work. It runs every unit and end-to-end test, fails if any fail, and takes about 6 minutes
+Run `npm run check` before you finish a change. It runs the formatting, lint, type and secret checks and every unit and end-to-end test, fails if any fail, and takes about 8 minutes. While you work, `npm run check:quick` leaves out the end-to-end tests and takes under a minute, and `npm run format` fixes the formatting
+
+Fix what the checks find. Don't loosen a rule or switch one off for a line without asking first
 
 Update `docs/STATUS.md` when you finish a piece of work

@@ -6,7 +6,9 @@ import { RecordPending } from './RecordMissing'
 
 function setup(error: unknown) {
   const onRetry = vi.fn()
-  const view = renderWithApp(<RecordPending error={error} listPath="/deals" listLabel="영업 기회" onRetry={onRetry} />)
+  const view = renderWithApp(
+    <RecordPending error={error} listPath="/deals" listLabel="영업 기회" onRetry={onRetry} />,
+  )
   return { ...view, onRetry }
 }
 

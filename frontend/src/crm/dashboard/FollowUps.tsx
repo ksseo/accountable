@@ -44,12 +44,20 @@ export function FollowUps({ followUps, later, figures, className }: Props) {
   }
 
   const counts = [
-    figures.overdue_follow_up_count > 0 ? `기한 지남 ${count(figures.overdue_follow_up_count, 'followUp')}` : null,
-    figures.due_today_follow_up_count > 0 ? `오늘 ${count(figures.due_today_follow_up_count, 'followUp')}` : null,
+    figures.overdue_follow_up_count > 0
+      ? `기한 지남 ${count(figures.overdue_follow_up_count, 'followUp')}`
+      : null,
+    figures.due_today_follow_up_count > 0
+      ? `오늘 ${count(figures.due_today_follow_up_count, 'followUp')}`
+      : null,
   ].filter(Boolean)
 
   return (
-    <Panel title="후속 조치" aside={counts.length ? counts.join(', ') : '기한 지난 것 없음'} className={className}>
+    <Panel
+      title="후속 조치"
+      aside={counts.length ? counts.join(', ') : '기한 지난 것 없음'}
+      className={className}
+    >
       {shown.length === 0 ? (
         <EmptyState message="앞으로 2주 안에 할 후속 조치가 없어요" />
       ) : (

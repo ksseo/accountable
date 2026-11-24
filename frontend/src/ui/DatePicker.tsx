@@ -74,7 +74,9 @@ export function DatePicker({ label, isRequired, error, name, value, onChange, on
                 <ChevronRight size={18} aria-hidden="true" />
               </Button>
             </header>
-            <CalendarGrid className={styles.grid}>{(date) => <CalendarCell date={date} className={styles.cell} />}</CalendarGrid>
+            <CalendarGrid className={styles.grid}>
+              {(date) => <CalendarCell date={date} className={styles.cell} />}
+            </CalendarGrid>
           </Calendar>
         </Dialog>
       </Popover>

@@ -4,7 +4,10 @@
 def test_add_read_edit_delete(client, make_org, make_contact):
     org = make_org()
     created = make_contact(
-        " 김민준 ", email="minjun@hanbit.example", phone="010-1234-5678", job_title="구매팀장",
+        " 김민준 ",
+        email="minjun@hanbit.example",
+        phone="010-1234-5678",
+        job_title="구매팀장",
         organization_id=org["id"],
     )
     assert created["name"] == "김민준"
@@ -70,7 +73,9 @@ def test_the_detail_has_its_organization_and_deals(client, make_org, make_contac
     ]
 
 
-def test_delete_impact_and_deleting_keeps_deals_and_deletes_activities(client, make_contact, make_deal, make_activity):
+def test_delete_impact_and_deleting_keeps_deals_and_deletes_activities(
+    client, make_contact, make_deal, make_activity
+):
     contact = make_contact()
     deal = make_deal(contact_id=contact["id"])
     make_deal("둘째", contact_id=contact["id"])
@@ -88,7 +93,10 @@ def test_delete_impact_and_deleting_keeps_deals_and_deletes_activities(client, m
 def test_the_timeline_endpoint(client, make_contact):
     contact = make_contact()
     assert client.get(f"/api/contacts/{contact['id']}/timeline").json() == {
-        "items": [], "total": 0, "offset": 0, "limit": 50,
+        "items": [],
+        "total": 0,
+        "offset": 0,
+        "limit": 50,
     }
     assert client.get("/api/contacts/999/timeline").status_code == 404
     assert client.get(f"/api/contacts/{contact['id']}/timeline?offset=-1").status_code == 422

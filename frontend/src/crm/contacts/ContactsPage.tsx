@@ -33,8 +33,19 @@ const COLUMNS: Column<Contact>[] = [
       </RecordLink>
     ),
   },
-  { key: 'status', header: '상태', value: (row) => STATUS_ORDER[row.status], cell: (row) => <StatusBadge status={row.status} /> },
-  { key: 'job_title', header: '직책', value: (row) => row.job_title, searchable: true, cell: (row) => row.job_title },
+  {
+    key: 'status',
+    header: '상태',
+    value: (row) => STATUS_ORDER[row.status],
+    cell: (row) => <StatusBadge status={row.status} />,
+  },
+  {
+    key: 'job_title',
+    header: '직책',
+    value: (row) => row.job_title,
+    searchable: true,
+    cell: (row) => row.job_title,
+  },
   {
     key: 'organization',
     header: '거래처',
@@ -48,7 +59,14 @@ const COLUMNS: Column<Contact>[] = [
       ) : null,
   },
   { key: 'email', header: '이메일', value: (row) => row.email, searchable: true, cell: (row) => row.email },
-  { key: 'phone', header: '전화번호', nowrap: true, value: (row) => row.phone, searchable: true, cell: (row) => row.phone },
+  {
+    key: 'phone',
+    header: '전화번호',
+    nowrap: true,
+    value: (row) => row.phone,
+    searchable: true,
+    cell: (row) => row.phone,
+  },
 ]
 
 /** 연락처: the contacts table with its status filter (TBL-5, TBL-7). */
@@ -68,7 +86,10 @@ export function ContactsPage() {
     for (const row of data ?? []) result[row.status] += 1
     return result
   }, [data])
-  const rows = useMemo(() => (filter === 'all' ? data : data?.filter((row) => row.status === filter)), [data, filter])
+  const rows = useMemo(
+    () => (filter === 'all' ? data : data?.filter((row) => row.status === filter)),
+    [data, filter],
+  )
 
   const addButton = (
     <Button variant="dark" onPress={() => setEditing('new')}>
@@ -108,7 +129,9 @@ export function ContactsPage() {
     <>
       <PageHeader
         title="연락처"
-        summary={data ? `연락처 ${count(counts.all, 'contact')} · 고객 ${count(counts.customer, 'contact')}` : ' '}
+        summary={
+          data ? `연락처 ${count(counts.all, 'contact')} · 고객 ${count(counts.customer, 'contact')}` : ' '
+        }
         actions={addButton}
       />
       <Panel>

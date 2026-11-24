@@ -1,9 +1,23 @@
 """Deals' API (API-4, DATA-5, RULE-3, DEL-2)."""
 
 DEAL_FIELDS = {
-    "id", "name", "organization_id", "organization_name", "contact_id", "contact_name", "stage", "value",
-    "probability", "expected_revenue", "close_date", "is_late", "days_late", "position", "furthest_open_stage",
-    "created_at", "updated_at",
+    "id",
+    "name",
+    "organization_id",
+    "organization_name",
+    "contact_id",
+    "contact_name",
+    "stage",
+    "value",
+    "probability",
+    "expected_revenue",
+    "close_date",
+    "is_late",
+    "days_late",
+    "position",
+    "furthest_open_stage",
+    "created_at",
+    "updated_at",
 }
 
 
@@ -11,7 +25,11 @@ def test_add_read_edit_delete(client, make_org, make_contact, make_deal):
     org = make_org()
     contact = make_contact(organization_id=org["id"])
     created = make_deal(
-        "2027 포장재 공급", value=120_000, stage="proposal", organization_id=org["id"], contact_id=contact["id"],
+        "2027 포장재 공급",
+        value=120_000,
+        stage="proposal",
+        organization_id=org["id"],
+        contact_id=contact["id"],
         close_date="2026-12-30",
     )
     assert created["probability"] == 50
@@ -21,7 +39,11 @@ def test_add_read_edit_delete(client, make_org, make_contact, make_deal):
     assert created["promoted_contact"] is None
 
     edited = client.patch(f"/api/deals/{created['id']}", json={"value": 130_000, "probability": 60})
-    assert (edited.json()["value"], edited.json()["probability"], edited.json()["expected_revenue"]) == (130_000, 60, 78_000)
+    assert (edited.json()["value"], edited.json()["probability"], edited.json()["expected_revenue"]) == (
+        130_000,
+        60,
+        78_000,
+    )
 
     assert client.delete(f"/api/deals/{created['id']}").status_code == 204
     assert client.get(f"/api/deals/{created['id']}").status_code == 404
@@ -69,7 +91,9 @@ def test_a_stage_change_by_edit_follows_rule_3(client, make_contact, make_deal):
     assert (saved["stage"], saved["probability"], saved["close_date"]) == ("won", 100, "2026-11-23")
     assert saved["promoted_contact"] == {"id": contact["id"], "name": "김민준"}
     timeline = client.get(f"/api/deals/{deal['id']}/timeline").json()["items"]
-    assert [(i["kind"], i["from_value"], i["to_value"]) for i in timeline] == [("stage_change", "negotiation", "won")]
+    assert [(i["kind"], i["from_value"], i["to_value"]) for i in timeline] == [
+        ("stage_change", "negotiation", "won")
+    ]
 
 
 def test_the_form_can_set_probability_and_close_date_with_the_stage(client, make_deal):

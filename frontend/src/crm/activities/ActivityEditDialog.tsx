@@ -13,7 +13,14 @@ type Props = {
 export function ActivityEditDialog({ entry, onSave, onClose }: Props) {
   return (
     <Dialog title="활동 수정" isOpen={entry !== null} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      {entry ? <ActivityForm mode="edit" initial={entry} onSave={(values) => onSave(entry, values)} onCancel={onClose} /> : null}
+      {entry ? (
+        <ActivityForm
+          mode="edit"
+          initial={entry}
+          onSave={(values) => onSave(entry, values)}
+          onCancel={onClose}
+        />
+      ) : null}
     </Dialog>
   )
 }

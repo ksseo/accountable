@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ReactNode, Ref } from 'react'
 import { Button as AriaButton, type ButtonProps as AriaButtonProps } from 'react-aria-components'
 import styles from './Button.module.css'
 
@@ -9,6 +9,7 @@ export type ButtonProps = Omit<AriaButtonProps, 'className' | 'children'> & {
   size?: 'md' | 'sm'
   className?: string
   children: ReactNode
+  ref?: Ref<HTMLButtonElement>
 }
 
 /** A React Aria button in the brand's styles. Icons go beside a text label (LOOK-10). */

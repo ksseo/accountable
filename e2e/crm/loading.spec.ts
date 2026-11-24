@@ -11,15 +11,46 @@ test.beforeAll(() => resetData())
 
 const FAILED = '불러오지 못했어요'
 
-const fail = (page: Page, call: string) => page.route(call, (route) => route.fulfill({ status: 500, body: '{}' }))
+const fail = (page: Page, call: string) =>
+  page.route(call, (route) => route.fulfill({ status: 500, body: '{}' }))
 
 const SCREENS = [
-  { title: '대시보드', path: '/', call: '**/api/dashboard', loaded: (page: Page) => page.getByRole('region', { name: '진행 중 파이프라인' }) },
-  { title: '거래처', path: '/organizations', call: '**/api/organizations', loaded: (page: Page) => tableRows(page, '거래처 목록').first() },
-  { title: '연락처', path: '/contacts', call: '**/api/contacts', loaded: (page: Page) => tableRows(page, '연락처 목록').first() },
-  { title: '영업 기회', path: '/deals', call: '**/api/deals', loaded: (page: Page) => tableRows(page, '영업 기회 목록').first() },
-  { title: '파이프라인', path: '/pipeline', call: '**/api/pipeline', loaded: (page: Page) => page.locator('[data-card-id]').first() },
-  { title: '파이프라인', path: '/pipeline', call: '**/api/meta', loaded: (page: Page) => page.locator('[data-card-id]').first() },
+  {
+    title: '대시보드',
+    path: '/',
+    call: '**/api/dashboard',
+    loaded: (page: Page) => page.getByRole('region', { name: '진행 중 파이프라인' }),
+  },
+  {
+    title: '거래처',
+    path: '/organizations',
+    call: '**/api/organizations',
+    loaded: (page: Page) => tableRows(page, '거래처 목록').first(),
+  },
+  {
+    title: '연락처',
+    path: '/contacts',
+    call: '**/api/contacts',
+    loaded: (page: Page) => tableRows(page, '연락처 목록').first(),
+  },
+  {
+    title: '영업 기회',
+    path: '/deals',
+    call: '**/api/deals',
+    loaded: (page: Page) => tableRows(page, '영업 기회 목록').first(),
+  },
+  {
+    title: '파이프라인',
+    path: '/pipeline',
+    call: '**/api/pipeline',
+    loaded: (page: Page) => page.locator('[data-card-id]').first(),
+  },
+  {
+    title: '파이프라인',
+    path: '/pipeline',
+    call: '**/api/meta',
+    loaded: (page: Page) => page.locator('[data-card-id]').first(),
+  },
 ]
 
 for (const { title, path, call, loaded } of SCREENS) {

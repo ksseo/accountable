@@ -11,7 +11,9 @@ afterEach(() => {
 describe('queryClient', () => {
   it('fetches while the computer has no internet, since the backend is on it (APP-4)', async () => {
     onlineManager.setOnline(false)
-    await expect(queryClient.fetchQuery({ queryKey: ['here'], queryFn: async () => 'loaded' })).resolves.toBe('loaded')
+    await expect(queryClient.fetchQuery({ queryKey: ['here'], queryFn: async () => 'loaded' })).resolves.toBe(
+      'loaded',
+    )
   }, 1000)
 
   it.each([404, 422])('does not ask again after a %i', async (status) => {

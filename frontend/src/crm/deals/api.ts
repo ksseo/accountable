@@ -22,4 +22,5 @@ export function saveDeal(id: number | null, body: DealIn): Promise<DealSaved> {
 export const dealImpact = (id: number) =>
   unwrap(api.GET('/api/deals/{deal_id}/delete-impact', { params: { path: { deal_id: id } } }))
 
-export const deleteDeal = (id: number) => unwrap(api.DELETE('/api/deals/{deal_id}', { params: { path: { deal_id: id } } }))
+export const deleteDeal = (id: number) =>
+  unwrap(api.DELETE('/api/deals/{deal_id}', { params: { path: { deal_id: id } } }))

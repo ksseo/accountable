@@ -55,7 +55,9 @@ function Frame() {
               key={section.to}
               to={section.to}
               end={section.end}
-              className={({ isActive }) => (isActive ? `${styles.navLink} ${styles.current}` : styles.navLink)}
+              className={({ isActive }) =>
+                isActive ? `${styles.navLink} ${styles.current}` : styles.navLink
+              }
             >
               {section.label}
             </NavLink>

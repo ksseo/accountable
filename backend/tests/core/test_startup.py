@@ -7,7 +7,7 @@ import pytest
 from alembic.autogenerate import compare_metadata
 from alembic.migration import MigrationContext
 from fastapi.testclient import TestClient
-from sqlalchemy import func, inspect, insert, select
+from sqlalchemy import func, insert, inspect, select
 
 import accountable.crm.tables  # noqa: F401
 from accountable import seed
@@ -20,8 +20,9 @@ from accountable.main import create_app
 
 def test_a_new_database_is_migrated_and_loaded_with_the_sample():
     assert not db_path().exists()
-    with TestClient(create_app()) as client:
-        engine = client.app.state.engine
+    app = create_app()
+    with TestClient(app):
+        engine = app.state.engine
         assert set(inspect(engine).get_table_names()) >= {
             "organizations",
             "contacts",
@@ -40,18 +41,18 @@ def test_an_existing_empty_database_gets_no_sample(client, engine):
 
 
 def test_a_second_start_keeps_a_record_added_by_hand():
-    with TestClient(create_app()) as client:
-        with client.app.state.engine.begin() as conn:
-            org_id = conn.execute(
-                insert(organizations).values(name="손으로 추가한 거래처")
-            ).inserted_primary_key[0]
-            count = conn.scalar(select(func.count()).select_from(organizations))
+    app = create_app()
+    with TestClient(app), app.state.engine.begin() as conn:
+        org_id = conn.execute(
+            insert(organizations).values(name="손으로 추가한 거래처").returning(organizations.c.id)
+        ).scalar_one()
+        count = conn.scalar(select(func.count()).select_from(organizations))
 
-    with TestClient(create_app()) as client:
-        with client.app.state.engine.connect() as conn:
-            name = conn.scalar(select(organizations.c.name).where(organizations.c.id == org_id))
-            # The sample isn't loaded again on top of the data.
-            assert conn.scalar(select(func.count()).select_from(organizations)) == count
+    app = create_app()
+    with TestClient(app), app.state.engine.connect() as conn:
+        name = conn.scalar(select(organizations.c.name).where(organizations.c.id == org_id))
+        # The sample isn't loaded again on top of the data.
+        assert conn.scalar(select(func.count()).select_from(organizations)) == count
     assert name == "손으로 추가한 거래처"
 
 
@@ -65,7 +66,8 @@ def test_a_first_start_cut_short_is_done_again_by_the_next_one(monkeypatch):
         with pytest.raises(RuntimeError, match="stopped halfway"), TestClient(create_app()):
             pass
 
-    with TestClient(create_app()) as client, client.app.state.engine.connect() as conn:
+    app = create_app()
+    with TestClient(app), app.state.engine.connect() as conn:
         names = set(conn.scalars(select(organizations.c.name)))
         assert "한빛정밀" in names
         assert "절반만 들어간 거래처" not in names
@@ -75,7 +77,9 @@ def test_a_first_start_cut_short_is_done_again_by_the_next_one(monkeypatch):
 def test_a_request_addressed_to_another_host_is_refused(client, host):
     """Another site can point its own name at 127.0.0.1, so the address alone isn't enough (APP-5)."""
     assert client.get("/api/contacts", headers={"host": host}).status_code == 400
-    response = client.post("/api/organizations", headers={"host": host}, json={"name": "다른 사이트가 추가함"})
+    response = client.post(
+        "/api/organizations", headers={"host": host}, json={"name": "다른 사이트가 추가함"}
+    )
     assert response.status_code == 400
 
 

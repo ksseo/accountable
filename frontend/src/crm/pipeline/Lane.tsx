@@ -43,7 +43,12 @@ export const Lane = memo(function Lane({ column, openValue, activeId, keyboard }
   const share = !closed && openValue > 0 ? (column.value / openValue) * 100 : 0
 
   return (
-    <section ref={setNodeRef} className={styles.lane} style={{ background: colors.tint }} aria-labelledby={headingId}>
+    <section
+      ref={setNodeRef}
+      className={styles.lane}
+      style={{ background: colors.tint }}
+      aria-labelledby={headingId}
+    >
       <div className={styles.laneHead}>
         <div className={styles.laneTitle}>
           <h2 id={headingId} style={{ color: colors.ink }}>
@@ -71,7 +76,11 @@ export const Lane = memo(function Lane({ column, openValue, activeId, keyboard }
           </div>
         )}
       </div>
-      <Button className={styles.laneAdd} aria-label={`${label} 단계에 영업 기회 추가`} onPress={() => actions.add(stage)}>
+      <Button
+        className={styles.laneAdd}
+        aria-label={`${label} 단계에 영업 기회 추가`}
+        onPress={() => actions.add(stage)}
+      >
         <Plus size={15} aria-hidden="true" />
         추가
       </Button>
@@ -116,7 +125,11 @@ const LaneCards = memo(function LaneCards({ stage, deals, headingId, activeId, k
   return (
     <div ref={scrollRef} className={styles.cards}>
       <SortableContext id={stage} items={ids} strategy={verticalListSortingStrategy}>
-        <ol className={styles.cardList} style={{ height: virtualizer.getTotalSize() }} aria-labelledby={headingId}>
+        <ol
+          className={styles.cardList}
+          style={{ height: virtualizer.getTotalSize() }}
+          aria-labelledby={headingId}
+        >
           {virtualizer.getVirtualItems().map((item) => {
             const deal = deals[item.index]
             return (

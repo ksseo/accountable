@@ -13,7 +13,8 @@ const FUNNEL: FunnelStage[] = [
   { stage: 'won', value: 120_000, count: 3, share: 0.0334 },
 ]
 
-const widthOf = (stage: string) => Number(document.querySelector(`[data-stage="${stage}"]`)!.getAttribute('data-width'))
+const widthOf = (stage: string) =>
+  Number(document.querySelector(`[data-stage="${stage}"]`)!.getAttribute('data-width'))
 
 describe('funnelWidths', () => {
   it('follows value against the largest, with a minimum', () => {

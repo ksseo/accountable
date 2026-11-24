@@ -35,7 +35,8 @@ export const STAGE_LABELS: Record<Stage, string> = {
 
 export const pipeline = () => apiGet<Pipeline>('/api/pipeline')
 
-export const laneOf = (board: Pipeline, stage: Stage) => board.columns.find((column) => column.stage === stage)!
+export const laneOf = (board: Pipeline, stage: Stage) =>
+  board.columns.find((column) => column.stage === stage)!
 
 /** The ids of a lane's cards in order, as the backend has them. */
 export async function savedOrder(stage: Stage): Promise<number[]> {
@@ -62,13 +63,22 @@ export async function bringToTop(dealId: number): Promise<void> {
   const column = board.columns.find((item) => item.deals.some((deal) => deal.id === dealId))!
   const first = column.deals[0].id
   if (first === dealId) return
-  await apiSend('POST', `/api/deals/${dealId}/move`, { stage: column.stage, after_id: null, before_id: first })
+  await apiSend('POST', `/api/deals/${dealId}/move`, {
+    stage: column.stage,
+    after_id: null,
+    before_id: first,
+  })
 }
 
 /** Drags a card with the mouse until its middle is over the top or bottom
  * quarter of another card, and drops it. The board places a card by where
  * the dragged card's middle is, as a person sees it, not by the pointer. */
-export async function dragTo(page: Page, card: Locator, target: Locator, where: 'top' | 'bottom' = 'top'): Promise<void> {
+export async function dragTo(
+  page: Page,
+  card: Locator,
+  target: Locator,
+  where: 'top' | 'bottom' = 'top',
+): Promise<void> {
   await card.scrollIntoViewIfNeeded()
   const from = (await card.boundingBox())!
   const grab = 15
@@ -93,7 +103,9 @@ export async function expectShownStart(page: Page, stage: Stage, expected: numbe
     .poll(async () => {
       const shown = await shownOrder(page, stage)
       if (shown.length === 0) return ['nothing drawn']
-      return shown.flatMap((id, index) => (id === expected[index] ? [] : [`place ${index + 1}: ${id}, expected ${expected[index]}`]))
+      return shown.flatMap((id, index) =>
+        id === expected[index] ? [] : [`place ${index + 1}: ${id}, expected ${expected[index]}`],
+      )
     })
     .toEqual([])
 }

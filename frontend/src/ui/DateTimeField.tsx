@@ -1,4 +1,9 @@
-import { fromDate, getLocalTimeZone, toCalendarDateTime, type CalendarDateTime } from '@internationalized/date'
+import {
+  fromDate,
+  getLocalTimeZone,
+  toCalendarDateTime,
+  type CalendarDateTime,
+} from '@internationalized/date'
 import { DateField, DateInput, DateSegment, FieldError } from 'react-aria-components'
 import { FieldLabel, type FieldProps } from './Field'
 import fieldStyles from './Field.module.css'
@@ -13,7 +18,8 @@ type Props = FieldProps & {
   focusRef?: (target: { focus: () => void } | null) => void
 }
 
-const toLocal = (value: string): CalendarDateTime => toCalendarDateTime(fromDate(new Date(value), getLocalTimeZone()))
+const toLocal = (value: string): CalendarDateTime =>
+  toCalendarDateTime(fromDate(new Date(value), getLocalTimeZone()))
 
 /** A date and a time to the minute, in the computer's time zone, shown the
  * Korean way: "2026. 11. 23. 오후 3:20" (FORM-6). */
@@ -36,7 +42,9 @@ export function DateTimeField({ label, isRequired, error, name, value, onChange,
         className={`${fieldStyles.input} ${styles.dateTime}`}
         ref={(element) =>
           focusRef?.(
-            element ? { focus: () => element.querySelector<HTMLElement>('[role="spinbutton"]')?.focus() } : null,
+            element
+              ? { focus: () => element.querySelector<HTMLElement>('[role="spinbutton"]')?.focus() }
+              : null,
           )
         }
       >

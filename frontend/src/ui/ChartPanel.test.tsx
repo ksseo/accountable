@@ -26,7 +26,10 @@ describe('ChartPanel', () => {
     setup()
     const summary = screen.getByText(/최근 12개월 수주 금액은 모두 \$813,500이에요/)
     expect(summary).toHaveClass('sr-only')
-    expect(screen.getByRole('heading', { name: '월별 수주 금액' }).closest('section')).toHaveAttribute('aria-describedby', summary.id)
+    expect(screen.getByRole('heading', { name: '월별 수주 금액' }).closest('section')).toHaveAttribute(
+      'aria-describedby',
+      summary.id,
+    )
   })
 
   it('shows the figures as a table with 표로 보기, and the chart again after', async () => {
@@ -40,7 +43,11 @@ describe('ChartPanel', () => {
     expect(toggle).toHaveAttribute('aria-pressed', 'true')
     expect(screen.queryByTestId('chart')).toBeNull()
     const table = screen.getByRole('table', { name: '월별 수주 금액' })
-    expect(within(table).getAllByRole('columnheader').map((cell) => cell.textContent)).toEqual(['월', '수주 금액'])
+    expect(
+      within(table)
+        .getAllByRole('columnheader')
+        .map((cell) => cell.textContent),
+    ).toEqual(['월', '수주 금액'])
     expect(within(table).getByRole('rowheader', { name: '11월' })).toBeInTheDocument()
     expect(within(table).getByRole('cell', { name: '$92,000' })).toBeInTheDocument()
 
