@@ -1,0 +1,30 @@
+# Git hooks, installed by npm install. Before each commit: format the staged
+# files, then run lint, types and gitleaks. The tests are left to npm run check.
+pre-commit:
+  piped: true
+  jobs:
+    - name: prettier
+      run: npx prettier --write --ignore-unknown {staged_files}
+      stage_fixed: true
+    - name: ruff format
+      root: backend/
+      glob: '*.py'
+      run: uv run ruff format {staged_files}
+      stage_fixed: true
+    - name: checks
+      group:
+        parallel: true
+        jobs:
+          - name: eslint
+            run: npm run --silent static:eslint
+          - name: tsc
+            run: npm run --silent static:tsc
+          - name: ruff
+            run: npm run --silent static:ruff
+          - name: ty
+            run: npm run --silent static:ty
+          - name: gitleaks
+            run: gitleaks git --pre-commit --staged --no-banner --redact --verbose
+            fail_text: >-
+              Take the secret out of the staged files. If gitleaks isn't installed, run
+              "winget install gitleaks" (Windows) or "brew install gitleaks" (macOS) and open a new terminal.

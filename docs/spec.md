@@ -68,7 +68,9 @@ Every requirement has an ID such as RULE-3, in bold brackets where it's stated. 
 - **[APP-15]** Each request is one database transaction. A write takes SQLite's write lock at the start and waits up to 15 seconds for another writer, so a seed run and the running app don't fail on each other.
 - **[APP-16]** After any save, delete or move, everything on screen is fetched again, so no figure is left out of date.
 - **[APP-17]** Four environment variables change the defaults: `ACCOUNTABLE_DB` (the database file), `ACCOUNTABLE_API_PORT` and `ACCOUNTABLE_WEB_PORT` (the ports), and `ACCOUNTABLE_TODAY` (for tests).
-- **[APP-18]** `npm run check` runs every check and fails if any of them fails. A warning counts as a failure. `npm run check:quick` runs the same checks without the end-to-end tests, and `npm run format` fixes the formatting. Everything but the tests runs together and all of it reports; the tests run once it passes. gitleaks is installed separately, and only these commands need it.
+- **[APP-18]** `npm run check` runs every check and fails if any of them fails. A warning counts as a failure. `npm run check:quick` runs the same checks without the end-to-end tests, and `npm run format` fixes the formatting. Everything but the tests runs together and all of it reports; the tests run once it passes. gitleaks is installed separately, and only these commands and committing need it.
+- **[APP-19]** `npm install` adds a git hook with lefthook. Before each commit it formats the staged files and stages them again, then runs ESLint, tsc, ruff, ty and gitleaks, without the tests. A failure stops the commit, and so does gitleaks not being installed.
+- **[APP-20]** Two hooks for Claude Code are in `scripts/hooks/`. When the agent finishes a turn, one runs `npm run check:quick` and sends a failure back to it, once per turn. The other refuses the agent's edits to `.env`, and any shell command of its that names `.env`.
   - Prettier and ESLint, over the frontend, the end-to-end tests and the scripts, with the recommended TypeScript, React Hooks and accessibility rules;
   - ruff's formatting and lint checks, over the backend;
   - a cyclomatic complexity of at most 15 per function, on both sides;
@@ -96,7 +98,7 @@ Mature libraries do these jobs, and none of them is hand-rolled (`docs/TECH_STAC
 | Styles | CSS Modules and CSS custom properties for the brand tokens |
 | Running both servers | concurrently, open |
 | Backend | FastAPI, Pydantic, email-validator, SQLAlchemy Core, Alembic, Uvicorn |
-| Checks | Prettier; ESLint with typescript-eslint, `eslint-plugin-react-hooks` and `eslint-plugin-jsx-a11y`; ruff; ty; gitleaks |
+| Checks | Prettier; ESLint with typescript-eslint, `eslint-plugin-react-hooks` and `eslint-plugin-jsx-a11y`; ruff; ty; gitleaks; lefthook |
 | Tests | Vitest with Testing Library; pytest with FastAPI's TestClient; Playwright Test with `@axe-core/playwright` and tree-kill |
 
 ### How the code is laid out
