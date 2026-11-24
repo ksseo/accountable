@@ -4,7 +4,10 @@
 // ACCOUNTABLE_API_PORT and ACCOUNTABLE_WEB_PORT move the ports (8000 and 5173).
 // Pass --no-open to skip opening the browser.
 import concurrently from 'concurrently'
+import { createRequire } from 'node:module'
 import net from 'node:net'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import open from 'open'
 
 const apiPort = Number(process.env.ACCOUNTABLE_API_PORT ?? 8000)
@@ -50,6 +53,12 @@ for (const port of [apiPort, webPort]) {
 process.env.ACCOUNTABLE_API_PORT = String(apiPort)
 process.env.ACCOUNTABLE_WEB_PORT = String(webPort)
 
+// Vite is run by Node, not by npm. On Windows npm is a batch file, and Ctrl+C
+// makes a batch file ask whether to stop, in letters that come out broken.
+const frontend = fileURLToPath(new URL('../frontend/', import.meta.url))
+const require = createRequire(path.join(frontend, 'package.json'))
+const vite = path.join(path.dirname(require.resolve('vite/package.json')), 'bin', 'vite.js')
+
 console.log('Accountable을 시작하고 있어요...')
 
 const { result } = concurrently(
@@ -61,7 +70,8 @@ const { result } = concurrently(
     },
     {
       name: 'web',
-      command: 'npm run dev --workspace frontend -- --logLevel warn',
+      command: `node "${vite}" --logLevel warn`,
+      cwd: frontend,
       prefixColor: 'cyan',
     },
   ],
