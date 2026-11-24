@@ -25,7 +25,7 @@ export function Funnel({ funnel, conversion, className }: { funnel: readonly Fun
     funnel.map((stage) => stage.value),
     FUNNEL_MIN_WIDTH,
   ).map((width) => width * FUNNEL_WIDTH)
-  const height = funnel.length * (SEGMENT_HEIGHT + GAP) - GAP
+  const height = funnel.length * (SEGMENT_HEIGHT + GAP)
   const middle = FUNNEL_WIDTH / 2
 
   const label = (stage: FunnelStage) => stageLabel(meta, stage.stage)

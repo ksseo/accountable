@@ -8,7 +8,7 @@ import { Panel } from '../../ui/Panel'
 import { RecordLink } from '../../ui/RecordLink'
 import { updateActivity } from '../activities/api'
 import { useRefreshAll } from '../forms'
-import type { DashboardFigures, FollowUp } from './api'
+import { organizationOf, type DashboardFigures, type FollowUp } from './api'
 import styles from './Dashboard.module.css'
 
 type Props = {
@@ -64,7 +64,7 @@ export function FollowUps({ followUps, later, figures, className }: Props) {
                   <RecordLink kind={followUp.record.kind} id={followUp.record.id}>
                     {followUp.record.name}
                   </RecordLink>
-                  {followUp.record.organization_name ? `, ${followUp.record.organization_name}` : null}
+                  {organizationOf(followUp.record)}
                 </span>
               </div>
               <span className={`${styles.when} ${styles[followUp.state]}`}>

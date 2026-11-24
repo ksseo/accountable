@@ -60,7 +60,7 @@ export function StatusBadge({ status }: { status: StatusKey }) {
 /** "지연", or "지연 9일" with the days. Raspberry means late and nothing else (LOOK-5). */
 export function LateBadge({ days }: { days?: number }) {
   return (
-    <Badge fill="var(--raspberry-ink)" ink="#fff" icon={<Clock size={13} strokeWidth={2.25} aria-hidden="true" />}>
+    <Badge fill="var(--raspberry-ink)" ink="#fff" icon={<Clock size={14} aria-hidden="true" />}>
       {days ? `지연 ${days}일` : '지연'}
     </Badge>
   )

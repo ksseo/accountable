@@ -32,7 +32,7 @@ export function PipelineBand({ band }: { band: readonly BandStage[] }) {
               <Link to="/pipeline" className={styles.bandBlock} style={{ background: colors.badge, color: colors.on }}>
                 <span className={styles.bandName}>
                   <span>{label}</span>
-                  <span>{count(stage.count, 'deal')}</span>
+                  <span className={styles.bandCount}>{count(stage.count, 'deal')}</span>
                 </span>
                 <span className={styles.bandValue}>{formatMoney(stage.value)}</span>
                 <span className="sr-only">예상 {formatMoney(stage.expected_revenue)}</span>

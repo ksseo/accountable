@@ -79,13 +79,16 @@ def test_now_is_time_zone_aware():
     assert clock.now().tzinfo is not None
 
 
-def test_timestamps_come_back_with_a_time_zone(engine):
+def test_timestamps_come_back_with_a_time_zone(engine, monkeypatch):
+    # With today fixed, created_at is on that day, so it can't be compared with the real clock.
+    monkeypatch.delenv("ACCOUNTABLE_TODAY")
+    before = datetime.now(UTC)
     with engine.begin() as conn:
         conn.execute(insert(organizations).values(name="시간 확인"))
         created_at = conn.scalar(select(organizations.c.created_at))
     assert created_at.tzinfo is not None
     assert created_at.utcoffset().total_seconds() == 0
-    assert abs((datetime.now(UTC) - created_at).total_seconds()) < 60 * 60 * 24
+    assert before <= created_at <= datetime.now(UTC)
 
 
 def test_deleting_an_organization_keeps_its_contacts(engine):

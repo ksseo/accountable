@@ -10,13 +10,18 @@
 .box {
   display: grid;
   place-items: center;
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
   flex: none;
-  border-radius: 6px;
+  border-radius: 5px;
   border: 2px solid var(--control-line);
   background: var(--panel);
   color: transparent;
+}
+
+/* The tick is part of the control rather than an icon, so it's drawn heavier. */
+.box svg {
+  stroke-width: 3;
 }
 
 .checkbox[data-hovered] .box {

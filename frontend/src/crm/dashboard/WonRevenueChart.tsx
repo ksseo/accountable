@@ -2,7 +2,17 @@ import { Area, AreaChart, CartesianGrid, LabelList, Tooltip, XAxis, YAxis } from
 import { formatAxisMoney, formatMoney } from '../../lib/money'
 import { ChartPanel } from '../../ui/ChartPanel'
 import type { MonthFigures } from './api'
-import { AXIS_TICK, ChartTooltip, fullMonth, GRID_STROKE, MonthTick } from './chartParts'
+import {
+  AXIS_TICK,
+  CHART_HEIGHT,
+  ChartTooltip,
+  fullMonth,
+  GRID_OPACITY,
+  GRID_STROKE,
+  lastLabelPlace,
+  MONTH_AXIS,
+  MonthTick,
+} from './chartParts'
 import styles from './Dashboard.module.css'
 
 const LINE = 'var(--sea-green-ink)'
@@ -33,14 +43,14 @@ export function WonRevenueChart({ months, className }: { months: readonly MonthF
     >
       <AreaChart
         responsive
-        style={{ width: '100%', height: 280 }}
+        style={{ width: '100%', height: CHART_HEIGHT }}
         data={data}
-        margin={{ top: 28, right: 24, bottom: 4, left: 4 }}
+        margin={{ top: 28, right: 20, bottom: MONTH_AXIS.marginBottom, left: 0 }}
         title="월별 수주 금액"
       >
-        <CartesianGrid vertical={false} stroke={GRID_STROKE} strokeOpacity={0.7} />
-        <XAxis dataKey="month" tick={MonthTick} interval={0} axisLine={false} tickLine={false} height={44} />
-        <YAxis tickFormatter={formatAxisMoney} tick={AXIS_TICK} axisLine={false} tickLine={false} width={56} />
+        <CartesianGrid vertical={false} stroke={GRID_STROKE} strokeOpacity={GRID_OPACITY} />
+        <XAxis dataKey="month" tick={MonthTick} interval={0} axisLine={false} tickLine={false} height={MONTH_AXIS.height} />
+        <YAxis tickFormatter={formatAxisMoney} tick={AXIS_TICK} axisLine={false} tickLine={false} tickMargin={4} width={52} />
         <Tooltip
           cursor={{ stroke: GRID_STROKE }}
           isAnimationActive={false}
@@ -72,13 +82,20 @@ export function WonRevenueChart({ months, className }: { months: readonly MonthF
         >
           <LabelList
             dataKey="value"
-            content={({ x, y, index, value }) =>
-              index === data.length - 1 ? (
-                <text x={Number(x)} y={Number(y) - 14} textAnchor="end" className={styles.pointLabel}>
+            content={({ x, y, index, value }) => {
+              if (index !== data.length - 1) return null
+              const place = lastLabelPlace(Number(y), current.won_value, months[months.length - 2]?.won_value ?? 0)
+              return (
+                <text
+                  x={Number(x)}
+                  y={place.y}
+                  textAnchor="end"
+                  className={place.overLine ? `${styles.pointLabel} ${styles.pointLabelOverLine}` : styles.pointLabel}
+                >
                   {formatMoney(Number(value))}
                 </text>
-              ) : null
-            }
+              )
+            }}
           />
         </Area>
       </AreaChart>

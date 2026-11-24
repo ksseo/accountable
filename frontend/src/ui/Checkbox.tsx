@@ -23,7 +23,7 @@ export function Checkbox({ isSelected, onChange, isDisabled, children, ...props 
       aria-label={props['aria-label']}
     >
       <span className={styles.box} aria-hidden="true">
-        <Check size={14} strokeWidth={3} />
+        <Check size={12} />
       </span>
       {children}
     </AriaCheckbox>

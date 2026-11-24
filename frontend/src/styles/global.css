@@ -83,6 +83,11 @@ i {
   flex: none;
 }
 
+/* One stroke width for every icon (LOOK-10). */
+.lucide {
+  stroke-width: 1.75;
+}
+
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;

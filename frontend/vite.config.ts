@@ -32,6 +32,8 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
+    // A leftover it.only would skip the rest of its file and still pass.
+    allowOnly: false,
     setupFiles: ['./src/test/setup.ts'],
     css: { modules: { classNameStrategy: 'non-scoped' } },
   },

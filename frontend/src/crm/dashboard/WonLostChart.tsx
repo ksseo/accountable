@@ -2,7 +2,7 @@ import { Bar, BarChart, CartesianGrid, LabelList, Tooltip, XAxis, YAxis } from '
 import { count } from '../../lib/korean'
 import { ChartPanel } from '../../ui/ChartPanel'
 import type { MonthFigures } from './api'
-import { ChartTooltip, fullMonth, GRID_STROKE, MonthTick } from './chartParts'
+import { CHART_HEIGHT, ChartTooltip, fullMonth, GRID_OPACITY, GRID_STROKE, MONTH_AXIS, TightMonthTick } from './chartParts'
 import styles from './Dashboard.module.css'
 
 const WON = 'var(--sea-green)'
@@ -46,16 +46,23 @@ export function WonLostChart({ months, className }: { months: readonly MonthFigu
     >
       <BarChart
         responsive
-        style={{ width: '100%', height: 280 }}
+        style={{ width: '100%', height: CHART_HEIGHT }}
         data={data}
-        margin={{ top: 22, right: 4, bottom: 4, left: 4 }}
+        margin={{ top: 22, right: 8, bottom: MONTH_AXIS.marginBottom, left: 8 }}
         barGap={3}
-        barCategoryGap="22%"
+        barCategoryGap="14%"
         title="월별 수주·실주 건수"
       >
-        <CartesianGrid vertical={false} stroke={GRID_STROKE} strokeOpacity={0.7} />
-        <XAxis dataKey="month" tick={MonthTick} interval={0} axisLine={false} tickLine={false} height={44} />
-        <YAxis hide allowDecimals={false} />
+        {/* Every bar has its count on it, so the grid is only the top and the base. */}
+        <CartesianGrid
+          vertical={false}
+          stroke={GRID_STROKE}
+          strokeOpacity={GRID_OPACITY}
+          horizontalCoordinatesGenerator={({ offset }) => [offset.top, offset.top + offset.height]}
+        />
+        <XAxis dataKey="month" tick={TightMonthTick} interval={0} axisLine={false} tickLine={false} height={MONTH_AXIS.height} />
+        {/* One more than the tallest bar, so its count stays under the top line. */}
+        <YAxis hide allowDecimals={false} domain={[0, (max: number) => max + 1]} />
         <Tooltip
           cursor={{ fill: 'var(--page)' }}
           isAnimationActive={false}
@@ -70,11 +77,11 @@ export function WonLostChart({ months, className }: { months: readonly MonthFigu
             ) : null
           }}
         />
-        <Bar dataKey="won" name="수주" fill={WON} radius={[3, 3, 0, 0]} maxBarSize={14} isAnimationActive={false}>
-          <LabelList dataKey="won" position="top" className={styles.barLabel} formatter={hideZero} />
+        <Bar dataKey="won" name="수주" fill={WON} radius={3} maxBarSize={14} isAnimationActive={false}>
+          <LabelList dataKey="won" position="top" fill="var(--midnight)" className={styles.barLabel} formatter={hideZero} />
         </Bar>
-        <Bar dataKey="lost" name="실주" fill={LOST} radius={[3, 3, 0, 0]} maxBarSize={14} isAnimationActive={false}>
-          <LabelList dataKey="lost" position="top" className={styles.barLabel} formatter={hideZero} />
+        <Bar dataKey="lost" name="실주" fill={LOST} radius={3} maxBarSize={14} isAnimationActive={false}>
+          <LabelList dataKey="lost" position="top" fill="var(--midnight)" className={styles.barLabel} formatter={hideZero} />
         </Bar>
       </BarChart>
     </ChartPanel>

@@ -4,7 +4,7 @@ import { Panel } from '../../ui/Panel'
 import { RecordLink } from '../../ui/RecordLink'
 import { automaticText, KIND_ICONS } from '../activities/kinds'
 import { kindLabel, useMeta } from '../meta'
-import type { RecentEntry } from './api'
+import { organizationOf, type RecentEntry } from './api'
 import styles from './Dashboard.module.css'
 
 /** The 10 newest timeline entries across all records, with the record each is
@@ -34,7 +34,7 @@ export function RecentActivity({ entries, today }: { entries: readonly RecentEnt
                     <RecordLink kind={entry.record.kind} id={entry.record.id}>
                       {entry.record.name}
                     </RecordLink>
-                    {entry.record.organization_name ? `, ${entry.record.organization_name}` : null}
+                    {organizationOf(entry.record)}
                   </p>
                 </div>
                 <time className={styles.at} dateTime={entry.occurred_at}>

@@ -7,7 +7,8 @@ export default defineConfig({
   testDir: 'e2e',
   workers: 1,
   fullyParallel: false,
-  forbidOnly: !!process.env.CI,
+  // A test.only left behind would skip the rest and still pass.
+  forbidOnly: true,
   retries: 0,
   timeout: 45_000,
   expect: { timeout: 8_000 },

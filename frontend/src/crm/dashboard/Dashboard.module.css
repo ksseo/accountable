@@ -36,7 +36,7 @@
   font-weight: 700;
 }
 
-.bandName span {
+.bandCount {
   font-size: 12.5px;
   font-weight: 500;
 }
@@ -141,10 +141,18 @@
   fill: var(--midnight);
 }
 
+/* Where the label has to cross the line, the panel's color around the letters keeps it readable. */
+.pointLabelOverLine {
+  paint-order: stroke;
+  stroke: var(--panel);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+/* The color is set on the chart: Recharts writes one into the label's own style. */
 .barLabel {
   font-size: 11px;
   font-weight: 600;
-  fill: var(--midnight);
 }
 
 .legend {
@@ -168,7 +176,6 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   gap: var(--gap);
-  align-items: start;
 }
 
 .full {
@@ -286,8 +293,12 @@
   min-width: 0;
 }
 
+.todo label {
+  gap: 14px;
+}
+
 .todoWhat {
-  font-size: 14.5px;
+  font-size: 15px;
   font-weight: 500;
 }
 

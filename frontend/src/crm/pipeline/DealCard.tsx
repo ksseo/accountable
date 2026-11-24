@@ -1,9 +1,9 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { Clock } from 'lucide-react'
 import { createContext, memo, useCallback, useContext, type KeyboardEvent } from 'react'
 import { formatDate } from '../../lib/dates'
 import { formatMoney, formatPercent } from '../../lib/money'
-import { LateBadge } from '../badges'
 import type { StageKey } from '../meta'
 import type { Card } from './applyMove'
 import styles from './Board.module.css'
@@ -63,7 +63,8 @@ export const CardBody = memo(function CardBody({
     >
       {deal.is_late ? (
         <p className={styles.lateChip}>
-          <LateBadge days={deal.days_late} />
+          <Clock size={18} aria-hidden="true" />
+          지연 {deal.days_late}일
         </p>
       ) : null}
       <h3 className={styles.cardName}>{deal.name}</h3>
@@ -83,7 +84,7 @@ export const CardBody = memo(function CardBody({
       <p className={styles.cardValue}>{formatMoney(deal.value)}</p>
       <p className={deal.is_late ? `${styles.cardFoot} ${styles.lateFoot}` : styles.cardFoot}>
         <span>{deal.close_date ? formatDate(deal.close_date) : '마감일 없음'}</span>
-        <span>{formatPercent(deal.probability)}</span>
+        <span className={styles.cardProbability}>{formatPercent(deal.probability)}</span>
       </p>
     </article>
   )

@@ -395,7 +395,7 @@ Lane colors. Every title and the muted text (`#4A6470`) on these tints reaches 4
 ### 7.2 Formats
 
 - **[KO-2]** Dates: `Intl.DateTimeFormat('ko-KR')`, giving "2026. 11. 23." and "2026. 1. 5.". With a weekday: "2026. 11. 23. (월)". With a time: "2026. 11. 23. 오후 3:20".
-- **[KO-3]** Chart months: "12월", and "2026년 1월" for January and for the first month on an axis.
+- **[KO-3]** Chart months: "12월", and "2026년 1월" for January and for the first month on an axis. The bar chart leaves the first month's year out when January comes next, since the two years would run into each other.
 - **[KO-4]** Amounts: US dollars, whole, with commas: "$12,500". Chart axes may shorten them to "$120K" and "$1.2M"; everywhere else they're written in full.
 - **[KO-5]** Counts take the right counter word: "3건" for deals, activities and follow-ups, "5명" for contacts, "4곳" for organizations.
 - **[KO-6]** Particles after a name that may end in a vowel or a consonant are written both ways, as in "을(를)" and "과(와)", unless the code works out the right one.

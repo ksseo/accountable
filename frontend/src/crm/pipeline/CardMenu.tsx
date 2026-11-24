@@ -23,7 +23,7 @@ export function CardMenu({ name, stage, stageLabel, canMoveUp, canMoveDown, onAc
   return (
     <MenuTrigger>
       <Button variant="ghost" size="sm" aria-label={`${name} 메뉴`} className={styles.menuButton}>
-        <MoreHorizontal size={16} aria-hidden="true" />
+        <MoreHorizontal size={15} aria-hidden="true" />
       </Button>
       <Popover className={menuStyles.popover} placement="bottom end">
         <Menu
