@@ -10,6 +10,7 @@ Make a separate pass over every change for each of these:
 - **Security:** no secrets or personal data are exposed, and nobody can do what they shouldn't.
 - **Matches spec.md and plan.md:** the change does what those documents say, with nothing missing and nothing extra.
 - **Undescribed code:** flag code that spec.md doesn't describe.
+- **Standards:** the change follows `docs/STANDARDS.md`.
 
 ## Important
 
