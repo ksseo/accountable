@@ -59,6 +59,7 @@ class RecordRef(BaseModel):
     kind: Literal["contact", "deal"]
     id: int
     name: str
+    organization_id: int | None
     organization_name: str | None
 
 

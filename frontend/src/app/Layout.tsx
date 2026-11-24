@@ -1,6 +1,8 @@
 import { Plus } from 'lucide-react'
 import { Link, NavLink, Outlet } from 'react-router'
-import { DealFormProvider, useDealForm } from '../crm/deals/DealFormHost'
+import { ContactFormProvider } from '../crm/contacts/ContactFormHost'
+import { DealFormProvider } from '../crm/deals/DealFormHost'
+import { useDealForm } from '../crm/openForms'
 import { Button } from '../ui/Button'
 import { ConnectionBanner } from './ConnectionBanner'
 import styles from './Layout.module.css'
@@ -30,9 +32,11 @@ function BrandMark() {
  * "영업 기회 추가" opens the deal form on any page. */
 export function Layout() {
   return (
-    <DealFormProvider>
-      <Frame />
-    </DealFormProvider>
+    <ContactFormProvider>
+      <DealFormProvider>
+        <Frame />
+      </DealFormProvider>
+    </ContactFormProvider>
   )
 }
 

@@ -1,11 +1,11 @@
 import { formatRecent } from '../../lib/dates'
 import { EmptyState } from '../../ui/EmptyState'
 import { Panel } from '../../ui/Panel'
-import { RecordLink } from '../../ui/RecordLink'
 import { automaticText, KIND_ICONS } from '../activities/kinds'
 import { kindLabel, useMeta } from '../meta'
-import { organizationOf, type RecentEntry } from './api'
+import type { RecentEntry } from './api'
 import styles from './Dashboard.module.css'
+import { RecordName } from './RecordName'
 
 /** The 10 newest timeline entries across all records, with the record each is
  * on and when (DASH-13). */
@@ -31,10 +31,7 @@ export function RecentActivity({ entries, today }: { entries: readonly RecentEnt
                   </p>
                   <p className={styles.on}>
                     {entry.automatic ? null : <span className="sr-only">{label}, </span>}
-                    <RecordLink kind={entry.record.kind} id={entry.record.id}>
-                      {entry.record.name}
-                    </RecordLink>
-                    {organizationOf(entry.record)}
+                    <RecordName record={entry.record} />
                   </p>
                 </div>
                 <time className={styles.at} dateTime={entry.occurred_at}>

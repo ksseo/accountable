@@ -48,7 +48,11 @@ test('the add and edit dialogs, the date picker and the delete question', async 
   await page.getByRole('button', { name: '거래처 추가' }).click()
   await expect(dialog(page, '거래처 추가')).toBeVisible()
   await expectNoA11yViolations(page, 'add organization')
+  await dialog(page, '거래처 추가').getByRole('textbox', { name: '이름 (필수)' }).fill('다온물류센터')
   await page.keyboard.press('Escape')
+  await expect(page.getByRole('alertdialog', { name: '저장하지 않고 닫을까요?' })).toBeVisible()
+  await expectNoA11yViolations(page, 'question about typed text')
+  await page.getByRole('button', { name: '버리기' }).click()
 
   const [organization] = await apiGet<Named[]>('/api/organizations')
   await rowAction(page, organization.name, '수정')

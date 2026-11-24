@@ -58,10 +58,10 @@ Every requirement has an ID such as RULE-3, in bold brackets where it's stated. 
 ## 1. Shape of the app
 
 - **[APP-1]** One salesperson, one computer, no sign-in. Light mode only. Designed for screens 1280px wide and up, and usable down to 1024px with no sideways scrolling of the page.
-- **[APP-2]** `backend/`: FastAPI serving a JSON API under `/api`, using SQLAlchemy Core (no raw SQL) on a SQLite file at `backend/data/accountable.db`, which git ignores. On start it brings the database up to date with Alembic migrations, and loads the sample data if the database is new.
+- **[APP-2]** `backend/`: FastAPI serving a JSON API under `/api`, using SQLAlchemy Core (no raw SQL) on a SQLite file at `backend/data/accountable.db`, which git ignores. On start it brings the database up to date with Alembic migrations, and loads the sample data if the database is new, both in one step, so a first start that's cut short is done again by the next one.
 - **[APP-3]** `frontend/`: React, TypeScript and Vite. It only talks to `/api`, which Vite passes on to the backend.
-- **[APP-4]** No internet connection is needed. Fonts and every library are installed by `npm install` or `uv` and served from this computer; nothing loads from a CDN or Google Fonts.
-- **[APP-5]** `npm run dev`, from the repo root, starts the backend on `127.0.0.1:8000` and the frontend on `127.0.0.1:5173`, prints the address, and opens the dashboard in the default browser. Both listen only on this computer. If a port is taken, it says so in plain words and stops.
+- **[APP-4]** No internet connection is needed, and losing it while the app is open changes nothing. Fonts and every library are installed by `npm install` or `uv` and served from this computer; nothing loads from a CDN or Google Fonts.
+- **[APP-5]** `npm run dev`, from the repo root, starts the backend on `127.0.0.1:8000` and the frontend on `127.0.0.1:5173`, prints the address, and opens the dashboard in the default browser. Both listen only on this computer, and the backend answers only requests addressed to `127.0.0.1` or `localhost`. If a port is taken, it says so in plain words and stops.
 - **[APP-6]** `npm run seed` deletes all data and loads the sample data again. It first asks "모든 데이터를 지우고 샘플 데이터로 되돌릴까요? (y/N)" and does nothing unless the answer is y. `npm run seed -- --yes` skips the question, for scripts.
 - **[APP-7]** `npm test` runs every test (Vitest, pytest, Playwright) and fails if any fails. The tests use their own database file and their own ports (8100 and 5273), so they never change real data and can run while `npm run dev` is running.
 - **[APP-8]** The commands work the same on Mac, Linux and Windows: npm scripts only, with no shell-specific syntax, and Python started with `uv run`.
@@ -86,7 +86,6 @@ Mature libraries do these jobs, and none of them is hand-rolled (TECH_STACK.md).
 | Dialogs, menus, selects, comboboxes, date picker, checkboxes | React Aria Components, with `I18nProvider locale="ko-KR"` |
 | Forms and validation | React Hook Form with Zod |
 | Icons | Lucide React |
-| Date arithmetic | date-fns |
 | Font | `@fontsource/noto-sans-kr` |
 | Styles | CSS Modules and CSS custom properties for the brand tokens |
 | Running both servers | concurrently |
@@ -200,7 +199,7 @@ The rules live in plain backend functions in the feature they belong to, with un
 - **[UI-2]** Each page starts with a header row: the page title, a one-line summary in plain words (for example "연락처 248명 · 고객 61명"), and the page's actions as buttons on the right.
 - **[UI-3]** Content sits in white panels on the page background, rounded, with no outline (LOOK-6).
 - **[UI-4]** Saving, deleting and moving show a short message that disappears by itself, such as "저장했어요" or "김민준 님이 고객이 되었어요", announced to screen readers.
-- **[UI-5]** While data loads, panels show their shape in a muted color instead of a spinner. If the backend can't be reached, a banner says "서버에 연결할 수 없어요. 터미널에서 npm run dev가 실행 중인지 확인해 주세요." and the page retries by itself.
+- **[UI-5]** While data loads, panels show their shape in a muted color instead of a spinner. If the backend can't be reached, a banner says "서버에 연결할 수 없어요. 터미널에서 npm run dev가 실행 중인지 확인해 주세요." and the page retries by itself. If something can't be loaded for another reason, its place says "불러오지 못했어요" with a "다시 시도" button, and no count is shown for it.
 - **[UI-6]** An empty table or list says so and offers the obvious next step, such as "아직 거래처가 없어요" with an "거래처 추가" button. A search with no results says "‘한빛’과(와) 일치하는 결과가 없어요".
 - **[UI-7]** Every record name shown anywhere (in tables, on cards, in timelines, in the dashboard's lists) links to that record's page.
 
@@ -255,7 +254,7 @@ Lists:
 - **[REC-2]** **Contact** (`/contacts/:id`): name, status badge, job title, organization link, email (a `mailto:` link) and phone; 수정 and 삭제; the deals where they're the main contact; their timeline (RULE-9).
 - **[REC-3]** **Deal** (`/deals/:id`): name, stage, value, probability, expected revenue, close date with the late badge if late, organization and main contact links; a stage selector that moves the deal under RULE-3; 수정 and 삭제; its timeline.
 - **[REC-4]** **Timeline**: entries newest first, each with an icon and label for its kind (메모, 통화, 이메일, 단계 변경, 상태 변경), the date and time ("2026. 11. 23. 오후 3:20"), the description, and on a contact's timeline the deal it came from. The first 50 show, with "더 보기" for the rest.
-- **[REC-5]** **Logging an activity**: above the timeline, a form with the kind (메모, 통화, 이메일), the description, when it happened (now by default) and an optional follow-up date. It's logged on the record whose page it's on.
+- **[REC-5]** **Logging an activity**: above the timeline, a form with the kind (메모, 통화, 이메일), the description, when it happened (by default, when it's saved) and an optional follow-up date. It's logged on the record whose page it's on.
 - **[REC-6]** A note, call or email in the timeline can be edited (kind, description, when, follow-up date, done) and deleted. A follow-up shows its date and a checkbox to mark it done.
 
 ### 4.5 Pipeline (`/pipeline`)
@@ -268,14 +267,14 @@ Lists:
 - **[PIPE-6]** A card's place is a number between its neighbors' numbers. The frontend sends the move as the new stage and the cards it now sits between, and the backend works out the number. If two numbers get too close, the backend renumbers that column.
 - **[PIPE-7]** At 1280px the six columns fit with no sideways scrolling. On narrower screens the board scrolls sideways inside its own panel, and the page doesn't.
 - **[PIPE-8]** A drop shows at once: the card moves, and the board's and the columns' totals change, before the save finishes. If the save fails, the card goes back and a message says "이동하지 못했어요. 다시 시도해 주세요."
-- **[PIPE-9]** By keyboard, a focused card can be picked up with Space, moved with the arrow keys between columns and up and down, dropped with Space, and put back with Escape. Each step is announced in Korean. Each card also has a menu with "단계 이동" (a list of stages), "위로", "아래로", 수정 and 삭제, for anyone who finds the drag keys awkward.
+- **[PIPE-9]** By keyboard, a focused card can be picked up with Space, moved with the arrow keys between columns and up and down, dropped with Space, and put back with Escape or by pressing the mouse anywhere. Each step is announced in Korean. Each card also has a menu with "단계 이동" (a list of stages), "위로", "아래로", 수정 and 삭제, for anyone who finds the drag keys awkward.
 
 ### 4.6 Forms
 
-- **[FORM-1]** Adding and editing happen in a dialog over the current page. Focus moves into the dialog, stays inside it, and goes back where it was when it closes. Escape closes it.
+- **[FORM-1]** Adding and editing happen in a dialog over the current page. Focus moves into the dialog, stays inside it, and goes back where it was when it closes. Escape closes it, but if something has been typed or changed it asks first ("저장하지 않고 닫을까요?", with 계속 입력 and 버리기, and focus on 계속 입력). 취소 and 닫기 close it at once. A click outside doesn't close it.
 - **[FORM-2]** Every field has a visible label. Required fields say "(필수)". Messages appear under the field in Korean as soon as the field is left, such as "이름을 입력해 주세요" or "올바른 이메일 주소가 아니에요", and the first wrong field gets focus when saving.
 - **[FORM-3]** Organization and contact are picked with a combobox that searches as you type, works by keyboard, and handles 1,000 options.
-- **[FORM-4]** In the deal form, choosing a contact who belongs to an organization fills in the organization if it's empty. Changing the stage fills in that stage's probability, and choosing Won or Lost fills in today's close date. Both can still be changed before saving.
+- **[FORM-4]** In the deal form, choosing a contact who belongs to an organization fills in the organization if it's empty. Changing the stage fills in that stage's probability, and choosing Won or Lost fills in today's close date. Both can still be changed before saving. Going back to the deal's saved stage gives back its probability and close date, and leaving Won or Lost for an open stage gives back the close date from before.
 - **[FORM-5]** The value field takes "12500", "12,500" or "$12,500" and shows "$12,500" once you leave it.
 - **[FORM-6]** Dates are picked with the React Aria date picker in Korean, showing "2026. 11. 23." whatever language the browser uses.
 - **[FORM-7]** Pressing Enter while a Korean letter is still being typed doesn't submit the form.
@@ -287,7 +286,7 @@ Lists:
   - Organization: "‘한빛정밀’을(를) 삭제할까요? 연락처 3명과 영업 기회 2건은 그대로 남고, 거래처 연결만 해제돼요."
   - Contact: "‘김민준’ 님을 삭제할까요? 영업 기회 2건은 그대로 남고 주 연락처가 비워져요. 이 연락처에 기록된 활동 5건은 함께 삭제돼요."
   - Deal: "‘2027 포장재 공급’을(를) 삭제할까요? 이 영업 기회에 기록된 활동 7건(단계 변경 기록 포함)이 함께 삭제돼요."
-  - Activity: "이 활동을 삭제할까요?"
+  - Activity, with its kind: "통화 기록을 삭제할까요?"
 - **[DEL-3]** Deleting a record from its own page goes back to its table afterwards.
 
 ## 5. API

@@ -12,10 +12,26 @@ const PATHS: Record<RecordKind, string> = {
 
 export const recordPath = (kind: RecordKind, id: number) => `${PATHS[kind]}/${id}`
 
+type Props = {
+  kind: RecordKind
+  id: number
+  children: ReactNode
+  /** In the weight of the text around it, for a name that isn't the row's main one. */
+  quiet?: boolean
+  /** -1 where something around it already takes the keyboard to the same page. */
+  tabIndex?: number
+}
+
 /** A record's name, linking to its page. Every record name shown anywhere is one (UI-7). */
-export function RecordLink({ kind, id, children }: { kind: RecordKind; id: number; children: ReactNode }) {
+export function RecordLink({ kind, id, children, quiet = false, tabIndex }: Props) {
   return (
-    <Link className={styles.link} to={recordPath(kind, id)}>
+    // Not draggable by itself: on the board, dragging a name drags its card.
+    <Link
+      className={quiet ? `${styles.link} ${styles.quiet}` : styles.link}
+      to={recordPath(kind, id)}
+      tabIndex={tabIndex}
+      draggable={false}
+    >
       {children}
     </Link>
   )

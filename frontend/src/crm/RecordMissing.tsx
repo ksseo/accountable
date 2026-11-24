@@ -1,12 +1,17 @@
 import { Link } from 'react-router'
-import { ApiError } from '../api/client'
+import { ApiError, isOffline } from '../api/client'
+import { LoadError } from '../ui/LoadError'
 import { PageHeader } from '../ui/PageHeader'
 import { Panel } from '../ui/Panel'
 import { SkeletonRows } from '../ui/Skeleton'
 
-/** What a record page shows while it loads, or when the record isn't there. */
-export function RecordPending({ error, listPath, listLabel }: { error: unknown; listPath: string; listLabel: string }) {
-  if (error instanceof ApiError && error.status === 404) {
+type Props = { error: unknown; listPath: string; listLabel: string; onRetry: () => void }
+
+/** What a record page shows while it loads, when the record isn't there, or
+ * when it couldn't be loaded. */
+export function RecordPending({ error, listPath, listLabel, onRetry }: Props) {
+  // 422 is an address with no record number in it, such as /deals/abc.
+  if (error instanceof ApiError && (error.status === 404 || error.status === 422)) {
     return (
       <PageHeader
         title="찾을 수 없어요"
@@ -18,12 +23,11 @@ export function RecordPending({ error, listPath, listLabel }: { error: unknown; 
       />
     )
   }
+  const failed = Boolean(error) && !isOffline(error)
   return (
     <>
-      <PageHeader title=" " />
-      <Panel>
-        <SkeletonRows rows={4} />
-      </Panel>
+      <PageHeader title={failed ? listLabel : ' '} />
+      <Panel>{failed ? <LoadError onRetry={onRetry} /> : <SkeletonRows rows={4} />}</Panel>
     </>
   )
 }

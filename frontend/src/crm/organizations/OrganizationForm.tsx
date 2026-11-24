@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { blockComposingEnter } from '../../lib/ime'
 import { Button } from '../../ui/Button'
 import { SuggestInput } from '../../ui/Combobox'
-import { DialogActions } from '../../ui/Dialog'
+import { DialogActions, useUnsaved } from '../../ui/Dialog'
 import { FieldStack, TextInput } from '../../ui/Field'
 import { optionalText, orNull, requiredName, showSaveError } from '../forms'
 import type { Organization, OrganizationIn } from './api'
@@ -38,6 +38,7 @@ export function OrganizationForm({ initial, industries, onSave, onCancel }: Prop
     },
   })
   const { control, handleSubmit, formState } = form
+  useUnsaved(formState.isDirty)
 
   async function submit(values: Values) {
     try {

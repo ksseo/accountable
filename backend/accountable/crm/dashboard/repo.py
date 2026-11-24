@@ -23,8 +23,10 @@ def _with_records() -> Select:
     return select(
         activities,
         contacts.c.name.label("contact_name"),
+        contacts.c.organization_id.label("contact_org_id"),
         _contact_org.c.name.label("contact_org_name"),
         deals.c.name.label("deal_name"),
+        deals.c.organization_id.label("deal_org_id"),
         _deal_org.c.name.label("deal_org_name"),
     ).select_from(
         activities.outerjoin(contacts, activities.c.contact_id == contacts.c.id)
@@ -35,14 +37,14 @@ def _with_records() -> Select:
 
 
 def _record(row: Mapping[str, Any]) -> dict:
-    if row["contact_id"] is not None:
-        return {
-            "kind": "contact",
-            "id": row["contact_id"],
-            "name": row["contact_name"],
-            "organization_name": row["contact_org_name"],
-        }
-    return {"kind": "deal", "id": row["deal_id"], "name": row["deal_name"], "organization_name": row["deal_org_name"]}
+    kind = "contact" if row["contact_id"] is not None else "deal"
+    return {
+        "kind": kind,
+        "id": row[f"{kind}_id"],
+        "name": row[f"{kind}_name"],
+        "organization_id": row[f"{kind}_org_id"],
+        "organization_name": row[f"{kind}_org_name"],
+    }
 
 
 def follow_up_query() -> Select:

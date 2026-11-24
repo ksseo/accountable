@@ -22,6 +22,12 @@ def test_add_read_edit_delete(client, make_org):
 
 def test_a_website_with_a_scheme_is_kept(make_org):
     assert make_org(website="http://old.example")["website"] == "http://old.example"
+    assert make_org(website="HTTPS://Old.example")["website"] == "HTTPS://Old.example"
+
+
+def test_a_website_with_another_address_in_it_still_gets_a_scheme(make_org):
+    website = "new.example/?next=https://old.example"
+    assert make_org(website=website)["website"] == f"https://{website}"
 
 
 def test_a_wrong_field_returns_422_with_its_name(client):

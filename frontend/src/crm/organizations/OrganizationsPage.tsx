@@ -1,5 +1,6 @@
 import { Plus } from 'lucide-react'
 import { useState } from 'react'
+import { failedLoad } from '../../api/failedLoad'
 import { count } from '../../lib/korean'
 import { formatMoney } from '../../lib/money'
 import { Button } from '../../ui/Button'
@@ -17,18 +18,20 @@ const COLUMNS: Column<OrganizationRow>[] = [
   {
     key: 'name',
     header: '이름',
-    sortValue: (row) => row.name,
+    value: (row) => row.name,
+    searchable: true,
     cell: (row) => (
       <RecordLink kind="organization" id={row.id}>
         {row.name}
       </RecordLink>
     ),
   },
-  { key: 'industry', header: '업종', sortValue: (row) => row.industry, cell: (row) => row.industry },
+  { key: 'industry', header: '업종', value: (row) => row.industry, searchable: true, cell: (row) => row.industry },
   {
     key: 'website',
     header: '웹사이트',
-    sortValue: (row) => row.website,
+    value: (row) => row.website,
+    searchable: true,
     cell: (row) =>
       row.website ? (
         <a className={styles.external} href={row.website} target="_blank" rel="noreferrer">
@@ -40,7 +43,7 @@ const COLUMNS: Column<OrganizationRow>[] = [
     key: 'contacts',
     header: '연락처 수',
     align: 'end',
-    sortValue: (row) => row.contact_count,
+    value: (row) => row.contact_count,
     cell: (row) => count(row.contact_count, 'contact'),
   },
   {
@@ -48,7 +51,7 @@ const COLUMNS: Column<OrganizationRow>[] = [
     header: '진행 중 영업 기회',
     align: 'end',
     nowrap: true,
-    sortValue: (row) => row.open_deal_value,
+    value: (row) => row.open_deal_value,
     cell: (row) =>
       row.open_deal_count ? (
         <>
@@ -61,11 +64,10 @@ const COLUMNS: Column<OrganizationRow>[] = [
   },
 ]
 
-const searchFields = (row: OrganizationRow) => [row.name, row.industry, row.website]
-
 /** 거래처: the organizations table (TBL-5). */
 export function OrganizationsPage() {
-  const { data } = useOrganizations()
+  const organizations = useOrganizations()
+  const { data } = organizations
   const [editing, setEditing] = useState<OrganizationRow | 'new' | null>(null)
   const [deleting, setDeleting] = useState<OrganizationRow | null>(null)
 
@@ -88,12 +90,12 @@ export function OrganizationsPage() {
         <DataTable
           caption="거래처 목록"
           rows={data}
+          onRetry={failedLoad(organizations)}
           totalCount={data?.length ?? 0}
           columns={COLUMNS}
           rowKey={(row) => row.id}
           rowHref={(row) => recordPath('organization', row.id)}
           rowName={(row) => row.name}
-          searchFields={searchFields}
           searchLabel="거래처 검색"
           searchPlaceholder="이름, 업종, 웹사이트로 검색"
           defaultSort={{ key: 'name', direction: 'asc' }}

@@ -10,7 +10,7 @@ import argparse
 import sys
 from collections.abc import Callable
 
-from sqlalchemy import Engine, delete
+from sqlalchemy import Connection, Engine, delete
 
 from accountable.core.db import make_engine, metadata, migrate, write_connection
 from accountable.core.settings import db_path
@@ -22,11 +22,10 @@ QUESTION = "모든 데이터를 지우고 샘플 데이터로 되돌릴까요? (
 SAMPLE_LOADERS = [crm_sample.load]
 
 
-def load_samples(engine: Engine) -> None:
-    """Load every area's sample data into an empty database."""
-    with write_connection(engine) as conn, conn.begin():
-        for load in SAMPLE_LOADERS:
-            load(conn)
+def load_samples(conn: Connection) -> None:
+    """Load every area's sample data into empty tables."""
+    for load in SAMPLE_LOADERS:
+        load(conn)
 
 
 def reset(engine: Engine) -> None:
@@ -34,8 +33,7 @@ def reset(engine: Engine) -> None:
     with write_connection(engine) as conn, conn.begin():
         for table in reversed(metadata.sorted_tables):
             conn.execute(delete(table))
-        for load in SAMPLE_LOADERS:
-            load(conn)
+        load_samples(conn)
 
 
 def main(argv: list[str] | None = None, ask: Callable[[str], str] = input) -> int:

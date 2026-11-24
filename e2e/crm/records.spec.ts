@@ -127,7 +127,7 @@ test('a deal moved by its stage selector shows on its main contact’s timeline,
     `/organizations/${contact.organization_id}`,
   )
   const deals = page.getByRole('list', { name: /^주 연락처로 있는 영업 기회/ })
-  await expect(deals.getByRole('link')).toHaveCount(contact.deals.length)
+  for (const item of contact.deals) await expect(deals.getByRole('link', { name: item.name, exact: true })).toBeVisible()
   await deals.getByRole('link', { name: deal.name, exact: true }).click()
 
   await expect(page).toHaveURL(`/deals/${deal.id}`)
@@ -178,6 +178,17 @@ test('logs a note, a call with a follow-up and an email, newest first, and keeps
   const saved = (await apiGet<TimelinePage>(`/api/contacts/${contact.id}/timeline`)).items.slice(0, 3)
   expect(saved.map((entry) => entry.kind)).toEqual(['email', 'call', 'note'])
   expect(saved[1].follow_up_date).toBe(followUp)
+})
+
+test('a note logged just after a stage change is above it', async ({ page }) => {
+  const deal = (await apiGet<Deal[]>('/api/deals')).find((d) => d.stage === 'new')!
+  await page.goto(`/deals/${deal.id}`)
+  await page.getByRole('button', { name: /단계/ }).click()
+  await page.getByRole('option', { name: '적격' }).click()
+  await expect(timeline(page).first()).toContainText('신규 → 적격')
+  await logActivity(page, '메모', '적격으로 바꾼 이유')
+  await expect(timeline(page).nth(0)).toContainText('적격으로 바꾼 이유')
+  await expect(timeline(page).nth(1)).toContainText('신규 → 적격')
 })
 
 test('a time in the future is refused, pointing to a follow-up instead', async ({ page }) => {
@@ -235,6 +246,73 @@ test('edits an activity, marks its follow-up done, and deletes it', async ({ pag
   await expect(call).toHaveCount(0)
   const after = await apiGet<TimelinePage>(`/api/deals/${deal.id}/timeline`)
   expect(after.items.some((entry) => entry.id === created.id)).toBe(false)
+})
+
+test('every record name shown anywhere is a link (UI-7)', async ({ page }) => {
+  const [organizations, contacts, deals] = await Promise.all([
+    apiGet<{ name: string }[]>('/api/organizations'),
+    apiGet<{ name: string }[]>('/api/contacts'),
+    apiGet<Deal[]>('/api/deals'),
+  ])
+  const names = [...organizations, ...contacts, ...deals].map((record) => record.name)
+  const linked = deals.find((deal) => deal.contact_id !== null && deal.organization_id !== null)!
+  const paths = [
+    '/',
+    '/organizations',
+    '/contacts',
+    '/deals',
+    '/pipeline',
+    `/organizations/${linked.organization_id}`,
+    `/contacts/${linked.contact_id}`,
+    `/deals/${linked.id}`,
+  ]
+  for (const path of paths) {
+    await page.goto(path)
+    await expect(page.getByRole('main').getByRole('link').first()).toBeVisible()
+    await page.waitForLoadState('networkidle')
+    const plain = await page.evaluate((known) => {
+      const found: string[] = []
+      const walker = document.createTreeWalker(document.querySelector('main')!, NodeFilter.SHOW_TEXT)
+      while (walker.nextNode()) {
+        const text = walker.currentNode.textContent!.replace(/^[\s,]+|[\s,]+$/g, '')
+        // The page's own title is the record it's on.
+        if (known.includes(text) && !walker.currentNode.parentElement!.closest('a, h1')) found.push(text)
+      }
+      return found
+    }, names)
+    expect(plain, `names that aren't links on ${path}`).toEqual([])
+  }
+})
+
+test.describe('when something can not be loaded', () => {
+  // Chrome logs the failed calls.
+  test.use({ allowConsole: [/status of (422|500)/] })
+
+  test('a timeline says so instead of saying it is empty', async ({ page }) => {
+    const contact = (await apiGet<{ id: number }[]>('/api/contacts'))[0]
+    await page.route('**/timeline*', (route) => route.fulfill({ status: 500, body: '{}' }))
+    await page.goto(`/contacts/${contact.id}`)
+    const main = page.getByRole('main')
+    await expect(main.getByText('불러오지 못했어요')).toBeVisible()
+    await expect(main.getByText('아직 기록된 활동이 없어요')).toHaveCount(0)
+
+    await page.unroute('**/timeline*')
+    await main.getByRole('button', { name: '다시 시도' }).click()
+    await expect(timeline(page).first()).toBeVisible()
+  })
+
+  test('a record page says so, and a wrong address says it is not there', async ({ page }) => {
+    const deal = (await apiGet<Deal[]>('/api/deals'))[0]
+    await page.route(`**/api/deals/${deal.id}`, (route) => route.fulfill({ status: 500, body: '{}' }))
+    await page.goto(`/deals/${deal.id}`)
+    await expect(page.getByText('불러오지 못했어요')).toBeVisible()
+    await page.unroute(`**/api/deals/${deal.id}`)
+    await page.getByRole('button', { name: '다시 시도' }).click()
+    await expect(page.getByRole('heading', { level: 1, name: deal.name })).toBeVisible()
+
+    await page.goto('/deals/abc')
+    await expect(page.getByRole('heading', { level: 1, name: '찾을 수 없어요' })).toBeVisible()
+  })
 })
 
 test('stage and status changes have no edit or delete; notes, calls and emails do', async ({ page }) => {

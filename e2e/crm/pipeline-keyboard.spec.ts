@@ -3,10 +3,24 @@
 // as a second way; Enter opens the deal (SC 8, PIPE-5, PIPE-9).
 import { dropped, movedTo, pickedUp, putBack } from '../../frontend/src/crm/pipeline/announcements'
 import { expect, resetData, test } from '../support/fixtures'
-import { cardOn, expectShownStart, lane, laneOf, laneTotal, pipeline, savedOrder, shownOrder, STAGE_LABELS } from './board'
+import {
+  cardOn,
+  dragTo,
+  expectShownStart,
+  lane,
+  laneOf,
+  laneTotal,
+  pipeline,
+  savedOrder,
+  shownOrder,
+  STAGE_LABELS,
+} from './board'
 import { formatMoney } from '../../frontend/src/lib/money'
 
 test.beforeEach(() => resetData())
+
+/** Whether a request saves a move. The dev server's own files can have "move" in their address. */
+const savesMove = (url: string) => /\/api\/deals\/\d+\/move$/.test(url)
 
 const announcer = (page: import('@playwright/test').Page) => page.getByTestId('board-announcer')
 
@@ -47,7 +61,7 @@ test('Escape puts the card back and saves nothing', async ({ page }) => {
   const board = await pipeline()
   const card = laneOf(board, 'proposal').deals[1]
   const moves: string[] = []
-  page.on('request', (request) => request.url().includes('/move') && moves.push(request.url()))
+  page.on('request', (request) => savesMove(request.url()) && moves.push(request.url()))
   await page.goto('/pipeline')
   await cardOn(page, card.id).focus()
 
@@ -64,6 +78,76 @@ test('Escape puts the card back and saves nothing', async ({ page }) => {
   await expectShownStart(page, 'proposal', laneOf(board, 'proposal').deals.map((deal) => deal.id))
   await expect(laneTotal(page, 'qualified')).toHaveText(formatMoney(laneOf(board, 'qualified').value))
   expect(moves).toEqual([])
+})
+
+test('pressing the mouse puts a picked-up card back, and the board works as before', async ({ page }) => {
+  const board = await pipeline()
+  const [picked, other] = laneOf(board, 'new').deals
+  const moves: string[] = []
+  page.on('request', (request) => savesMove(request.url()) && moves.push(request.url()))
+  await page.goto('/pipeline')
+  const back = putBack(picked.name, { stageLabel: '신규', position: 1, total: laneOf(board, 'new').count })
+
+  // On an empty part of the page. Focus goes where the press put it.
+  await cardOn(page, picked.id).focus()
+  await page.keyboard.press('Space')
+  await page.keyboard.press('ArrowRight')
+  await expect(lane(page, 'qualified').locator(`[data-card-id="${picked.id}"]`)).toBeVisible()
+  await page.getByRole('heading', { level: 1 }).click()
+  await expect(announcer(page)).toHaveText(back)
+  await expectShownStart(page, 'new', laneOf(board, 'new').deals.map((deal) => deal.id))
+  await expect(cardOn(page, picked.id)).not.toBeFocused()
+  expect(moves).toEqual([])
+
+  // Another card drags.
+  await cardOn(page, picked.id).focus()
+  await page.keyboard.press('Space')
+  await dragTo(page, cardOn(page, other.id), cardOn(page, laneOf(board, 'proposal').deals[0].id), 'top')
+  await expect.poll(() => savedOrder('proposal').then((ids) => ids[0])).toBe(other.id)
+
+  // Another card opens.
+  await cardOn(page, picked.id).focus()
+  await page.keyboard.press('Space')
+  await cardOn(page, other.id).getByText(formatMoney(other.value)).click()
+  await expect(page).toHaveURL(new RegExp(`/deals/${other.id}$`))
+  expect(await savedOrder('new')).toContain(picked.id)
+})
+
+test('Space picks up a card after it was dragged by a name on it', async ({ page }) => {
+  const deal = laneOf(await pipeline(), 'new').deals.find((item) => item.organization_id !== null)!
+  await page.goto('/pipeline')
+  for (const name of [deal.name, deal.organization_name!]) {
+    const card = cardOn(page, deal.id)
+    const grip = (await card.getByRole('link', { name, exact: true }).boundingBox())!
+    const y = grip.y + 8
+    await page.mouse.move(grip.x + 10, y)
+    await page.mouse.down()
+    await page.mouse.move(grip.x + 24, y + 4, { steps: 4 })
+    await page.mouse.move(grip.x + 10, y, { steps: 4 })
+    await page.mouse.up()
+    await expect(card).toBeFocused()
+    await page.keyboard.press('Space')
+    await expect(announcer(page)).toContainText('들었어요')
+    await page.keyboard.press('Escape')
+    await expect(announcer(page)).toContainText('옮기지 않았어요')
+  }
+})
+
+test('picking up another card puts the first one back', async ({ page }) => {
+  const [first, second] = laneOf(await pipeline(), 'qualified').deals
+  await page.goto('/pipeline')
+  await cardOn(page, first.id).focus()
+  await page.keyboard.press('Space')
+  await page.keyboard.press('ArrowLeft')
+  await expect(lane(page, 'new').locator(`[data-card-id="${first.id}"]`)).toBeVisible()
+  await cardOn(page, second.id).focus()
+  await page.keyboard.press('Space')
+  await expect(announcer(page)).toContainText(second.name)
+  await expect(lane(page, 'qualified').locator(`[data-card-id="${first.id}"]`)).toBeVisible()
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('Space')
+  await expect.poll(() => savedOrder('proposal')).toContain(second.id)
+  expect(await savedOrder('qualified')).toContain(first.id)
 })
 
 test('the card menu moves a card to another stage, up and down', async ({ page }) => {

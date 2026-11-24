@@ -1,7 +1,8 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import { META, renderWithApp } from '../../test/render'
-import type { Deal } from './api'
+import type { DealDefaults } from '../openForms'
+import type { Deal, DealIn } from './api'
 import { DealForm } from './DealForm'
 import { dealDeleteMessage } from './deleteMessage'
 
@@ -14,13 +15,35 @@ const ORGANIZATIONS = [
   { id: 2, name: '대성기계공업', detail: '제조' },
 ]
 
-function setup(props: { initial?: Deal } = {}) {
-  const onSave = vi.fn(() => Promise.resolve())
+const SAVED = {
+  id: 1,
+  name: '2027 포장재 공급',
+  stage: 'proposal',
+  value: 120_000,
+  probability: 77,
+  close_date: '2026-12-31',
+  contact_id: null,
+  organization_id: null,
+} as Deal
+
+function setup(props: { initial?: Deal; defaults?: DealDefaults } = {}) {
+  const onSave = vi.fn((_body: DealIn) => Promise.resolve())
   const view = renderWithApp(
     <DealForm meta={META} contacts={CONTACTS} organizations={ORGANIZATIONS} onSave={onSave} onCancel={vi.fn()} {...props} />,
   )
-  const field = (name: string) => screen.getByRole('textbox', { name })
-  return { ...view, onSave, field }
+  const field = (name: string) => screen.getByRole<HTMLInputElement>('textbox', { name })
+  /** The date in the 마감일 field as YYYY-MM-DD, or nothing while it's empty. */
+  const closeDate = () => {
+    const group = within(screen.getByRole('group', { name: '마감일' }))
+    const parts = ['년', '월', '일'].map((unit) => group.getByRole('spinbutton', { name: new RegExp(`^${unit}`) }))
+    if (parts.some((part) => part.hasAttribute('data-placeholder'))) return ''
+    return parts.map((part) => part.textContent!.padStart(2, '0')).join('-')
+  }
+  const saved = async () => {
+    await view.user.click(screen.getByRole('button', { name: '저장' }))
+    return onSave.mock.lastCall![0]
+  }
+  return { ...view, onSave, field, closeDate, saved }
 }
 
 async function chooseStage(user: ReturnType<typeof setup>['user'], label: string) {
@@ -102,6 +125,51 @@ describe('DealForm', () => {
       contact_id: null,
       organization_id: null,
     })
+  })
+
+  it('gives back the probability and the date when the stage goes back to the saved one', async () => {
+    const { user, field, closeDate, saved } = setup({ initial: SAVED })
+    await chooseStage(user, '수주')
+    expect([field('확률').value, closeDate()]).toEqual(['100', '2026-11-23'])
+    await chooseStage(user, '제안')
+    expect([field('확률').value, closeDate()]).toEqual(['77', '2026-12-31'])
+    expect(await saved()).toMatchObject({ stage: 'proposal', probability: 77, close_date: '2026-12-31' })
+  })
+
+  it('keeps a closed deal’s real date when its stage goes away and back', async () => {
+    const { user, field, closeDate, saved } = setup({ initial: { ...SAVED, stage: 'won', probability: 100, close_date: '2026-10-21' } })
+    await chooseStage(user, '실주')
+    expect(closeDate()).toBe('2026-11-23')
+    await chooseStage(user, '제안')
+    expect([field('확률').value, closeDate()]).toEqual(['50', '2026-10-21'])
+    await chooseStage(user, '수주')
+    expect([field('확률').value, closeDate()]).toEqual(['100', '2026-10-21'])
+    expect(await saved()).toMatchObject({ stage: 'won', probability: 100, close_date: '2026-10-21' })
+  })
+
+  it('gives back the date on the way to another open stage, with that stage’s probability', async () => {
+    const { user, field, closeDate } = setup({ initial: SAVED })
+    await chooseStage(user, '수주')
+    await chooseStage(user, '협상')
+    expect([field('확률').value, closeDate()]).toEqual(['75', '2026-12-31'])
+  })
+
+  it('gives back values typed before the stage was changed', async () => {
+    const { user, field } = setup({ initial: SAVED })
+    await user.clear(field('확률'))
+    await user.type(field('확률'), '80')
+    await chooseStage(user, '수주')
+    await chooseStage(user, '제안')
+    expect(field('확률')).toHaveValue('80')
+  })
+
+  it('leaves a new deal without a date once it is open again', async () => {
+    const { user, closeDate } = setup({ defaults: { stage: 'won' } })
+    expect(closeDate()).toBe('2026-11-23')
+    await chooseStage(user, '신규')
+    expect(closeDate()).toBe('')
+    await chooseStage(user, '수주')
+    expect(closeDate()).toBe('2026-11-23')
   })
 
   it('checks the probability range', async () => {

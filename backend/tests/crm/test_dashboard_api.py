@@ -183,8 +183,16 @@ def test_follow_ups_in_order_with_the_14_day_window_and_later_count(small_datase
         ("follow-up +14", "upcoming", 0),
     ]
     assert small_dataset["follow_ups_later"] == 2
-    assert items[1]["record"] == {"kind": "contact", "id": items[1]["record"]["id"], "name": "박서연", "organization_name": "한빛정밀"}
-    assert (items[0]["record"]["kind"], items[0]["record"]["name"], items[0]["record"]["organization_name"]) == ("deal", "A", "한빛정밀")
+    contact, deal = items[1]["record"], items[0]["record"]
+    assert (contact["kind"], contact["name"], contact["organization_name"]) == ("contact", "박서연", "한빛정밀")
+    assert (deal["kind"], deal["name"], deal["organization_name"]) == ("deal", "A", "한빛정밀")
+
+
+def test_a_record_names_its_organization_with_its_id(client, small_dataset):
+    org_id = client.get("/api/organizations").json()[0]["id"]
+    records = [item["record"] for item in small_dataset["follow_ups"] + small_dataset["recent"]]
+    assert {record["organization_id"] for record in records if record["organization_name"] == "한빛정밀"} == {org_id}
+    assert {record["organization_id"] for record in records if record["organization_name"] is None} <= {None}
 
 
 def test_the_10_newest_entries_with_their_records(small_dataset):

@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useRef } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { z } from 'zod'
 import { blockComposingEnter } from '../../lib/ime'
@@ -6,13 +7,14 @@ import { formatMoney, MAX_VALUE, parseMoney } from '../../lib/money'
 import { Button } from '../../ui/Button'
 import { Combobox, type ComboboxOption } from '../../ui/Combobox'
 import { DatePicker } from '../../ui/DatePicker'
-import { DialogActions } from '../../ui/Dialog'
+import { DialogActions, useUnsaved } from '../../ui/Dialog'
 import { FieldRow, FieldStack, TextInput } from '../../ui/Field'
 import { MoneyField } from '../../ui/MoneyField'
 import { Select } from '../../ui/Select'
 import { StageBadge } from '../badges'
 import { requiredName, showSaveError } from '../forms'
 import { isClosed, STAGES, usualProbability, type Meta, type StageKey } from '../meta'
+import type { DealDefaults } from '../openForms'
 import type { Deal, DealIn } from './api'
 
 const schema = z
@@ -42,8 +44,6 @@ type Values = z.infer<typeof schema>
 
 export type ContactOption = ComboboxOption & { organization_id: number | null }
 
-export type DealDefaults = { stage?: StageKey; organization_id?: number | null; contact_id?: number | null }
-
 type Props = {
   initial?: Deal
   defaults?: DealDefaults
@@ -56,7 +56,8 @@ type Props = {
 
 /** Adding or editing a deal. Choosing a contact fills in their organization if
  * it's empty; changing the stage fills in its probability, and Won or Lost
- * today's close date. All of them can still be changed (FORM-4). */
+ * today's close date. All of them can still be changed, and going back gives
+ * back what was there (FORM-4). */
 export function DealForm({ initial, defaults, meta, contacts, organizations, onSave, onCancel }: Props) {
   const stage = initial?.stage ?? defaults?.stage ?? 'new'
   const form = useForm<Values>({
@@ -73,6 +74,15 @@ export function DealForm({ initial, defaults, meta, contacts, organizations, onS
     },
   })
   const { control, handleSubmit, formState, getValues, setValue } = form
+  useUnsaved(formState.isDirty)
+
+  // What choosing a stage replaced: the probability at the deal's saved stage,
+  // and the close date from before Won or Lost filled in today's.
+  const replaced = useRef({
+    probability: getValues('probability'),
+    closeDate: initial?.close_date ?? null,
+    filledToday: !initial && isClosed(stage),
+  })
 
   function chooseContact(contactId: number | null) {
     setValue('contact_id', contactId, { shouldDirty: true })
@@ -83,9 +93,17 @@ export function DealForm({ initial, defaults, meta, contacts, organizations, onS
   }
 
   function chooseStage(next: StageKey) {
+    const kept = replaced.current
+    const { stage: from, probability, close_date: closeDate } = getValues()
+    if (from === initial?.stage) kept.probability = probability
+    if (!kept.filledToday || closeDate !== meta.today) kept.closeDate = closeDate
+
+    const isSaved = next === initial?.stage
+    kept.filledToday = isClosed(next) && !isSaved
+    const usual = String(usualProbability(meta, next) ?? 0)
     setValue('stage', next, { shouldDirty: true })
-    setValue('probability', String(usualProbability(meta, next) ?? 0), { shouldDirty: true, shouldValidate: true })
-    if (isClosed(next)) setValue('close_date', meta.today, { shouldDirty: true, shouldValidate: true })
+    setValue('probability', isSaved ? kept.probability : usual, { shouldDirty: true, shouldValidate: true })
+    setValue('close_date', kept.filledToday ? meta.today : kept.closeDate, { shouldDirty: true, shouldValidate: true })
   }
 
   async function submit(values: Values) {

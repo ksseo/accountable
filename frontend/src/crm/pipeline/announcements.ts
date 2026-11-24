@@ -30,5 +30,3 @@ export function putBack(name: string, spot: Spot): string {
 export function movedByMenu(name: string, stageLabel: string): string {
   return `${quoted(name, objectParticle)} ${stageLabel} 단계로 옮겼어요.`
 }
-
-export const MOVE_FAILED = '이동하지 못했어요. 다시 시도해 주세요.'

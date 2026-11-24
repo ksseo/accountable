@@ -8,9 +8,8 @@ import { PageHeader } from '../../ui/PageHeader'
 import { Panel } from '../../ui/Panel'
 import { RecordLink } from '../../ui/RecordLink'
 import { LateBadge, StageBadge, StatusBadge } from '../badges'
-import { ContactDialog } from '../contacts/ContactDialog'
-import { useDealForm } from '../deals/DealFormHost'
 import { DeleteRecord } from '../DeleteRecord'
+import { useContactForm, useDealForm } from '../openForms'
 import { recordId, RecordPending } from '../RecordMissing'
 import { AddButton, Details, Figures, Joined, LinkedList, LinkedRow, RecordActions, WebsiteLink } from '../RecordParts'
 import styles from '../records.module.css'
@@ -20,16 +19,16 @@ import { OrganizationDialog } from './OrganizationDialog'
 
 /** An organization's page (REC-1). */
 export function OrganizationPage() {
-  const { data, error } = useOrganization(recordId(useParams().id))
-  if (!data) return <RecordPending error={error} listPath="/organizations" listLabel="거래처" />
+  const { data, error, refetch } = useOrganization(recordId(useParams().id))
+  if (!data) return <RecordPending error={error} listPath="/organizations" listLabel="거래처" onRetry={() => refetch()} />
   return <OrganizationRecord organization={data} />
 }
 
 function OrganizationRecord({ organization }: { organization: OrganizationDetail }) {
+  const contactForm = useContactForm()
   const dealForm = useDealForm()
   const navigate = useNavigate()
   const [editing, setEditing] = useState(false)
-  const [addingContact, setAddingContact] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const wonCount = organization.deals.filter((deal) => deal.stage === 'won').length
 
@@ -61,7 +60,12 @@ function OrganizationRecord({ organization }: { organization: OrganizationDetail
           </Panel>
           <Panel
             title="연락처"
-            aside={<AddButton label={`${organization.name}에 연락처 추가`} onPress={() => setAddingContact(true)} />}
+            aside={
+              <AddButton
+                label={`${organization.name}에 연락처 추가`}
+                onPress={() => contactForm.openNew({ organization_id: organization.id })}
+              />
+            }
           >
             {organization.contacts.length === 0 ? (
               <EmptyState message="아직 연락처가 없어요" />
@@ -144,11 +148,6 @@ function OrganizationRecord({ organization }: { organization: OrganizationDetail
         </div>
       </div>
       <OrganizationDialog target={editing ? organization : null} onClose={() => setEditing(false)} />
-      <ContactDialog
-        target={addingContact ? 'new' : null}
-        defaults={{ organization_id: organization.id }}
-        onClose={() => setAddingContact(false)}
-      />
       <DeleteRecord
         target={deleting ? organization : null}
         onClose={() => setDeleting(false)}

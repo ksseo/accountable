@@ -5,11 +5,11 @@ import { count } from '../../lib/korean'
 import { Checkbox } from '../../ui/Checkbox'
 import { EmptyState } from '../../ui/EmptyState'
 import { Panel } from '../../ui/Panel'
-import { RecordLink } from '../../ui/RecordLink'
 import { updateActivity } from '../activities/api'
 import { useRefreshAll } from '../forms'
-import { organizationOf, type DashboardFigures, type FollowUp } from './api'
+import type { DashboardFigures, FollowUp } from './api'
 import styles from './Dashboard.module.css'
+import { RecordName } from './RecordName'
 
 type Props = {
   followUps: readonly FollowUp[]
@@ -61,10 +61,7 @@ export function FollowUps({ followUps, later, figures, className }: Props) {
                   <span className={styles.todoWhat}>{followUp.description}</span>
                 </Checkbox>
                 <span className={styles.on}>
-                  <RecordLink kind={followUp.record.kind} id={followUp.record.id}>
-                    {followUp.record.name}
-                  </RecordLink>
-                  {organizationOf(followUp.record)}
+                  <RecordName record={followUp.record} />
                 </span>
               </div>
               <span className={`${styles.when} ${styles[followUp.state]}`}>

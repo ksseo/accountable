@@ -1095,6 +1095,8 @@ export interface components {
             id: number;
             /** Name */
             name: string;
+            /** Organization Id */
+            organization_id: number | null;
             /** Organization Name */
             organization_name: string | null;
         };

@@ -1,9 +1,10 @@
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { Clock } from 'lucide-react'
-import { createContext, memo, useCallback, useContext, type KeyboardEvent } from 'react'
+import { createContext, memo, useCallback, useContext, type KeyboardEvent, type MouseEvent } from 'react'
 import { formatDate } from '../../lib/dates'
 import { formatMoney, formatPercent } from '../../lib/money'
+import { RecordLink } from '../../ui/RecordLink'
 import type { StageKey } from '../meta'
 import type { Card } from './applyMove'
 import styles from './Board.module.css'
@@ -50,6 +51,22 @@ export const CardBody = memo(function CardBody({
 }: BodyProps) {
   const actions = useBoardActions()
   const classes = [styles.card, lifted ? styles.lifted : '', overlay ? styles.overlay : ''].filter(Boolean).join(' ')
+
+  const onName = (event: MouseEvent<HTMLElement>) => (event.target as HTMLElement).closest('a') !== null
+
+  function openCard(event: MouseEvent<HTMLElement>) {
+    // The names on the card go to their own pages.
+    if (!onName(event)) actions.open(deal.id)
+  }
+
+  // A press on a name focuses the card, as one anywhere else on it does, so
+  // after a drag Space still picks it up.
+  function focusCard(event: MouseEvent<HTMLElement>) {
+    if (event.button !== 0 || !onName(event)) return
+    event.preventDefault()
+    event.currentTarget.focus({ preventScroll: true })
+  }
+
   return (
     <article
       className={classes}
@@ -58,7 +75,8 @@ export const CardBody = memo(function CardBody({
       aria-label={`${deal.name}, ${formatMoney(deal.value)}`}
       aria-describedby={overlay ? undefined : BOARD_HELP_ID}
       aria-hidden={overlay || undefined}
-      onClick={overlay ? undefined : () => actions.open(deal.id)}
+      onMouseDown={overlay ? undefined : focusCard}
+      onClick={overlay ? undefined : openCard}
       onKeyDown={overlay ? undefined : (event) => actions.onKey(event, deal.id)}
     >
       {deal.is_late ? (
@@ -67,8 +85,26 @@ export const CardBody = memo(function CardBody({
           지연 {deal.days_late}일
         </p>
       ) : null}
-      <h3 className={styles.cardName}>{deal.name}</h3>
-      {deal.organization_name ? <p className={styles.cardOrg}>{deal.organization_name}</p> : null}
+      <h3 className={styles.cardName}>
+        {overlay ? (
+          deal.name
+        ) : (
+          <RecordLink kind="deal" id={deal.id} tabIndex={-1}>
+            {deal.name}
+          </RecordLink>
+        )}
+      </h3>
+      {deal.organization_id !== null ? (
+        <p className={styles.cardOrg}>
+          {overlay ? (
+            deal.organization_name
+          ) : (
+            <RecordLink kind="organization" id={deal.organization_id} quiet>
+              {deal.organization_name}
+            </RecordLink>
+          )}
+        </p>
+      ) : null}
       {overlay ? null : (
         <div className={styles.cardMenu}>
           <CardMenu

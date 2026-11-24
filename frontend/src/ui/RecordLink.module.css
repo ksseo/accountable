@@ -6,6 +6,10 @@
   text-underline-offset: 3px;
 }
 
+.quiet {
+  font-weight: inherit;
+}
+
 .link:hover {
   text-decoration-color: currentColor;
 }

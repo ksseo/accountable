@@ -21,6 +21,9 @@ from accountable.main import create_app
 
 TODAY = date(2026, 11, 23)
 
+# The app only answers requests addressed to this computer.
+BASE_URL = "http://127.0.0.1"
+
 _real_connect = sqlite3.dbapi2.connect
 
 
@@ -68,14 +71,14 @@ def empty_db() -> Path:
 @pytest.fixture
 def client(empty_db: Path) -> Iterator[TestClient]:
     """The app on an empty database."""
-    with TestClient(create_app()) as test_client:
+    with TestClient(create_app(), base_url=BASE_URL) as test_client:
         yield test_client
 
 
 @pytest.fixture
 def sample_client() -> Iterator[TestClient]:
     """The app on a new database, so it loads the sample data."""
-    with TestClient(create_app()) as test_client:
+    with TestClient(create_app(), base_url=BASE_URL) as test_client:
         yield test_client
 
 

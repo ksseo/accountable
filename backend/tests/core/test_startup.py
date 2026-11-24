@@ -10,6 +10,7 @@ from fastapi.testclient import TestClient
 from sqlalchemy import func, inspect, insert, select
 
 import accountable.crm.tables  # noqa: F401
+from accountable import seed
 from accountable.core import clock
 from accountable.core.db import make_engine, metadata
 from accountable.core.settings import DEFAULT_DB_PATH, db_path
@@ -52,6 +53,35 @@ def test_a_second_start_keeps_a_record_added_by_hand():
             # The sample isn't loaded again on top of the data.
             assert conn.scalar(select(func.count()).select_from(organizations)) == count
     assert name == "손으로 추가한 거래처"
+
+
+def test_a_first_start_cut_short_is_done_again_by_the_next_one(monkeypatch):
+    def cut_short(conn):
+        conn.execute(insert(organizations).values(name="절반만 들어간 거래처"))
+        raise RuntimeError("stopped halfway")
+
+    with monkeypatch.context() as patch:
+        patch.setattr(seed, "SAMPLE_LOADERS", [cut_short])
+        with pytest.raises(RuntimeError, match="stopped halfway"), TestClient(create_app()):
+            pass
+
+    with TestClient(create_app()) as client, client.app.state.engine.connect() as conn:
+        names = set(conn.scalars(select(organizations.c.name)))
+        assert "한빛정밀" in names
+        assert "절반만 들어간 거래처" not in names
+
+
+@pytest.mark.parametrize("host", ["evil.example", "evil.example:8000", "127.0.0.1.evil.example", ""])
+def test_a_request_addressed_to_another_host_is_refused(client, host):
+    """Another site can point its own name at 127.0.0.1, so the address alone isn't enough (APP-5)."""
+    assert client.get("/api/contacts", headers={"host": host}).status_code == 400
+    response = client.post("/api/organizations", headers={"host": host}, json={"name": "다른 사이트가 추가함"})
+    assert response.status_code == 400
+
+
+@pytest.mark.parametrize("host", ["127.0.0.1:8000", "127.0.0.1:5173", "localhost:5173", "127.0.0.1"])
+def test_this_computers_own_addresses_are_answered(client, host):
+    assert client.get("/api/health", headers={"host": host}).status_code == 200
 
 
 def test_the_tables_match_the_migrations(empty_db):

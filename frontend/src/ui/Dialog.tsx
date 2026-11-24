@@ -1,8 +1,19 @@
 import { X } from 'lucide-react'
-import type { ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { Dialog as AriaDialog, Heading, Modal, ModalOverlay } from 'react-aria-components'
 import { Button } from './Button'
 import styles from './Dialog.module.css'
+
+const UnsavedContext = createContext<(hasUnsaved: boolean) => void>(() => {})
+
+/** Tells the dialog around a form whether closing it would lose something. */
+export function useUnsaved(hasUnsaved: boolean): void {
+  const tell = useContext(UnsavedContext)
+  useEffect(() => {
+    tell(hasUnsaved)
+    return () => tell(false)
+  }, [tell, hasUnsaved])
+}
 
 type Props = {
   title: string
@@ -15,23 +26,73 @@ type Props = {
 }
 
 /** A dialog over the page. Focus moves in, stays inside and goes back when it
- * closes; Escape closes it (FORM-1, A11Y-4). React Aria does the focus work. */
+ * closes. A click outside doesn't close it, and Escape asks first if something
+ * would be lost (FORM-1, A11Y-4). React Aria does the focus work. */
 export function Dialog({ title, isOpen, onOpenChange, role = 'dialog', size = 'md', children }: Props) {
+  const hasUnsaved = useRef(false)
+  const tell = useCallback((value: boolean) => {
+    hasUnsaved.current = value
+  }, [])
+  const [isAsking, setIsAsking] = useState(false)
+  // A save that finished meanwhile closed the dialog, so there's nothing to ask.
+  if (isAsking && !isOpen) setIsAsking(false)
+
+  const close = () => onOpenChange(false)
   return (
-    <ModalOverlay
-      className={styles.overlay}
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      isDismissable={role === 'dialog'}
-    >
+    <>
+      <Frame
+        title={title}
+        isOpen={isOpen}
+        onEscape={() => (hasUnsaved.current ? setIsAsking(true) : close())}
+        onClose={role === 'dialog' ? close : undefined}
+        role={role}
+        size={size}
+      >
+        <UnsavedContext.Provider value={tell}>{children}</UnsavedContext.Provider>
+      </Frame>
+      <Frame
+        title="저장하지 않고 닫을까요?"
+        isOpen={isAsking}
+        onEscape={() => setIsAsking(false)}
+        role="alertdialog"
+        size="sm"
+      >
+        <p>입력한 내용이 사라져요.</p>
+        <DialogActions>
+          <Button variant="page" autoFocus onPress={() => setIsAsking(false)}>
+            계속 입력
+          </Button>
+          <Button variant="danger" onPress={close}>
+            버리기
+          </Button>
+        </DialogActions>
+      </Frame>
+    </>
+  )
+}
+
+type FrameProps = {
+  title: string
+  isOpen: boolean
+  onEscape: () => void
+  /** For the 닫기 button, where there is one. */
+  onClose?: () => void
+  role: 'dialog' | 'alertdialog'
+  size: 'md' | 'sm'
+  children: ReactNode
+}
+
+function Frame({ title, isOpen, onEscape, onClose, role, size, children }: FrameProps) {
+  return (
+    <ModalOverlay className={styles.overlay} isOpen={isOpen} onOpenChange={(open) => !open && onEscape()}>
       <Modal className={size === 'sm' ? `${styles.modal} ${styles.sm}` : styles.modal}>
         <AriaDialog className={styles.dialog} role={role}>
           <div className={styles.head}>
             <Heading slot="title" className={styles.title}>
               {title}
             </Heading>
-            {role === 'dialog' ? (
-              <Button variant="ghost" size="sm" slot="close" aria-label="닫기" className={styles.close}>
+            {onClose ? (
+              <Button variant="ghost" size="sm" aria-label="닫기" className={styles.close} onPress={onClose}>
                 <X size={18} aria-hidden="true" />
               </Button>
             ) : null}

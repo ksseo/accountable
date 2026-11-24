@@ -4,11 +4,12 @@ import { z } from 'zod'
 import { blockComposingEnter } from '../../lib/ime'
 import { Button } from '../../ui/Button'
 import { Combobox, type ComboboxOption } from '../../ui/Combobox'
-import { DialogActions } from '../../ui/Dialog'
+import { DialogActions, useUnsaved } from '../../ui/Dialog'
 import { FieldRow, FieldStack, TextInput } from '../../ui/Field'
 import { Select } from '../../ui/Select'
 import { optionalEmail, optionalText, orNull, requiredName, showSaveError } from '../forms'
 import type { Meta, StatusKey } from '../meta'
+import type { ContactDefaults } from '../openForms'
 import type { Contact, ContactIn } from './api'
 
 const schema = z.object({
@@ -25,7 +26,7 @@ type Values = z.infer<typeof schema>
 type Props = {
   initial?: Contact
   /** Filled in when adding from an organization's page. */
-  defaults?: { organization_id?: number | null }
+  defaults?: ContactDefaults
   meta: Meta
   organizations: readonly ComboboxOption[]
   onSave: (body: ContactIn) => Promise<unknown>
@@ -47,6 +48,7 @@ export function ContactForm({ initial, defaults, meta, organizations, onSave, on
     },
   })
   const { control, handleSubmit, formState } = form
+  useUnsaved(formState.isDirty)
 
   async function submit(values: Values) {
     try {

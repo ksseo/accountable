@@ -3270,6 +3270,17 @@
             "type": "string",
             "title": "Name"
           },
+          "organization_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Organization Id"
+          },
           "organization_name": {
             "anyOf": [
               {
@@ -3287,6 +3298,7 @@
           "kind",
           "id",
           "name",
+          "organization_id",
           "organization_name"
         ],
         "title": "RecordRef",

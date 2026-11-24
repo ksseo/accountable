@@ -195,6 +195,68 @@ test('"추가" in a lane opens the form with its stage, and the new deal goes to
 test('clicking a card opens the deal', async ({ page }) => {
   const deal = laneOf(await pipeline(), 'qualified').deals[0]
   await page.goto('/pipeline')
-  await cardOn(page, deal.id).click({ position: { x: 30, y: 30 } })
+  await cardOn(page, deal.id).getByText(formatMoney(deal.value)).click()
+  await expect(page).toHaveURL(new RegExp(`/deals/${deal.id}$`))
+})
+
+test('the names on a card link to their own pages (UI-7)', async ({ page }) => {
+  const deal = laneOf(await pipeline(), 'qualified').deals.find((item) => item.organization_id !== null)!
+  await page.goto('/pipeline')
+  const card = cardOn(page, deal.id)
+  await expect(card.getByRole('link', { name: deal.name, exact: true })).toHaveAttribute('href', `/deals/${deal.id}`)
+  await card.getByRole('link', { name: deal.organization_name!, exact: true }).click()
+  await expect(page).toHaveURL(`/organizations/${deal.organization_id}`)
+})
+
+test('letting go after Escape, or after dragging a card by a name on it, opens nothing', async ({ page }) => {
+  const deal = laneOf(await pipeline(), 'new').deals.find((item) => item.organization_id !== null)!
+  await bringToTop(deal.id)
+  const order = await savedOrder('new')
+  // A full page load would lose this, so it also shows that no link was followed.
+  await page.goto('/pipeline')
+  await page.evaluate(() => Object.assign(window, { samePage: true }))
+  const card = cardOn(page, deal.id)
+  const stillHere = async () => {
+    await page.waitForTimeout(400)
+    expect(page.url()).toMatch(/\/pipeline$/)
+    expect(await page.evaluate(() => 'samePage' in window)).toBe(true)
+  }
+
+  const grips = [
+    card.getByRole('link', { name: deal.name, exact: true }),
+    card.getByRole('link', { name: deal.organization_name!, exact: true }),
+    card.getByText(formatMoney(deal.value)),
+  ]
+  for (const grip of grips) {
+    // Letting go at once, or a while after Escape.
+    for (const wait of [0, 600]) {
+      const box = (await grip.boundingBox())!
+      const at = { x: box.x + 10, y: box.y + box.height / 2 }
+      await page.mouse.move(at.x, at.y)
+      await page.mouse.down()
+      await page.mouse.move(at.x + 14, at.y + 4, { steps: 4 })
+      await page.keyboard.press('Escape')
+      if (wait) await page.waitForTimeout(wait)
+      await page.mouse.move(at.x, at.y)
+      await page.mouse.up()
+      await stillHere()
+    }
+    // Dropped where it was.
+    const box = (await grip.boundingBox())!
+    await page.mouse.move(box.x + 10, box.y + box.height / 2)
+    await page.mouse.down()
+    await page.mouse.move(box.x + 24, box.y + box.height / 2 + 4, { steps: 4 })
+    await page.mouse.move(box.x + 10, box.y + box.height / 2, { steps: 4 })
+    await page.mouse.up()
+    await stillHere()
+  }
+  expect(await savedOrder('new')).toEqual(order)
+
+  // The keyboard and the next click work as before.
+  await page.getByRole('navigation', { name: '주 메뉴' }).getByRole('link', { name: '연락처' }).focus()
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL('/contacts')
+  await page.goBack()
+  await cardOn(page, deal.id).getByText(formatMoney(deal.value)).click()
   await expect(page).toHaveURL(new RegExp(`/deals/${deal.id}$`))
 })

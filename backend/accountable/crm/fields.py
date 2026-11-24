@@ -4,6 +4,7 @@ Text is trimmed and its length checked; empty optional text is saved as empty
 (None). A wrong field returns 422 with the field's name.
 """
 
+import re
 from typing import Annotated, Any
 
 from pydantic import AfterValidator, BeforeValidator, EmailStr, Field, StringConstraints
@@ -16,9 +17,12 @@ def _blank_to_none(value: Any) -> Any:
     return value
 
 
+_SCHEME = re.compile(r"[a-z][a-z0-9+.-]*://", re.IGNORECASE)
+
+
 def _add_scheme(value: str | None) -> str | None:
     """A website gets https:// if it has no scheme."""
-    if value is None or "://" in value:
+    if value is None or _SCHEME.match(value):
         return value
     return f"https://{value}"
 

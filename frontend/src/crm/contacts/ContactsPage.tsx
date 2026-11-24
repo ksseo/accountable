@@ -2,6 +2,7 @@ import { Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { ToggleButton, ToggleButtonGroup } from 'react-aria-components'
 import { useSearchParams } from 'react-router'
+import { failedLoad } from '../../api/failedLoad'
 import { count } from '../../lib/korean'
 import { Button } from '../../ui/Button'
 import { DataTable, type Column } from '../../ui/DataTable/DataTable'
@@ -24,19 +25,21 @@ const COLUMNS: Column<Contact>[] = [
   {
     key: 'name',
     header: '이름',
-    sortValue: (row) => row.name,
+    value: (row) => row.name,
+    searchable: true,
     cell: (row) => (
       <RecordLink kind="contact" id={row.id}>
         {row.name}
       </RecordLink>
     ),
   },
-  { key: 'status', header: '상태', sortValue: (row) => STATUS_ORDER[row.status], cell: (row) => <StatusBadge status={row.status} /> },
-  { key: 'job_title', header: '직책', sortValue: (row) => row.job_title, cell: (row) => row.job_title },
+  { key: 'status', header: '상태', value: (row) => STATUS_ORDER[row.status], cell: (row) => <StatusBadge status={row.status} /> },
+  { key: 'job_title', header: '직책', value: (row) => row.job_title, searchable: true, cell: (row) => row.job_title },
   {
     key: 'organization',
     header: '거래처',
-    sortValue: (row) => row.organization_name,
+    value: (row) => row.organization_name,
+    searchable: true,
     cell: (row) =>
       row.organization_id && row.organization_name ? (
         <RecordLink kind="organization" id={row.organization_id}>
@@ -44,15 +47,14 @@ const COLUMNS: Column<Contact>[] = [
         </RecordLink>
       ) : null,
   },
-  { key: 'email', header: '이메일', sortValue: (row) => row.email, cell: (row) => row.email },
-  { key: 'phone', header: '전화번호', nowrap: true, sortValue: (row) => row.phone, cell: (row) => row.phone },
+  { key: 'email', header: '이메일', value: (row) => row.email, searchable: true, cell: (row) => row.email },
+  { key: 'phone', header: '전화번호', nowrap: true, value: (row) => row.phone, searchable: true, cell: (row) => row.phone },
 ]
-
-const searchFields = (row: Contact) => [row.name, row.email, row.phone, row.job_title, row.organization_name]
 
 /** 연락처: the contacts table with its status filter (TBL-5, TBL-7). */
 export function ContactsPage() {
-  const { data } = useContacts()
+  const contacts = useContacts()
+  const { data } = contacts
   const { data: meta } = useMeta()
   const [params, setParams] = useSearchParams()
   const [editing, setEditing] = useState<Contact | 'new' | null>(null)
@@ -96,7 +98,7 @@ export function ContactsPage() {
       {FILTERS.map((key) => (
         <ToggleButton key={key} id={key} className={styles.segment}>
           {key === 'all' ? '전체' : statusLabel(meta, key)}
-          <span className={styles.segmentCount}>{counts[key].toLocaleString('ko-KR')}</span>
+          {data ? <span className={styles.segmentCount}>{counts[key].toLocaleString('ko-KR')}</span> : null}
         </ToggleButton>
       ))}
     </ToggleButtonGroup>
@@ -113,12 +115,12 @@ export function ContactsPage() {
         <DataTable
           caption="연락처 목록"
           rows={rows}
+          onRetry={failedLoad(contacts)}
           totalCount={data?.length ?? 0}
           columns={COLUMNS}
           rowKey={(row) => row.id}
           rowHref={(row) => recordPath('contact', row.id)}
           rowName={(row) => row.name}
-          searchFields={searchFields}
           searchLabel="연락처 검색"
           searchPlaceholder="이름, 이메일, 전화번호, 직책, 거래처로 검색"
           defaultSort={{ key: 'name', direction: 'asc' }}

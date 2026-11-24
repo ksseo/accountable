@@ -1,4 +1,5 @@
-import { expect, renderedFonts, test } from './support/fixtures'
+import { tableRows } from './crm/helpers'
+import { apiGet, expect, renderedFonts, resetData, test } from './support/fixtures'
 
 const SECTIONS = [
   { label: '대시보드', path: '/' },
@@ -38,6 +39,28 @@ test('the top bar has the five sections and marks the current one', async ({ pag
     await expect(page.getByRole('heading', { level: 1, name: section.label })).toBeVisible()
     await expect(nav.locator('[aria-current="page"]')).toHaveText(section.label)
   }
+})
+
+test('losing the internet while the app is open changes nothing (APP-4)', async ({ page }) => {
+  resetData()
+  await page.goto('/')
+  await expect(page.getByRole('heading', { level: 1, name: '대시보드' })).toBeVisible()
+  // What the browser says when the network goes away. The backend is on this computer.
+  await page.evaluate(() => window.dispatchEvent(new Event('offline')))
+  const nav = page.getByRole('navigation', { name: '주 메뉴' })
+  await nav.getByRole('link', { name: '거래처' }).click()
+  await expect(tableRows(page, '거래처 목록').first()).toBeVisible()
+  await nav.getByRole('link', { name: '파이프라인' }).click()
+
+  const card = page.locator('section[aria-labelledby="lane-new"] [data-card-id]').first()
+  const id = await card.getAttribute('data-card-id')
+  await card.focus()
+  await page.keyboard.press('Space')
+  await page.keyboard.press('ArrowRight')
+  await page.keyboard.press('Space')
+  await expect.poll(() => apiGet<{ stage: string }>(`/api/deals/${id}`).then((deal) => deal.stage)).toBe('qualified')
+  await expect(page.getByRole('status').getByText('적격 단계로 옮겼어요')).toBeVisible()
+  await expect(page.locator(`section[aria-labelledby="lane-qualified"] [data-card-id="${id}"]`)).toBeVisible()
 })
 
 test('every section has the sample data in it', async ({ page }) => {

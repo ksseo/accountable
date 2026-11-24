@@ -9,8 +9,8 @@ import { Panel } from '../../ui/Panel'
 import { RecordLink } from '../../ui/RecordLink'
 import { LogActivity, Timeline } from '../activities/Timeline'
 import { LateBadge, StageBadge, StatusBadge } from '../badges'
-import { useDealForm } from '../deals/DealFormHost'
 import { DeleteRecord } from '../DeleteRecord'
+import { useDealForm } from '../openForms'
 import { recordId, RecordPending } from '../RecordMissing'
 import { AddButton, Details, Joined, LinkedList, LinkedRow, RecordActions } from '../RecordParts'
 import styles from '../records.module.css'
@@ -20,8 +20,8 @@ import { contactDeleteMessage } from './deleteMessage'
 
 /** A contact's page (REC-2). */
 export function ContactPage() {
-  const { data, error } = useContact(recordId(useParams().id))
-  if (!data) return <RecordPending error={error} listPath="/contacts" listLabel="연락처" />
+  const { data, error, refetch } = useContact(recordId(useParams().id))
+  if (!data) return <RecordPending error={error} listPath="/contacts" listLabel="연락처" onRetry={() => refetch()} />
   return <ContactRecord contact={data} />
 }
 
@@ -85,7 +85,14 @@ function ContactRecord({ contact }: { contact: ContactDetail }) {
                     }
                     meta={
                       <Joined
-                        parts={[deal.organization_name, deal.close_date ? `마감 ${formatDate(deal.close_date)}` : '마감일 없음']}
+                        parts={[
+                          deal.organization_id !== null && deal.organization_name ? (
+                            <RecordLink kind="organization" id={deal.organization_id} quiet>
+                              {deal.organization_name}
+                            </RecordLink>
+                          ) : null,
+                          deal.close_date ? `마감 ${formatDate(deal.close_date)}` : '마감일 없음',
+                        ]}
                       />
                     }
                     end={formatMoney(deal.value)}

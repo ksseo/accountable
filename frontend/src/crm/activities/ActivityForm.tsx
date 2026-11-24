@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useId } from 'react'
+import { useEffect, useId, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { ToggleButton, ToggleButtonGroup } from 'react-aria-components'
 import { z } from 'zod'
@@ -8,7 +8,7 @@ import { Button } from '../../ui/Button'
 import { Checkbox } from '../../ui/Checkbox'
 import { DatePicker } from '../../ui/DatePicker'
 import { DateTimeField } from '../../ui/DateTimeField'
-import { DialogActions } from '../../ui/Dialog'
+import { DialogActions, useUnsaved } from '../../ui/Dialog'
 import { FieldRow, FieldStack, TextInput } from '../../ui/Field'
 import fieldStyles from '../../ui/Field.module.css'
 import { showSaveError } from '../forms'
@@ -41,8 +41,18 @@ const schema = z.object({
   follow_up_done: z.boolean(),
 })
 
-export type ActivityValues = { kind: LoggedKind; description: string; occurred_at: string; follow_up_date: string | null; follow_up_done: boolean }
+export type ActivityValues = {
+  kind: LoggedKind
+  description: string
+  /** Left out, it's when the backend saves the activity. */
+  occurred_at?: string
+  follow_up_date: string | null
+  follow_up_done: boolean
+}
 type Values = z.infer<typeof schema>
+
+// How often the time shown catches up with the clock.
+const CLOCK_MS = 5_000
 
 /** Now, to the minute. */
 const now = () => {
@@ -76,14 +86,27 @@ export function ActivityForm({ mode, initial, onSave, onCancel }: Props) {
     },
   })
   const { control, handleSubmit, formState, watch } = form
+  useUnsaved(formState.isDirty)
   const followUp = watch('follow_up_date')
+
+  // Until it's changed, the time is now, and it stays now while the page is open.
+  const [isNow, setIsNow] = useState(mode === 'log')
+  useEffect(() => {
+    if (!isNow) return
+    const timer = setInterval(() => {
+      const value = now()
+      if (value !== form.getValues('occurred_at')) form.setValue('occurred_at', value)
+    }, CLOCK_MS)
+    return () => clearInterval(timer)
+  }, [isNow, form])
 
   async function submit(values: Values) {
     try {
       await onSave({
         kind: values.kind,
         description: values.description.trim(),
-        occurred_at: values.occurred_at!,
+        // The backend's own now has seconds, so entries in the same minute stay in order.
+        occurred_at: isNow ? undefined : values.occurred_at!,
         follow_up_date: values.follow_up_date,
         follow_up_done: values.follow_up_date ? values.follow_up_done : false,
       })
@@ -92,6 +115,7 @@ export function ActivityForm({ mode, initial, onSave, onCancel }: Props) {
       return
     }
     if (mode === 'log') {
+      setIsNow(true)
       form.reset({ kind: values.kind, description: '', occurred_at: now(), follow_up_date: null, follow_up_done: false })
     }
   }
@@ -163,7 +187,10 @@ export function ActivityForm({ mode, initial, onSave, onCancel }: Props) {
                 isRequired
                 name={field.name}
                 value={field.value}
-                onChange={field.onChange}
+                onChange={(value) => {
+                  setIsNow(false)
+                  field.onChange(value)
+                }}
                 onBlur={field.onBlur}
                 focusRef={field.ref}
                 error={fieldState.error?.message}

@@ -2,6 +2,7 @@ import { Plus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { Switch } from 'react-aria-components'
 import { useSearchParams } from 'react-router'
+import { failedLoad } from '../../api/failedLoad'
 import { formatDate } from '../../lib/dates'
 import { count } from '../../lib/korean'
 import { formatMoney, formatPercent } from '../../lib/money'
@@ -13,27 +14,29 @@ import { RecordLink, recordPath } from '../../ui/RecordLink'
 import { LateBadge, StageBadge } from '../badges'
 import { DeleteRecord } from '../DeleteRecord'
 import { isClosed, STAGES } from '../meta'
+import { useDealForm } from '../openForms'
 import styles from '../tables.module.css'
 import { dealImpact, deleteDeal, useDeals, type Deal } from './api'
-import { useDealForm } from './DealFormHost'
 import { dealDeleteMessage } from './deleteMessage'
 
 const COLUMNS: Column<Deal>[] = [
   {
     key: 'name',
     header: '이름',
-    sortValue: (row) => row.name,
+    value: (row) => row.name,
+    searchable: true,
     cell: (row) => (
       <RecordLink kind="deal" id={row.id}>
         {row.name}
       </RecordLink>
     ),
   },
-  { key: 'stage', header: '단계', sortValue: (row) => STAGES.indexOf(row.stage), cell: (row) => <StageBadge stage={row.stage} /> },
+  { key: 'stage', header: '단계', value: (row) => STAGES.indexOf(row.stage), cell: (row) => <StageBadge stage={row.stage} /> },
   {
     key: 'organization',
     header: '거래처',
-    sortValue: (row) => row.organization_name,
+    value: (row) => row.organization_name,
+    searchable: true,
     cell: (row) =>
       row.organization_id && row.organization_name ? (
         <RecordLink kind="organization" id={row.organization_id}>
@@ -44,7 +47,8 @@ const COLUMNS: Column<Deal>[] = [
   {
     key: 'contact',
     header: '주 연락처',
-    sortValue: (row) => row.contact_name,
+    value: (row) => row.contact_name,
+    searchable: true,
     cell: (row) =>
       row.contact_id && row.contact_name ? (
         <RecordLink kind="contact" id={row.contact_id}>
@@ -52,12 +56,12 @@ const COLUMNS: Column<Deal>[] = [
         </RecordLink>
       ) : null,
   },
-  { key: 'value', header: '금액', align: 'end', nowrap: true, sortValue: (row) => row.value, cell: (row) => formatMoney(row.value) },
+  { key: 'value', header: '금액', align: 'end', nowrap: true, value: (row) => row.value, cell: (row) => formatMoney(row.value) },
   {
     key: 'probability',
     header: '확률',
     align: 'end',
-    sortValue: (row) => row.probability,
+    value: (row) => row.probability,
     cell: (row) => formatPercent(row.probability),
   },
   {
@@ -65,14 +69,14 @@ const COLUMNS: Column<Deal>[] = [
     header: '예상 매출',
     align: 'end',
     nowrap: true,
-    sortValue: (row) => row.expected_revenue,
+    value: (row) => row.expected_revenue,
     cell: (row) => formatMoney(row.expected_revenue),
   },
   {
     key: 'close_date',
     header: '마감일',
     nowrap: true,
-    sortValue: (row) => row.close_date,
+    value: (row) => row.close_date,
     cell: (row) =>
       row.close_date ? (
         <span className={styles.closeDate}>
@@ -83,11 +87,10 @@ const COLUMNS: Column<Deal>[] = [
   },
 ]
 
-const searchFields = (row: Deal) => [row.name, row.organization_name, row.contact_name]
-
 /** 영업 기회: the deals table with "지연된 것만" (TBL-5, TBL-8). */
 export function DealsPage() {
-  const { data } = useDeals()
+  const deals = useDeals()
+  const { data } = deals
   const dealForm = useDealForm()
   const [params, setParams] = useSearchParams()
   const [deleting, setDeleting] = useState<Deal | null>(null)
@@ -120,7 +123,7 @@ export function DealsPage() {
     >
       <span className={styles.track} aria-hidden="true" />
       지연된 것만
-      <span className={styles.segmentCount}>{late.toLocaleString('ko-KR')}</span>
+      {data ? <span className={styles.segmentCount}>{late.toLocaleString('ko-KR')}</span> : null}
     </Switch>
   )
 
@@ -134,12 +137,12 @@ export function DealsPage() {
         <DataTable
           caption="영업 기회 목록"
           rows={rows}
+          onRetry={failedLoad(deals)}
           totalCount={data?.length ?? 0}
           columns={COLUMNS}
           rowKey={(row) => row.id}
           rowHref={(row) => recordPath('deal', row.id)}
           rowName={(row) => row.name}
-          searchFields={searchFields}
           searchLabel="영업 기회 검색"
           searchPlaceholder="이름, 거래처, 주 연락처로 검색"
           defaultSort={{ key: 'close_date', direction: 'asc' }}

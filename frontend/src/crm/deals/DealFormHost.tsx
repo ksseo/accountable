@@ -1,31 +1,18 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
+import { useCallback, useMemo, useState, type ReactNode } from 'react'
+import { failedLoad } from '../../api/failedLoad'
 import { toast } from '../../app/toastStore'
 import { Dialog } from '../../ui/Dialog'
+import { LoadError } from '../../ui/LoadError'
 import { SkeletonRows } from '../../ui/Skeleton'
 import { useContacts } from '../contacts/api'
 import { useRefreshAll } from '../forms'
 import { useMeta } from '../meta'
+import { DealFormContext, type DealDefaults } from '../openForms'
 import { useOrganizations } from '../organizations/api'
 import { saveDeal, type Deal, type DealSaved } from './api'
-import { DealForm, type DealDefaults } from './DealForm'
+import { DealForm } from './DealForm'
 
 type Target = { mode: 'new'; defaults: DealDefaults } | { mode: 'edit'; deal: Deal }
-
-type DealFormApi = {
-  /** Opens the add form, with a stage or links already chosen. */
-  openNew: (defaults?: DealDefaults) => void
-  openEdit: (deal: Deal) => void
-}
-
-const DealFormContext = createContext<DealFormApi | null>(null)
-
-/** The deal form, which the top bar's "영업 기회 추가", the tables, the board's
- * lanes and the record pages all open. */
-export function useDealForm(): DealFormApi {
-  const context = useContext(DealFormContext)
-  if (!context) throw new Error('useDealForm needs DealFormProvider')
-  return context
-}
 
 /** The messages after a deal is saved: "저장했어요", and if the save made the
  * main contact a customer, "김민준 님이 고객이 되었어요" (UI-4). */
@@ -49,9 +36,13 @@ export function DealFormProvider({ children }: { children: ReactNode }) {
 }
 
 function DealDialog({ target, onClose }: { target: Target; onClose: () => void }) {
-  const { data: meta } = useMeta()
-  const { data: contacts } = useContacts()
-  const { data: organizations } = useOrganizations()
+  const metaLoad = useMeta()
+  const contactsLoad = useContacts()
+  const organizationsLoad = useOrganizations()
+  const retry = failedLoad(metaLoad, contactsLoad, organizationsLoad)
+  const { data: meta } = metaLoad
+  const { data: contacts } = contactsLoad
+  const { data: organizations } = organizationsLoad
   const refresh = useRefreshAll()
   const editing = target.mode === 'edit' ? target.deal : undefined
 
@@ -87,6 +78,8 @@ function DealDialog({ target, onClose }: { target: Target; onClose: () => void }
             await refresh()
           }}
         />
+      ) : retry ? (
+        <LoadError onRetry={retry} />
       ) : (
         <SkeletonRows rows={5} />
       )}

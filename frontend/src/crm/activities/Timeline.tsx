@@ -1,5 +1,6 @@
 import { Pencil, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { failedLoad } from '../../api/failedLoad'
 import { toast } from '../../app/toastStore'
 import { daysBetween, formatDateTime, formatDateWithWeekday } from '../../lib/dates'
 import { count, objectParticle } from '../../lib/korean'
@@ -7,6 +8,7 @@ import { Button } from '../../ui/Button'
 import { Checkbox } from '../../ui/Checkbox'
 import { ConfirmDelete } from '../../ui/ConfirmDelete'
 import { EmptyState } from '../../ui/EmptyState'
+import { LoadError } from '../../ui/LoadError'
 import { Panel } from '../../ui/Panel'
 import { RecordLink } from '../../ui/RecordLink'
 import { RowMenu } from '../../ui/RowMenu'
@@ -83,10 +85,13 @@ export function Timeline({ owner }: { owner: Owner }) {
   }
 
   const deletingLabel = deleting ? `${kindLabel(meta, deleting.kind)} 기록` : ''
+  const retry = failedLoad(timeline)
 
   return (
     <Panel title="타임라인" aside={timeline.data ? `활동 ${count(total, 'activity')}` : undefined}>
-      {timeline.isPending ? (
+      {retry ? (
+        <LoadError onRetry={retry} />
+      ) : !timeline.data ? (
         <SkeletonRows rows={4} />
       ) : entries.length === 0 ? (
         <EmptyState message="아직 기록된 활동이 없어요" />

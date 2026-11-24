@@ -20,6 +20,9 @@ export class ApiError extends Error {
   }
 }
 
+/** Whether a call failed because the backend can't be reached. */
+export const isOffline = (error: unknown): boolean => error instanceof ApiError && error.offline
+
 // Whether the backend can be reached (UI-5). Every call updates it.
 let online = true
 const listeners = new Set<() => void>()

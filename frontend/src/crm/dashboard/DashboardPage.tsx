@@ -1,5 +1,7 @@
+import { failedLoad } from '../../api/failedLoad'
 import { formatDateWithWeekday } from '../../lib/dates'
 import { count, subjectParticle, withParticle } from '../../lib/korean'
+import { LoadError } from '../../ui/LoadError'
 import { PageHeader } from '../../ui/PageHeader'
 import { Panel } from '../../ui/Panel'
 import { SkeletonRows } from '../../ui/Skeleton'
@@ -27,11 +29,21 @@ export function headline(today: string, figures: DashboardFigures): string {
 
 /** The dashboard, laid out as in mockup 3 (DASH-1 to DASH-13). */
 export function DashboardPage() {
-  const { data } = useDashboard()
+  const dashboard = useDashboard()
+  const { data } = dashboard
+  const retry = failedLoad(dashboard)
   return (
     <>
       <PageHeader title="대시보드" summary={data ? headline(data.today, data.figures) : ' '} />
-      {data ? <DashboardGrid dashboard={data} /> : <DashboardSkeleton />}
+      {data ? (
+        <DashboardGrid dashboard={data} />
+      ) : retry ? (
+        <Panel>
+          <LoadError onRetry={retry} />
+        </Panel>
+      ) : (
+        <DashboardSkeleton />
+      )}
     </>
   )
 }

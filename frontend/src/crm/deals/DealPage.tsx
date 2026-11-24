@@ -13,20 +13,19 @@ import { LateBadge } from '../badges'
 import { DeleteRecord } from '../DeleteRecord'
 import { useRefreshAll } from '../forms'
 import { stageLabel, STAGES, useMeta, type StageKey } from '../meta'
-import { MOVE_FAILED } from '../pipeline/announcements'
-import { moveDeal } from '../pipeline/api'
+import { useDealForm } from '../openForms'
 import { recordId, RecordPending } from '../RecordMissing'
 import { Details, Figures, Joined, RecordActions } from '../RecordParts'
 import styles from '../records.module.css'
 import { dealImpact, deleteDeal, useDeal, type Deal } from './api'
-import { useDealForm } from './DealFormHost'
 import { dealDeleteMessage } from './deleteMessage'
+import { MOVE_FAILED, moveDeal } from './move'
 
 /** A deal's page (REC-3). */
 export function DealPage() {
   const id = recordId(useParams().id)
-  const { data, error } = useDeal(id)
-  if (!data) return <RecordPending error={error} listPath="/deals" listLabel="영업 기회" />
+  const { data, error, refetch } = useDeal(id)
+  if (!data) return <RecordPending error={error} listPath="/deals" listLabel="영업 기회" onRetry={() => refetch()} />
   return <DealRecord deal={data} />
 }
 

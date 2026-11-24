@@ -78,6 +78,21 @@ test('finds a phone number by its digits alone', async ({ page }) => {
   await expect(tableRows(page, '연락처 목록').filter({ hasText: contact.name })).toHaveCount(1)
 })
 
+test('keeps every letter of a search typed quickly', async ({ page }) => {
+  await page.goto('/contacts')
+  const box = page.getByRole('searchbox', { name: '연락처 검색' })
+  await expect(tableRows(page, '연락처 목록').first()).toBeVisible()
+  for (let run = 0; run < 8; run += 1) {
+    await box.fill('')
+    await expect(page).toHaveURL('/contacts')
+    await box.focus()
+    await page.keyboard.type('01012345678', { delay: 10 })
+    await expect(page).toHaveURL(/q=0\d*8$/)
+    await page.waitForTimeout(200)
+    await expect(box).toHaveValue('01012345678')
+  }
+})
+
 test('pages through 50 at a time, kept in the address', async ({ page }) => {
   const contacts = await apiGet<Contact[]>('/api/contacts')
   await page.goto('/contacts')

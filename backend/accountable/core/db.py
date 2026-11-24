@@ -4,7 +4,7 @@ Everything specific to SQLite lives here, so moving to Postgres later changes
 this file and the migrations, and not the features (DATA-1, DATA-2).
 """
 
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated
@@ -12,7 +12,7 @@ from typing import Annotated
 from alembic import command
 from alembic.config import Config
 from fastapi import Depends, Request
-from sqlalchemy import Column, Connection, DateTime, Engine, MetaData, create_engine, event
+from sqlalchemy import Column, Connection, DateTime, Engine, MetaData, create_engine, event, inspect
 from sqlalchemy.types import TypeDecorator
 
 from accountable.core import clock
@@ -112,10 +112,17 @@ def _request_connection(request: Request) -> Iterator[Connection]:
 Conn = Annotated[Connection, Depends(_request_connection, scope="function")]
 
 
-def migrate(engine: Engine) -> None:
-    """Bring the database up to date with the Alembic migrations."""
+def migrate(engine: Engine, on_create: Callable[[Connection], None] | None = None) -> None:
+    """Bring the database up to date with the Alembic migrations.
+
+    A new database, one with no tables yet, is then filled by on_create in the
+    same transaction. A start cut short leaves it new, so the next one does both.
+    """
     config = Config()
     config.set_main_option("script_location", str(MIGRATIONS_DIR))
     with write_connection(engine) as conn, conn.begin():
+        is_new = not inspect(conn).get_table_names()
         config.attributes["connection"] = conn
         command.upgrade(config, "head")
+        if is_new and on_create is not None:
+            on_create(conn)

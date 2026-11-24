@@ -8,29 +8,25 @@ import {
   type DragOverEvent,
   type DragStartEvent,
 } from '@dnd-kit/core'
-import { useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router'
+import { failedLoad } from '../../api/failedLoad'
 import { toast } from '../../app/toastStore'
 import { objectParticle, quoted } from '../../lib/korean'
 import { formatMoney } from '../../lib/money'
+import { LoadError } from '../../ui/LoadError'
 import { PageHeader } from '../../ui/PageHeader'
+import { Panel } from '../../ui/Panel'
 import { SkeletonRows } from '../../ui/Skeleton'
 import { dealImpact, deleteDeal } from '../deals/api'
-import { useDealForm } from '../deals/DealFormHost'
 import { dealDeleteMessage } from '../deals/deleteMessage'
+import { MOVE_FAILED, moveDeal } from '../deals/move'
 import { DeleteRecord } from '../DeleteRecord'
 import { useRefreshAll } from '../forms'
 import { stageLabel, STAGES, useMeta, usualProbability, type Meta, type StageKey } from '../meta'
-import {
-  BOARD_HELP,
-  dropped,
-  MOVE_FAILED,
-  movedTo,
-  pickedUp,
-  putBack,
-  type Spot,
-} from './announcements'
-import { moveDeal, usePipeline } from './api'
+import { useDealForm } from '../openForms'
+import { BOARD_HELP, dropped, movedTo, pickedUp, putBack, type Spot } from './announcements'
+import { usePipeline } from './api'
 import { applyMove, isSamePlace, neighbours, placementOf, type Board, type MoveRules, type Placement } from './applyMove'
 import styles from './Board.module.css'
 import type { CardAction } from './CardMenu'
@@ -40,14 +36,21 @@ import { Lane } from './Lane'
 import { ShareBand } from './ShareBand'
 
 export function PipelinePage() {
-  const { data: board } = usePipeline()
-  const { data: meta } = useMeta()
-  return board && meta ? (
-    <PipelineBoard board={board} meta={meta} />
+  const boardLoad = usePipeline()
+  const metaLoad = useMeta()
+  const retry = failedLoad(boardLoad, metaLoad)
+  return boardLoad.data && metaLoad.data ? (
+    <PipelineBoard board={boardLoad.data} meta={metaLoad.data} />
   ) : (
     <>
       <PageHeader title="파이프라인" />
-      <SkeletonRows rows={6} />
+      {retry ? (
+        <Panel>
+          <LoadError onRetry={retry} />
+        </Panel>
+      ) : (
+        <SkeletonRows rows={6} />
+      )}
     </>
   )
 }
@@ -93,9 +96,11 @@ function PipelineBoard({ board, meta }: { board: Board; meta: Meta }) {
   const dragRef = useRef<Drag | null>(null)
   const seqRef = useRef(0)
   const focusRef = useRef<number | null>(null)
-  const clickBlockedUntil = useRef(0)
+  // Whether the mouse press that's under way became a drag.
+  const pressDragged = useRef(false)
 
-  const shown = drag?.draft ?? pending?.board ?? board
+  const settled = pending?.board ?? board
+  const shown = drag?.draft ?? settled
 
   const rules: MoveRules = useMemo(
     () => ({ today: meta.today, usualProbability: (stage) => usualProbability(meta, stage) ?? 0 }),
@@ -156,21 +161,31 @@ function PipelineBoard({ board, meta }: { board: Board; meta: Meta }) {
     if (!dragRef.current) focusRef.current = null
   })
 
+  /** Puts a card picked up by keyboard back where it was, leaving focus alone. */
+  function dropPickedUp() {
+    const current = dragRef.current
+    if (current?.mode !== 'keyboard') return
+    setDrag(null)
+    focusRef.current = null
+    setAnnouncement(putBack(cardOf(current.start, current.dealId)!.name, spotOf(current.start, current.dealId)))
+  }
+
   function onKey(event: KeyboardEvent<HTMLElement>, dealId: number) {
-    // Keys on the card's menu button belong to the menu.
+    // Keys on the card's links and menu button belong to them.
     if (event.target !== event.currentTarget) return
     const current = dragRef.current
-    if (current && current.mode === 'keyboard' && current.dealId === dealId) {
+    if (current?.mode === 'mouse') return
+    if (current?.dealId === dealId) {
       moveByKey(event, current)
       return
     }
-    if (current) return
+    dropPickedUp()
     if (event.key === ' ') {
       event.preventDefault()
-      const card = cardOf(shown, dealId)!
-      setDrag({ dealId, mode: 'keyboard', start: shown, draft: shown })
+      const card = cardOf(settled, dealId)!
+      setDrag({ dealId, mode: 'keyboard', start: settled, draft: settled })
       focusRef.current = dealId
-      setAnnouncement(pickedUp(card.name, spotOf(shown, dealId)))
+      setAnnouncement(pickedUp(card.name, spotOf(settled, dealId)))
     } else if (event.key === 'Enter') {
       event.preventDefault()
       navigate(`/deals/${dealId}`)
@@ -232,19 +247,40 @@ function PipelineBoard({ board, meta }: { board: Board; meta: Meta }) {
 
   // The functions cards call go through a ref, so the context value never
   // changes and cards don't draw again when the board does.
-  const handlers = useRef({ onKey, onMenu, open: (_: number) => {}, add: (_: StageKey) => {}, label })
+  const handlers = useRef({ onKey, onMenu, open: (_: number) => {}, add: (_: StageKey) => {}, label, dropPickedUp })
   useLayoutEffect(() => {
     handlers.current = {
       onKey,
       onMenu,
       label,
-      open: (dealId) => {
-        if (Date.now() < clickBlockedUntil.current || dragRef.current) return
-        navigate(`/deals/${dealId}`)
-      },
+      open: (dealId) => navigate(`/deals/${dealId}`),
       add: (stage) => dealForm.openNew({ stage }),
+      dropPickedUp,
     }
   })
+
+  // On the window, before the cards and their links: dnd-kit only holds clicks
+  // back from React, and only while it's dragging.
+  useEffect(() => {
+    function onPress() {
+      pressDragged.current = false
+      handlers.current.dropPickedUp()
+    }
+    // The release that ends a drag, or comes after Escape cancelled it, clicks
+    // whatever is under it. A click from the keyboard has no press (detail 0).
+    function onClick(event: MouseEvent) {
+      if (!pressDragged.current || event.detail === 0) return
+      event.preventDefault()
+      event.stopPropagation()
+    }
+    window.addEventListener('pointerdown', onPress, true)
+    window.addEventListener('click', onClick, true)
+    return () => {
+      window.removeEventListener('pointerdown', onPress, true)
+      window.removeEventListener('click', onClick, true)
+    }
+  }, [])
+
   const actions: BoardActions = useMemo(
     () => ({
       open: (dealId) => handlers.current.open(dealId),
@@ -260,6 +296,7 @@ function PipelineBoard({ board, meta }: { board: Board; meta: Meta }) {
 
   function onDragStart({ active }: DragStartEvent) {
     if (dragRef.current) return
+    pressDragged.current = true
     setDrag({ dealId: Number(active.id), mode: 'mouse', start: shown, draft: shown })
   }
 
@@ -276,7 +313,6 @@ function PipelineBoard({ board, meta }: { board: Board; meta: Meta }) {
   function onDragEnd({ collisions }: DragEndEvent) {
     const current = dragRef.current
     if (!current || current.mode !== 'mouse') return
-    clickBlockedUntil.current = Date.now() + 300
     const target = targetOf(collisions)
     setDrag(null)
     // Dropped outside the lanes: the card goes back.

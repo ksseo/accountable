@@ -32,7 +32,7 @@ def bulk_client(tmp_path_factory: pytest.TempPathFactory) -> Iterator[TestClient
         with write_connection(engine) as conn, conn.begin():
             bulk.load(conn)
         engine.dispose()
-        with TestClient(create_app()) as client:
+        with TestClient(create_app(), base_url="http://127.0.0.1") as client:
             yield client
 
 

@@ -31,13 +31,13 @@ The intent says Accountable will grow from a sales CRM into a business OS with E
 2. **Shared code holds what every area needs and no business rules.** In the backend that's `core/`. In the frontend it's `api/`, `styles/`, `lib/` and `ui/`. Nothing in them knows about deals or stages, so a later area can use them as they are.
 3. **Each business area is one folder** with its own tables, routes, sample data and screens. The MVP has one area, `crm`. A later area, such as `invoicing` or `accounting`, is a sibling folder.
 4. **Inside an area, one folder per feature** (APP-13). Imports between features go one way, so there are no cycles:
-   - `activities` uses no other feature;
-   - `contacts` may use `activities`;
-   - `deals` may use `contacts` and `activities`;
-   - `pipeline` and `dashboard` may use `deals`;
-   - `organizations` uses no other feature.
+   - `activities` and `organizations` use no other feature;
+   - `contacts` may use `activities` and `organizations`;
+   - `deals` may use `contacts`, `organizations` and `activities`;
+   - `pipeline` may use `deals`;
+   - `dashboard` may use `deals` and `activities`.
 
-   Every feature may use its area's shared files and the shared code.
+   Every feature may use its area's shared files and the shared code. The shared files use no feature, apart from the backend's `router.py`, `sample.py` and `bulk.py`, which no feature uses. A page that opens another feature's form, such as "영업 기회 추가" on an organization's page, asks for it through the area's `openForms.ts`. A test on each side checks all of this.
 
 Adding an area later touches its own folders, plus one line each in:
 
@@ -82,7 +82,7 @@ Backend tests are in `backend/tests/`, in `core/` and `crm/` folders that mirror
 
 | Path | What it holds |
 | --- | --- |
-| `package.json` | react, react-dom, react-router, @tanstack/react-query, @tanstack/react-table, recharts, @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities, react-aria-components, react-hook-form, zod, @hookform/resolvers, lucide-react, date-fns, @fontsource/noto-sans-kr, openapi-fetch. Dev: vite, @vitejs/plugin-react, typescript, vitest, jsdom, Testing Library (react, user-event, jest-dom) |
+| `package.json` | react, react-dom, react-router, @tanstack/react-query, @tanstack/react-table, recharts, @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities, react-aria-components, react-hook-form, zod, @hookform/resolvers, lucide-react, @fontsource/noto-sans-kr, openapi-fetch. Dev: vite, @vitejs/plugin-react, typescript, vitest, jsdom, Testing Library (react, user-event, jest-dom) |
 | `vite.config.ts` | Host `127.0.0.1`. The port comes from `ACCOUNTABLE_WEB_PORT` (5173 by default, 5273 in tests), with `strictPort` so a taken port fails instead of moving. `/api` is passed on to the backend at `ACCOUNTABLE_API_PORT` (8000 by default, 8100 in tests). Vitest settings: jsdom, a setup file |
 | `tsconfig.json`, `index.html` | Strict TypeScript. `<html lang="ko">`. KO-9 |
 | `src/main.tsx` | Loads the four font weights and the global styles. Providers: TanStack Query, React Aria's `I18nProvider locale="ko-KR"`, the router |
@@ -92,6 +92,7 @@ Backend tests are in `backend/tests/`, in `core/` and `crm/` folders that mirror
 | `src/lib/` | Plain functions. `dates.ts` (KO-2, KO-3), `money.ts` (KO-4, and reading typed amounts for FORM-5), `korean.ts` (counter words and particles, KO-5, KO-6), `ime.ts` (telling when a Korean letter is still being typed, for TBL-2 and FORM-7) |
 | `src/ui/` | Shared components, each with its own `.module.css`: Panel, PageHeader (UI-2), Dialog (FORM-1), Field, Combobox (FORM-3), DatePicker (FORM-6), MoneyField (FORM-5), Badge, EmptyState (UI-6), Skeleton (UI-5), RecordLink (UI-7), RowMenu, SearchBox, ConfirmDelete (DEL-1; each feature gives it its own message), ChartPanel with "표로 보기" (A11Y-6). `DataTable/` holds the table and the search and Korean sort that only it uses (TBL-1 to TBL-6) |
 | `src/crm/meta.ts`, `src/crm/badges.tsx` | The `/api/meta` query, and each stage's color token. The stage, status and late badges, built on `ui/Badge` (LOOK-5, A11Y-2) |
+| `src/crm/openForms.ts` | How a page of any feature opens the deal and contact forms, which their own features provide |
 | `src/crm/organizations/` | OrganizationsPage, OrganizationPage, OrganizationForm, `api.ts` (its queries and saves), its delete message |
 | `src/crm/contacts/` | ContactsPage (status filter), ContactPage, ContactForm, `api.ts`, its delete message |
 | `src/crm/deals/` | DealsPage ("지연된 것만"), DealPage (stage selector), DealForm (FORM-4), `api.ts`, its delete message |
@@ -360,6 +361,7 @@ Together these are TEST-1. `test_startup.py` and `test_openapi.py` are in `backe
 | `test_dashboard_api.py` | On a small hand-made dataset: the four figures, the band, 12 months including this one with empty months at zero, the funnel (a won deal counts at every stage, a deal lost from Proposal at three, a deal added straight into Proposal at New and Qualified), the follow-up order and the 14-day window with the later count, the 10 newest entries | API-7, DASH-1 to DASH-6, DASH-9, DASH-10, DASH-12, DASH-13, RULE-12, RULE-13 |
 | `test_meta.py` | Stages with Korean names and probabilities, statuses, kinds, industries in use, today. Health answers | API-1, API-8, DATA-8 |
 | `test_openapi.py` | The committed `openapi.json` matches the backend | API-9 |
+| `test_imports.py` | Features import each other one way | APP-13 |
 | `test_speed.py` | With the bulk data, `/api/dashboard` and `/api/pipeline` answer within 300 ms, and their queries use the indexes | PERF-4 |
 
 ### Frontend unit tests (Vitest, beside each module)
@@ -372,10 +374,13 @@ Together these are TEST-2.
 | `lib/money.test.ts` | "$12,500", never "US$". Reads "12500", "12,500" and "$12,500"; refuses other text. Axis labels "$120K" and "$1.2M" | KO-4, FORM-5 |
 | `lib/korean.test.ts` | 건, 명 and 곳. 을/를 and 과/와 picked for Korean names, both written for others | KO-5, KO-6 |
 | `ui/DataTable/search.test.ts` | Upper and lower case, extra spaces, part matches, phone numbers by digits | TBL-2 |
-| `ui/DataTable/sort.test.ts` | Korean order, empty values last in both directions | TBL-3 |
+| `ui/DataTable/sort.test.ts` | Korean order, numbers in text, dates | TBL-3 |
 | `ui/SearchBox.test.tsx` | No search while a Korean letter is being typed; search once it's finished | TBL-2 |
-| `ui/DataTable/DataTable.test.tsx` | `aria-sort`, 50 rows a page, search, sort and page kept in the address, the empty and no-results messages | TBL-1, TBL-3, TBL-6, UI-6 |
+| `ui/DataTable/DataTable.test.tsx` | `aria-sort`, empty values last in both directions, equal values in their own order, 50 rows a page, the page kept when rows change, search, sort and page kept in the address, the empty and no-results messages | TBL-1 to TBL-3, TBL-6, UI-6 |
 | `crm/organizations/OrganizationForm.test.tsx`, `crm/contacts/ContactForm.test.tsx`, `crm/deals/DealForm.test.tsx` | Labels and "(필수)". Korean messages when a field is left. Focus on the first wrong field. The deal form fills in the organization, the probability and today's close date. Enter while typing a Korean letter doesn't submit. Each feature's delete message with its counts | FORM-2, FORM-4, FORM-7, A11Y-3, DEL-2 |
+| `crm/imports.test.ts` | Features import each other one way | APP-13 |
+| `ui/Dialog.test.tsx` | A click outside keeps the form. Escape asks first when something was typed, and closes at once when nothing was | FORM-1 |
+| `api/failedLoad.test.ts` | Only a load that failed while the backend is up can be tried again | UI-5 |
 | `ui/ConfirmDelete.test.tsx` | Focus starts on 취소. Shows the message it's given. The delete button is Raspberry ink with white text | DEL-1 |
 | `crm/pipeline/applyMove.test.ts` | The card lands in the right place. Lane and board totals change. Rounding matches the shared cases file | PIPE-8, RULE-1 |
 | `crm/pipeline/announcements.test.ts` | Korean messages for picking up, moving, dropping and putting back | PIPE-9 |
@@ -393,6 +398,8 @@ Every test also fails on a console error or warning, or on a request that leaves
 | `crm/contacts.spec.ts` | The same for contacts, plus the status filter with its counts, search by phone digits, picking an organization with the combobox by keyboard | SC 2, SC 3, TBL-7, FORM-3 |
 | `crm/deals.spec.ts` | The same for deals, plus the late switch and badge, the money field, the Korean date picker, the deal form filling in fields, and the dashboard's late figure opening the late deals | SC 2, TBL-8, FORM-4 to FORM-6, DASH-6 |
 | `crm/records.spec.ts` | Each record page shows its linked records. Logging a note, call and email with a follow-up. Editing, deleting and finishing them. Automatic entries have no edit or delete. A contact's timeline shows their deal's stage changes. Every record name is a link. Deleting from a record's page goes back to its table | SC 3, SC 5, REC-1 to REC-6, DEL-3, UI-7 |
+| `crm/dialogs.spec.ts` | In every form, Escape asks before it throws away what was typed, and 닫기 and 취소 close at once. A click outside keeps the form | FORM-1 |
+| `crm/loading.spec.ts` | A list, the dashboard, the pipeline or a form that can't be loaded says so, shows no count, and loads on 다시 시도 | UI-5 |
 | `crm/pipeline-mouse.spec.ts` | Dragging to another lane changes stage and probability, and the deals table shows both. Dropping higher, lower and between two cards in its own lane. Every drop stays after a refresh. Totals change before a slowed-down save finishes. A failed save puts the card back with the message. "추가" in a lane. Moving to Won sets today's close date, makes the contact a customer and says so. Won and Lost show only the last 30 days. Late cards show the chip | SC 4, PIPE-1 to PIPE-8, RULE-3, RULE-7, RULE-14 |
 | `crm/pipeline-keyboard.spec.ts` | Space, arrows and Space move a card across lanes and within one. Escape puts it back. Each step is announced. The card menu's 단계 이동, 위로 and 아래로. Enter opens the deal | SC 8, PIPE-5, PIPE-9 |
 | `crm/dashboard.spec.ts` | The figures equal totals counted from the API. A deal moved to Won changes 이번 달 수주. A new follow-up appears; marking it done removes it. A band block opens the pipeline. Tooltips show on focus. "표로 보기" | SC 6, DASH-1 to DASH-13 |

@@ -247,6 +247,11 @@
   white-space: nowrap;
 }
 
+/* Inside the name's own box, which hides what doesn't fit. */
+.cardOrg a:focus-visible {
+  outline-offset: -2px;
+}
+
 .cardMenu {
   position: absolute;
   top: 7px;

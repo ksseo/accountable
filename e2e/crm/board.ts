@@ -12,6 +12,8 @@ export type BoardDeal = {
   close_date: string | null
   is_late: boolean
   days_late: number
+  organization_id: number | null
+  organization_name: string | null
   contact_id: number | null
   contact_name: string | null
 }
