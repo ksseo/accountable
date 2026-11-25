@@ -16,3 +16,5 @@ Run `npm run check` before you finish a change. It runs the formatting, lint, ty
 Fix what the checks find. Don't loosen a rule or switch one off for a line without asking first
 
 Update `docs/STATUS.md` when you finish a piece of work
+
+At Deploy, after the review fixes and before the merge, follow `docs/IMPROVE.md`
