@@ -71,6 +71,7 @@ Every requirement has an ID such as RULE-3, in bold brackets where it's stated. 
 - **[APP-18]** `npm run check` runs every check and fails if any of them fails. A warning counts as a failure. `npm run check:quick` runs the same checks without the end-to-end tests, and `npm run format` fixes the formatting. Everything but the tests runs together and all of it reports; the tests run once it passes. gitleaks is installed separately, and only these commands and committing need it.
 - **[APP-19]** `npm install` adds a git hook with lefthook. Before each commit it formats the staged files and stages them again, then runs ESLint, tsc, ruff, ty and gitleaks, without the tests. A failure stops the commit, and so does gitleaks not being installed.
 - **[APP-20]** Two hooks for Claude Code are in `scripts/hooks/`. When the agent finishes a turn, one runs `npm run check:quick` and sends a failure back to it, once per turn. The other refuses the agent's edits to `.env`, and any shell command of its that names `.env`.
+- **[APP-21]** GitHub Actions runs `npm run check` on Linux on every push to any branch, after gitleaks has looked through the repo. It uses the Google Chrome on GitHub's runner and no secrets. When it fails, the Playwright report is kept with the run.
   - Prettier and ESLint, over the frontend, the end-to-end tests and the scripts, with the recommended TypeScript, React Hooks and accessibility rules;
   - ruff's formatting and lint checks, over the backend;
   - a cyclomatic complexity of at most 15 per function, on both sides;

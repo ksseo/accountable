@@ -40,6 +40,7 @@ The data is in `backend/data/accountable.db`, which git ignores. The first start
 - Harness, coding standards: `AGENTS.md` points to `docs/STANDARDS.md`, and `docs/REVIEW.md` checks changes against it.
 - Harness, checks: `npm run check`, `check:quick` and `format` (APP-18), without a coverage limit. The settings are in `eslint.config.js`, `.prettierrc.json`, `pyproject.toml` and `.gitleaks-files.toml`. Each check was seen to fail on a file made to break it: complexity passes at 15 and fails at 16, and gitleaks reports a key in a file, in a `.env` in another folder and in a committed `.env`, but not in the git-ignored `.env`. Everything was formatted once, and all they found was fixed with no rule loosened and no line exempted: 16 from ESLint, 22 from ruff and 49 from ty. `eslint-plugin-jsx-a11y` says it needs ESLint 9, which is no longer supported; it uses nothing ESLint 10 removed, so `package.json` overrides that.
 - Harness, hooks: the pre-commit hook in `lefthook.yml` (APP-19) and the two Claude Code hooks in `scripts/hooks/` (APP-20). `.claude/settings.json` turns the Claude Code hooks on, and it's git-ignored, so a fresh clone has the scripts but not the setting.
+- Harness, CI: `.github/workflows/ci.yml` (APP-21). Playwright writes its HTML report on CI only.
 
 ## Speed (PERF-1, PERF-2)
 
