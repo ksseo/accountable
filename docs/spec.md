@@ -622,7 +622,7 @@ Choices that aren't obvious from the rest, and why.
 
 - **One font for everything.** The brand's original fonts have no Korean letters, and a label such as "예상 $20,000" drawn in several fonts looked patchy (LOOK-2).
 - **Ink shades.** White on Cerulean and Raspberry, and bright brand colors as text on white, fall below 4.5:1 (LOOK-4).
-- **Six stages from five brand colors.** Raspberry means trouble, so a Raspberry "Won" column would read as a warning. Won is Midnight and Lost Sea Mist (LOOK-5).
+- **Six stages from five brand colors.** Raspberry means trouble, so a Raspberry "Won" column would read as a warning. In light mode Won is Midnight and Lost Sea Mist; in dark mode Won is Sea Mist and Lost a dark slate (LOOK-5).
 - **One name field for a contact**, so Korean names (김민준) and overseas names (Sarah Kim) are both written naturally (DATA-4).
 - **Links are optional.** A contact's organization, a deal's organization and main contact, and an open deal's close date can all be empty. A deal with no close date is never late.
 - **A deal's history follows its main contact.** If the main contact changes, the whole history shows on the new contact's timeline instead (RULE-9).
