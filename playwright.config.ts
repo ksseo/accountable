@@ -12,8 +12,7 @@ export default defineConfig({
   retries: 0,
   timeout: 45_000,
   expect: { timeout: 8_000 },
-  // CI uploads the HTML report when a test fails.
-  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : [['list']],
+  reporter: [['list']],
   globalSetup: './e2e/global-setup.ts',
   globalTeardown: './e2e/global-teardown.ts',
   use: {

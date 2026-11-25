@@ -69,15 +69,15 @@ Every requirement has an ID such as RULE-3, in bold brackets where it's stated. 
 - **[APP-16]** After any save, delete or move, everything on screen is fetched again, so no figure is left out of date.
 - **[APP-17]** Four environment variables change the defaults: `ACCOUNTABLE_DB` (the database file), `ACCOUNTABLE_API_PORT` and `ACCOUNTABLE_WEB_PORT` (the ports), and `ACCOUNTABLE_TODAY` (for tests).
 - **[APP-18]** `npm run check` runs every check and fails if any of them fails. A warning counts as a failure. `npm run check:quick` runs the same checks without the end-to-end tests, and `npm run format` fixes the formatting. Everything but the tests runs together and all of it reports; the tests run once it passes. gitleaks is installed separately, and only these commands and committing need it.
-- **[APP-19]** `npm install` adds a git hook with lefthook. Before each commit it formats the staged files and stages them again, then runs ESLint, tsc, ruff, ty and gitleaks, without the tests. A failure stops the commit, and so does gitleaks not being installed.
-- **[APP-20]** Four hooks for Claude Code are in `scripts/hooks/`. When the agent finishes a turn, one runs `npm run check:quick` and sends a failure back to it, once per turn. Another refuses the agent's edits to `.env`, and any shell command of its that names `.env`. The other two belong to the subagents (APP-22).
-- **[APP-21]** GitHub Actions runs `npm run check` on Linux on every push to any branch, after gitleaks has looked through the repo. It uses the Google Chrome on GitHub's runner and no secrets. When it fails, the Playwright report is kept with the run.
   - Prettier and ESLint, over the frontend, the end-to-end tests and the scripts, with the recommended TypeScript, React Hooks and accessibility rules;
   - ruff's formatting and lint checks, over the backend;
   - a cyclomatic complexity of at most 15 per function, on both sides;
   - tsc for the frontend and ty for the backend;
   - gitleaks, over git's history on every branch and the files on this computer. Among the files it allows two things git ignores: `.env`, where this computer's own keys go, and the installed packages. A `.env` that's been committed is reported;
   - every test (APP-7).
+- **[APP-19]** `npm install` adds a git hook with lefthook. Before each commit it formats the staged files and stages them again, then runs ESLint, tsc, ruff, ty and gitleaks, without the tests. A failure stops the commit, and so does gitleaks not being installed.
+- **[APP-20]** Four hooks for Claude Code are in `scripts/hooks/`. When the agent finishes a turn, one runs `npm run check:quick` and sends a failure back to it, once per turn. Another refuses the agent's edits to `.env`, and any shell command of its that names `.env`. The other two belong to the subagents (APP-22).
+- **[APP-21]** GitHub Actions runs `npm run check:quick` on Linux on every push to any branch, after gitleaks has looked through the repo. It uses no secrets. The end-to-end tests run only on the developer's computer, in `npm run check`.
 - **[APP-22]** Two subagents for Claude Code are in `.claude/agents/`, both on Sonnet. `reviewer` reviews the changes on a branch with `docs/REVIEW.md` and reports its findings by severity. It has no tool that edits, and its hook refuses any shell command that isn't known to only read. `ui-check` opens the running app's pages through the Playwright MCP server, checks a screenshot of each against the brand skill and this spec, and reports anything off-brand or broken. It has no shell and no tool that edits, and its hook refuses to save a file anywhere but `.playwright-mcp/`, which git ignores.
 
 ### Libraries
