@@ -30,7 +30,7 @@ Use Sea Green, Marigold and Coral when three things sit side by side, such as pi
 ## Surfaces
 
 - **Light mode**: page background `#F0F4F5`, white panels and cards
-- **Dark mode**: page background `#04232E`, black panels and cards
+- **Dark mode**: page background `#04232E`, black panels and cards. What floats over the page is lighter, since a shadow can't be seen on black: dialogs and a card being dragged `#0C313E`; menus, lists and the calendar `#154252`
 
 Panels are rounded with no outline. Sea Green and Marigold are too bright for small text, so darken them for headings and body copy on light backgrounds and lighten them on dark ones.
 

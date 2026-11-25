@@ -22,7 +22,7 @@ Accountable is a business management system: a sales CRM that will grow into a f
 - **Organizations**, **Contacts** and **Deals**: a table of each, to search, sort, add, edit and delete. Each record has its own page with the records it's linked to; a contact's and a deal's also has a timeline.
 - **Pipeline**: the deals as cards on a board, one column per stage, dragged from stage to stage.
 
-**What it doesn't do:** sign-in, user accounts or several users; a dark mode or a layout for phones; AI features; email, calendar or phone integrations; currencies other than US dollars; reports beyond the dashboard; tags or custom fields; changing the pipeline stages; importing or exporting data; undoing a delete.
+**What it doesn't do:** sign-in, user accounts or several users; a layout for phones; following the device's own dark mode setting; AI features; email, calendar or phone integrations; currencies other than US dollars; reports beyond the dashboard; tags or custom fields; changing the pipeline stages; importing or exporting data; undoing a delete.
 
 ## Requirement IDs
 
@@ -51,7 +51,7 @@ Every requirement has an ID such as RULE-3, in bold brackets where it's stated. 
 
 ## 1. Shape of the app
 
-- **[APP-1]** One salesperson, one computer, no sign-in. Light mode only. Designed for screens 1280px wide and up, and usable down to 1024px with no sideways scrolling of the page.
+- **[APP-1]** One salesperson, one computer, no sign-in. Light mode, with a dark mode to switch to (UI-9). Designed for screens 1280px wide and up, and usable down to 1024px with no sideways scrolling of the page.
 - **[APP-2]** `backend/`: FastAPI serving a JSON API under `/api`, using SQLAlchemy Core (no raw SQL) on a SQLite file at `backend/data/accountable.db`, which git ignores. On start it brings the database up to date with Alembic migrations, and loads the sample data if the database is new, both in one step, so a first start that's cut short is done again by the next one. Tables only ever come from migrations.
 - **[APP-3]** `frontend/`: React, TypeScript and Vite. It only talks to `/api`, which Vite passes on to the backend. When the backend is down, Vite answers 503 with the header `X-Accountable-Offline`, which the frontend reads as unreachable (UI-5).
 - **[APP-4]** No internet connection is needed, and losing it while the app is open changes nothing. Fonts and every library are installed by `npm install` or `uv` and served from this computer; nothing loads from a CDN or Google Fonts.
@@ -60,7 +60,7 @@ Every requirement has an ID such as RULE-3, in bold brackets where it's stated. 
 - **[APP-7]** `npm test` runs every test (the frontend type check, pytest, Vitest, then Playwright), stops at the first failure and fails if any fails. The tests use their own database file and their own ports (8100 and 5273), refuse to open the real database, and can run while `npm run dev` is running.
 - **[APP-8]** The commands work the same on Mac, Linux and Windows: npm scripts only, with no shell-specific syntax, and Python started with `uv run`.
 - **[APP-9]** `docs/STATUS.md` says how to install, start, reset and test the app. `README.md` is the course's own guide and is left as it is.
-- **[APP-10]** Every change is saved to the database as it's made. It's still there after a browser refresh and after the app is stopped and started.
+- **[APP-10]** Every change is saved to the database as it's made. It's still there after a browser refresh and after the app is stopped and started. Only the choice of light or dark mode is kept in the browser instead (UI-9).
 - **[APP-11]** "Today" is the computer's local date, taken from one backend function. The frontend gets it from `GET /api/meta`, never from the browser's clock. Tests can fix it with `ACCOUNTABLE_TODAY`.
 - **[APP-12]** No errors or warnings appear in the browser's console on any screen or action.
 - **[APP-13]** Code is organized by feature on both sides (organizations, contacts, deals, activities, pipeline, dashboard), each with its own routes, data access and screens. Shared code holds only what two or more features use. Data access stays in each feature's own module, so moving to Supabase later changes those modules and nothing else. "How the code is laid out" below has the rules.
@@ -127,7 +127,7 @@ Adding an area touches its own folders, plus one line each in the backend's `mai
 | `backend/accountable/migrations/` | One Alembic history for the whole app |
 | `backend/accountable/crm/` | The area's shared files: `tables.py` (the four tables, which point at each other), `stages.py`, `fields.py` (field rules), `figures.py` (expected revenue and lateness), `meta.py`, `router.py`, `sample.py` and `sample_data.py`, `bulk.py` |
 | `backend/accountable/crm/<feature>/` | `routes.py` (endpoints), `repo.py` (data access), `schemas.py` (shapes) and `rules.py` (plain functions), as needed. `pipeline/` has `positions.py` |
-| `frontend/src/app/` | The router, the top bar, the connection banner and the messages |
+| `frontend/src/app/` | The router, the top bar, the light and dark mode, the connection banner and the messages |
 | `frontend/src/api/` | The API client and the generated types |
 | `frontend/src/lib/`, `styles/`, `ui/` | Formats and Korean text; tokens and global styles; shared components, with the table in `ui/DataTable/` |
 | `frontend/src/crm/` | The area's shared files, and one folder per feature with its pages, forms and `api.ts` |
@@ -239,14 +239,18 @@ The rules live in plain backend functions in the feature they belong to, with un
 
 ### 4.1 Shared layout
 
-- **[UI-1]** A navigation bar with the wordmark "Accountable", which opens the dashboard, and the five sections in this order: 대시보드, 거래처, 연락처, 영업 기회, 파이프라인. The current section is marked visually and with `aria-current="page"`. On the right, "영업 기회 추가" opens the deal form on any page. The bar runs across the top of the page, with no sidebar (6.1).
+- **[UI-1]** A navigation bar with the wordmark "Accountable", which opens the dashboard, and the five sections in this order: 대시보드, 거래처, 연락처, 영업 기회, 파이프라인. The current section is marked visually and with `aria-current="page"`. On the right are the dark mode toggle (UI-9) and "영업 기회 추가", which opens the deal form on any page. The bar runs across the top of the page, with no sidebar (6.1).
 - **[UI-2]** Each page starts with a header row: the page title, a one-line summary in plain words (for example "연락처 248명 · 고객 61명"), and the page's actions as buttons on the right. The browser tab says the title and "Accountable".
-- **[UI-3]** Content sits in white panels on the page background, rounded, with no outline (LOOK-6).
+- **[UI-3]** Content sits in panels on the page background, white in light mode and black in dark mode, rounded, with no outline (LOOK-6).
 - **[UI-4]** Saving, deleting and moving show a short message that disappears by itself after 4 seconds, such as "저장했어요" or "김민준 님이 고객이 되었어요", announced to screen readers. At most three show at once. One that fails says so and to try again ("저장하지 못했어요. 다시 시도해 주세요."), and a form stays open with what was typed.
 - **[UI-5]** While data loads, panels show their shape in a muted color instead of a spinner. If the backend can't be reached, a banner says "서버에 연결할 수 없어요. 터미널에서 npm run dev가 실행 중인지 확인해 주세요." and the page retries by itself, every 2 seconds. If something can't be loaded for another reason, its place says "불러오지 못했어요" with a "다시 시도" button, and no count is shown for it.
 - **[UI-6]** An empty table or list says so and, where there's an obvious next step, offers it, such as "아직 거래처가 없어요" with a "거래처 추가" button. A search with no results says "‘한빛’과(와) 일치하는 결과가 없어요", with the right particle (KO-6).
 - **[UI-7]** Every record name shown anywhere (in tables, on cards, in timelines, in the dashboard's lists) links to that record's page.
 - **[UI-8]** A record that isn't there, or an address such as `/deals/abc`, says "찾을 수 없어요" with a link to its table. Any other unknown address says "페이지를 찾을 수 없어요" with a link to the dashboard.
+- **[UI-9]** **Dark mode.** The app is in light mode until dark mode is turned on, whatever the device's own setting is. A toggle on every page switches between the two: an icon button in the top bar, left of "영업 기회 추가", named "다크 모드" and pressed while dark mode is on, with a moon in light mode and a sun in dark mode. Switching is instant, shows no message, and leaves everything else as it is: the page, its scroll, and anything typed but not saved.
+  - The choice is kept in the browser's `localStorage`. It's still there after a reload, after the app is stopped and started, and after `npm run seed`. Each browser and each address (`127.0.0.1` and `localhost`) keeps its own, and a tab that's already open follows when it's next loaded.
+  - A page is drawn in the chosen mode from the start, without showing the other one first.
+  - If the browser won't keep the choice, the toggle still works until the page is reloaded.
 
 ### 4.2 Dashboard (`/`)
 
@@ -327,7 +331,7 @@ Lists:
 
 ### 4.7 Deleting
 
-- **[DEL-1]** Deleting always opens a confirmation dialog first. Focus starts on 취소. The delete button is in Raspberry ink with white text, and waits for the counts. There's no undo; the dialog is the safeguard.
+- **[DEL-1]** Deleting always opens a confirmation dialog first. Focus starts on 취소. The delete button is in deep Raspberry with white text, and waits for the counts. There's no undo; the dialog is the safeguard.
 - **[DEL-2]** The dialog says what will happen to linked records, with counts from `GET /api/<kind>/<id>/delete-impact`. A part with nothing to count is left out, and an organization with nothing linked says so:
   - Organization: "‘한빛정밀’을 삭제할까요? 연락처 3명과 영업 기회 2건은 그대로 남고, 거래처 연결만 해제돼요."
   - Contact: "‘김민준’ 님을 삭제할까요? 영업 기회 2건은 그대로 남고 주 연락처가 비워져요. 이 연락처에 기록된 활동 5건은 함께 삭제돼요."
@@ -355,8 +359,8 @@ The brand skill takes priority over general design guidance. Layout, spacing and
 
 - **[LOOK-1]** One font, bundled from npm (APP-4): Noto Sans KR, weights 400, 500, 600 and 700. It comes in many small pieces, and the browser loads only the pieces for the letters on screen.
 - **[LOOK-2]** Everything uses `"Noto Sans KR", sans-serif`: text, headings, amounts, percentages, dates and the Accountable wordmark (bold). One font covers Korean, Latin letters and numbers, so a line never mixes typefaces. `font-variant-numeric: tabular-nums` lines numbers up. No italic anywhere, since Korean fonts have no italic.
-- **[LOOK-3]** Colors are CSS custom properties in one file, named after the brand: `--sea-green`, `--marigold`, `--coral`, `--cerulean`, `--raspberry`, `--midnight`, `--sea-mist`, `--page` (`#F0F4F5`) and `--panel` (white), plus the ink shades below. Body text is Midnight.
-- **[LOOK-4]** Bright brand colors are for fills: columns, bars, funnel segments, badges and large buttons, with Midnight text on Sea Green, Marigold, Coral and Sea Mist. For text, thin lines, small icons and white-on-color small text, use the darker ink shades. Each reaches 4.5:1 on white and on the page background:
+- **[LOOK-3]** Every color is a CSS custom property in one file, and no component or other stylesheet has a color of its own. The brand's colors are named after the brand and are the same in both modes: `--sea-green`, `--marigold`, `--coral`, `--cerulean`, `--raspberry`, `--midnight` and `--sea-mist`. The rest are named for their job, such as `--page` (`#F0F4F5`) and `--panel` (white). A color with several jobs has a name for each, so that Midnight as body text, as a fill, and as the text on a bright fill can each change or stay. Dark mode is a second set of values for those names, in the same file (6.2), so nothing else asks which mode it is, apart from the toggle. Body text is Midnight, and Sea Mist in dark mode.
+- **[LOOK-4]** Bright brand colors are for fills: columns, bars, funnel segments, badges and large buttons, with Midnight text on Sea Green, Marigold, Coral and Sea Mist. They're the same in both modes. For text, thin lines and small icons, use the ink shades, which are darker than the brand color in light mode and lighter in dark mode. For a fill that carries small white text, use deep Cerulean (`#0D7194`) or deep Raspberry (`#C2244C`): the light mode ink shades, the same in both modes. In light mode each ink shade reaches 4.5:1 on white and on the page background (dark mode is in 6.2):
 
 | Color | Fill | Ink shade | Ink on white | Ink on page | White text on ink |
 | --- | --- | --- | --- | --- | --- |
@@ -368,29 +372,29 @@ The brand skill takes priority over general design guidance. Layout, spacing and
 
 White on Cerulean (3.96) and on Raspberry (3.62) are allowed only for large text (24px, or 18.7px bold). Midnight is 12.08 on white and 10.91 on the page background.
 
-- **[LOOK-5]** Stage colors, used the same way on the board, the charts, the badges and the funnel: New Sea Green, Qualified Marigold, Proposal Coral, Negotiation Cerulean (its ink where it carries small white text), Won Midnight (white text), Lost Sea Mist (Midnight text). Raspberry means late or overdue, something wrong, or a delete. Contact statuses: 리드 Marigold, 적격 Cerulean ink, 고객 Sea Green.
-- **[LOOK-6]** Panels and cards are white, rounded, with no outline. No border on one edge of a panel and no single line across the top of the page. Panels stand out from the page by color alone; a very soft shadow is allowed only on what floats over the page: a card being dragged, dialogs, menus, lists, the calendar and messages. Table rows are kept apart by a thin, faint line.
-- **[LOOK-7]** No gradient fills. The area under the line chart is a flat, light Sea Green.
-- **[LOOK-8]** Charts: thin lines and points use ink shades; bars and segments use fills with their value written in Midnight; grid lines are faint Sea Mist; tooltips are Midnight with white text.
+- **[LOOK-5]** Stage colors, used the same way on the board, the charts, the badges and the funnel: New Sea Green, Qualified Marigold, Proposal Coral, Negotiation Cerulean (deep Cerulean where it carries small white text), Won Midnight (white text), Lost Sea Mist (Midnight text). In dark mode Won is Sea Mist (Midnight text) and Lost is a dark slate, `#3B5561` (Sea Mist text, 5.43); the other four fills stay the same. Raspberry means late or overdue, something wrong, or a delete. Contact statuses: 리드 Marigold, 적격 deep Cerulean, 고객 Sea Green.
+- **[LOOK-6]** Panels and cards are white, or black in dark mode, rounded, with no outline. No border on one edge of a panel and no single line across the top of the page. Panels stand out from the page by color alone; a very soft shadow is allowed only on what floats over the page: a card being dragged, dialogs, menus, lists, the calendar and messages. A shadow can't be seen on black, so in dark mode these also have a background lighter than the page (6.2). Table rows are kept apart by a thin, faint line.
+- **[LOOK-7]** No gradient fills. The area under the line chart is a flat, faint Sea Green.
+- **[LOOK-8]** Charts: thin lines and points use ink shades; bars and segments use fills with their value written in the body text color; grid lines are faint Sea Mist; tooltips are Midnight with white text, and Sea Mist with Midnight text in dark mode.
 - **[LOOK-9]** Keyboard focus shows a 2px Cerulean ink ring with a small gap, on every focusable thing.
 - **[LOOK-10]** Icons are Lucide, at one stroke width, always beside a text label or with an accessible name.
 
 ### 6.1 Chosen mockup
 
-The look follows **mockup 3, Stage lanes** (`docs/mockups/3-stage-lanes.html`, screenshots `3-stage-lanes-dashboard.png` and `3-stage-lanes-pipeline.png`). Its sample figures are only for the mockup. It was chosen because the open pipeline comes first on the dashboard, as one band of stage colors, so it's clear at a glance where the deals stand, and because it looks like a screen for daily work.
+The look follows **mockup 3, Stage lanes** (`docs/mockups/3-stage-lanes.html`, screenshots `3-stage-lanes-dashboard.png` and `3-stage-lanes-pipeline.png`). Its sample figures are only for the mockup, and its colors, like those in this section, are light mode's. It was chosen because the open pipeline comes first on the dashboard, as one band of stage colors, so it's clear at a glance where the deals stand, and because it looks like a screen for daily work.
 
-- **Top bar**: the wordmark on the left, with a small mark of four rounded blocks in the four open-stage colors. The five sections are a segmented control on a `#E3EAEC` track, with the current one on white. The Midnight "영업 기회 추가" button is on the right.
+- **Top bar**: the wordmark on the left, with a small mark of four rounded blocks in the four open-stage colors. The five sections are a segmented control on a `#E3EAEC` track, with the current one on white. The dark mode toggle (UI-9) and the Midnight "영업 기회 추가" button are on the right.
 - **Dashboard**, on a 12-column grid with 22px gaps, in this order (below 1180px the panels stack):
   1. Full width: the top panel with the four figures (DASH-3 to DASH-6), the open pipeline largest, and the pipeline band under them (DASH-9).
   2. 월별 수주 금액 (7 columns) beside 월별 수주·실주 건수 (5 columns).
   3. 영업 퍼널 as stacked trapezoids, with the figures to their right (5 columns), beside 후속 조치 as one-line rows with the date on the right (7 columns).
   4. Full width: 최근 활동 in two columns.
-- **Pipeline**: under the header, a thin band of the open stages with each stage's share of the open value written under it. Then six lanes, each with a light background in its stage's tint, holding white cards. A lane's head has the stage name in its ink shade, a count pill, the total, expected revenue ("최근 30일" for Won and Lost) and, for open stages, a bar for its share of the open value. The "추가" button sits at the top of the lane, above the cards. A late card starts with a "지연 N일" chip (a clock icon, white text on Raspberry ink), and its close date and probability turn Raspberry ink.
+- **Pipeline**: under the header, a thin band of the open stages with each stage's share of the open value written under it. Then six lanes, each with a light background in its stage's tint, holding white cards. A lane's head has the stage name in its ink shade, a count pill, the total, expected revenue ("최근 30일" for Won and Lost) and, for open stages, a bar for its share of the open value. The "추가" button sits at the top of the lane, above the cards. A late card starts with a "지연 N일" chip (a clock icon, white text on deep Raspberry), and its close date and probability turn Raspberry ink.
 - **Record pages**, which have no mockup: details and linked records on the left (5 parts), and on the right (7 parts) the form and timeline, or an organization's figures and deals. One column below 1100px.
 - **Sizes**: panels have 26px corners, lanes 22px and cards 14px. Page titles are 32px bold. The open pipeline figure is 40px and the other three figures 28px.
-- **Where the app differs from the mockup**: "표로 보기" on the charts (DASH-11), ten recent activities (DASH-13), lanes that scroll (PIPE-7), and no "활동 기록" button in the dashboard's header, since an activity is always logged on a contact's or deal's page.
+- **Where the app differs from the mockup**: the dark mode toggle (UI-9), "표로 보기" on the charts (DASH-11), ten recent activities (DASH-13), lanes that scroll (PIPE-7), and no "활동 기록" button in the dashboard's header, since an activity is always logged on a contact's or deal's page.
 
-Lane colors. Every title and the muted text (`#4A6470`) on these tints reaches 4.5:1:
+Lane colors in light mode. Every title and the muted text (`#4A6470`) on these tints reaches 4.5:1:
 
 | Stage | Lane tint | Title ink | Title on tint | Muted text on tint |
 | --- | --- | --- | --- | --- |
@@ -400,6 +404,55 @@ Lane colors. Every title and the muted text (`#4A6470`) on these tints reaches 4
 | 협상 | `#E2F1F6` | `#0D7194` | 4.77 | 5.42 |
 | 수주 | `#E3E9EC` | `#073B4C` | 9.85 | 5.12 |
 | 실주 | `#EBF0F1` | `#4A6470` | 5.46 | 5.46 |
+
+### 6.2 Dark mode
+
+- **[LOOK-11]** Dark mode changes colors and nothing else: the layout, sizes and wording are light mode's. The page, panel and floating backgrounds are the brand's. What the browser draws itself, such as the page's scrollbar, follows the mode too. These colors change, along with the stage colors (LOOK-5), the ink shades and the lane colors below; every other color is the same in both modes.
+
+| What | Light mode | Dark mode |
+| --- | --- | --- |
+| Page background; rows, headings and icon tiles inside a panel; the item under the pointer in a menu or list | `#F0F4F5` | `#04232E` |
+| Panels, cards, fields, the current part of a segmented control, and the centers of a chart's points | white | black |
+| Dialogs, and a card being dragged | white | `#0C313E` |
+| Menus, lists and the calendar | white | `#154252` |
+| Tracks of segmented controls and bars, loading shapes, and the line between table rows | `#E3EAEC` | `#103845` |
+| A table row or a white button under the pointer | `#F7FAFA` | `#031920` |
+| Body text | Midnight | Sea Mist |
+| Muted text | `#4A6470` | `#9DB1BA` |
+| Outlines of fields and checkboxes, and a switch that's off | `#5B7681` | `#6E8A96` |
+| Main buttons, messages (one that fails is deep Raspberry in both modes), chart tooltips, and the chosen day in the calendar | Midnight, white text | Sea Mist, Midnight text |
+| A main button under the pointer | `#0B4A5E` | `#E4EBED` |
+| A ticked checkbox | `#047A5C`, white tick | Sea Green, Midnight tick |
+| Grid lines in charts | Sea Mist at 55% | Sea Mist at 20% |
+| A lane's share bar, and its "추가" button | white at 85%, and at 70% | black at 45%, and at 40% |
+| A lane's scrollbar | Midnight at 20% | Sea Mist at 30% |
+| The shadow of what floats | Midnight at 16% | black at 60% |
+| The veil behind a dialog | Midnight at 32% | black at 60% |
+
+- **[LOOK-12]** Text in dark mode follows the same contrast rules as in light mode. Each of these reaches 4.5:1 on every surface:
+
+| Text | Color | On black | On page | On a dialog | On a menu | On a track |
+| --- | --- | --- | --- | --- | --- | --- |
+| Body text | `#CDD8DB` | 14.44 | 11.24 | 9.47 | 7.47 | 8.63 |
+| Muted text | `#9DB1BA` | 9.43 | 7.34 | 6.19 | 4.88 | 5.64 |
+| Sea Green ink | `#5CE5C0` | 13.42 | 10.45 | 8.81 | 6.94 | 8.02 |
+| Marigold ink | `#FFD27A` | 14.75 | 11.48 | 9.68 | 7.63 | 8.81 |
+| Coral ink | `#FAAD95` | 11.48 | 8.93 | 7.53 | 5.94 | 6.86 |
+| Cerulean ink | `#54BCDD` | 9.61 | 7.48 | 6.31 | 4.97 | 5.74 |
+| Raspberry ink | `#FF8AA5` | 9.43 | 7.34 | 6.19 | 4.88 | 5.63 |
+
+Midnight on Sea Mist is 8.30. The outline of a field reaches 3:1 on panels (5.74) and dialogs (3.76).
+
+Lane colors in dark mode, with the body text on them reaching 7.99 or more:
+
+| Stage | Lane tint | Title ink | Title on tint | Muted text on tint |
+| --- | --- | --- | --- | --- |
+| 신규 | `#05382F` | `#5CE5C0` | 8.32 | 5.85 |
+| 적격 | `#3A2E12` | `#FFD27A` | 9.34 | 5.97 |
+| 제안 | `#3D241B` | `#FAAD95` | 7.83 | 6.43 |
+| 협상 | `#0A3A4C` | `#54BCDD` | 5.58 | 5.48 |
+| 수주 | `#2B3B42` | `#CDD8DB` | 7.99 | 5.22 |
+| 실주 | `#15303B` | `#9DB1BA` | 6.21 | 6.21 |
 
 ## 7. Korean text and formats
 
@@ -429,6 +482,7 @@ Lane colors. Every title and the muted text (`#4A6470`) on these tints reaches 4
 | Organization notes | 비고 |
 | Name, email, phone, job title, website, industry | 이름, 이메일, 전화번호, 직책, 웹사이트, 업종 |
 | Add, edit, delete, save, cancel, search | 추가, 수정, 삭제, 저장, 취소, 검색 |
+| Dark mode | 다크 모드 |
 
 ### 7.2 Formats
 
@@ -446,13 +500,13 @@ Lane colors. Every title and the muted text (`#4A6470`) on these tints reaches 4
 
 ## 8. Keyboard and accessibility
 
-- **[A11Y-1]** Everything can be done by keyboard alone, in a sensible tab order: navigating, searching, sorting, paging, adding, editing, deleting, logging activities, marking follow-ups done and moving deals on the board (PIPE-9).
-- **[A11Y-2]** Text meets WCAG 2.1 AA contrast (LOOK-4). Color is never the only signal: late, overdue, stage and status always have a word too.
+- **[A11Y-1]** Everything can be done by keyboard alone, in a sensible tab order: navigating, searching, sorting, paging, adding, editing, deleting, logging activities, marking follow-ups done, moving deals on the board (PIPE-9) and switching dark mode.
+- **[A11Y-2]** Text meets WCAG 2.1 AA contrast in both modes (LOOK-4, LOOK-12). Color is never the only signal: late, overdue, stage and status always have a word too.
 - **[A11Y-3]** Every input has a label tied to it, and every icon-only button has an accessible name.
 - **[A11Y-4]** Dialogs, menus, comboboxes and the date picker follow the WAI-ARIA patterns, which React Aria provides.
 - **[A11Y-5]** Messages after saving, moving and deleting are announced through a polite live region (UI-4).
 - **[A11Y-6]** Each chart has a text summary and a "표로 보기" toggle that shows its figures as a table.
-- **[A11Y-7]** An automated accessibility check (axe) finds no WCAG 2.1 AA violations on any screen, with and without a dialog open (TEST-4). One rule is off for one check, the calendar's days; `docs/STATUS.md` says why.
+- **[A11Y-7]** An automated accessibility check (axe) finds no WCAG 2.1 AA violations on any screen in either mode, with and without a dialog open (TEST-4). One rule is off for one check, the calendar's days; `docs/STATUS.md` says why.
 - **[A11Y-8]** Transitions and animations are off for anyone whose computer asks for reduced motion.
 
 ## 9. Speed
@@ -478,7 +532,7 @@ With about 1,000 organizations, 1,000 contacts, 1,000 deals and 1,000 activities
 - **[TEST-1]** pytest, in `backend/tests/`: every rule in section 3, every API endpoint including validation and delete effects, the seed's shape, and a run of `npm run seed -- --yes` twice in a row. Each test has its own database file, with today fixed at 2026-11-23.
 - **[TEST-2]** Vitest, beside each module: formatting (dates, amounts, counter words), search normalization, sorting in Korean order, the optimistic board totals, and form validation.
 - **[TEST-3]** Playwright, in installed Chrome, in `e2e/`, against servers and a database of its own: each success criterion in section 12 as a user would do it, including drag and drop with the mouse and with the keyboard, a refresh after each change, and a restart of the backend.
-- **[TEST-4]** Playwright with axe on every screen (A11Y-7). Every Playwright test also fails on a console error or warning (APP-12), or a request that leaves `127.0.0.1` (APP-4).
+- **[TEST-4]** Playwright with axe on every screen, in light and in dark mode (A11Y-7). Axe can't judge text drawn in SVG, so a check of its own works out the contrast of the charts' text, in both modes (LOOK-4, LOOK-12). Every Playwright test also fails on a console error or warning (APP-12), or a request that leaves `127.0.0.1` (APP-4).
 - **[TEST-5]** Playwright with the 1,000-record database for PERF-1 to PERF-4.
 - **[TEST-6]** A leftover `.only` fails Vitest and Playwright.
 
@@ -524,7 +578,8 @@ What each test file proves:
 | `crm/dashboard.spec.ts` | SC 6, DASH-1 to DASH-13, A11Y-6 |
 | `restart.spec.ts` | SC 2, APP-6, APP-10, UI-5 |
 | `keyboard.spec.ts` | SC 8, A11Y-1, FORM-1 |
-| `a11y.spec.ts` | SC 8, A11Y-2, A11Y-3, A11Y-7, LOOK-4 |
+| `a11y.spec.ts` | SC 8, SC 11, A11Y-2, A11Y-3, A11Y-7, LOOK-4, LOOK-12 |
+| `dark-mode.spec.ts` | SC 11, UI-9, LOOK-11 |
 | `layout.spec.ts` | APP-1, PIPE-7 |
 | `perf/screens.spec.ts`, `perf/board.spec.ts` | SC 9, PERF-1 to PERF-4 |
 
@@ -532,7 +587,7 @@ The rest is checked by a person; the list is under "Checks by hand" in `docs/STA
 
 ## 12. Success criteria
 
-What has to be true of the product as a whole. The tests call these SC 1 to SC 10.
+What has to be true of the product as a whole. The tests call these SC 1 to SC 11.
 
 | SC | Criterion | Covered by |
 | --- | --- | --- |
@@ -546,6 +601,7 @@ What has to be true of the product as a whole. The tests call these SC 1 to SC 1
 | 8 | Every action can be done from the keyboard, including moving a deal. Text has enough contrast and every input has a label | A11Y, PIPE-9, LOOK-4 |
 | 9 | With about 1,000 of each record, nothing has a noticeable wait | PERF |
 | 10 | Someone has used it end to end in a real browser, as a salesperson would, with each screen checked by eye and no errors in the console. Passing tests isn't enough | TEST-3, TEST-4, and a person using it by hand |
+| 11 | Dark mode can be switched on and off from every page, covers every screen, dialog, chart and message, and is remembered. Light mode is the default | UI-9, LOOK-5, LOOK-11, LOOK-12 |
 
 ## 13. Later
 
@@ -553,7 +609,6 @@ Likely next, and kept possible by how it's built:
 
 - Sign-in, several users and a record of who did what, when the rest of the sales team joins: data access sits in one module per feature (APP-13), so adding a user to each change, and moving to Supabase's database, changes those modules.
 - Use beyond this computer: the backend only listens on `127.0.0.1` for now (APP-5). Deploying to Render later changes that, together with sign-in.
-- Dark mode: colors are already tokens (LOOK-3), and the brand's dark surfaces can be added as a second set.
 - ERP: products, quotes, invoices, bills and accounting, each as an area of its own (section 1).
 
 ## 14. Decisions
@@ -571,6 +626,10 @@ Choices that aren't obvious from the rest, and why.
 - **A closed deal can be reopened.** It may show as late straight away, and its main contact stays a customer (RULE-5).
 - **Won and Lost columns go by close date**, so editing a won deal's close date to more than 30 days ago takes it off the board. It stays in the Deals table (RULE-14).
 - **Something to do later is a follow-up**, so an activity can't have happened in the future (DATA-6).
+- **The mode is kept in the browser.** It's known before the page is drawn, it needs no table or API, and the reset leaves it alone (UI-9).
+- **Midnight and Sea Mist change places in dark mode.** Midnight on black is 1.74:1, so the Won stage, the main buttons, the messages and the tooltips would disappear into the panels, and Sea Mist is the brand's ink on dark backgrounds. Lost can't be Sea Mist as well, so it's a dark slate (LOOK-5).
+- **Ink shades and deep shades are separate.** In light mode one color does both jobs, text on a panel and a fill under white text. In dark mode the first has to be light and the second dark (LOOK-4).
+- **What floats isn't black in dark mode.** Panels and cards are black, as the brand says. A black dialog or menu over a black panel would have no edge, since its shadow can't be seen and panels have no outline (LOOK-6).
 
 ### The code
 
