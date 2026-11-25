@@ -533,7 +533,7 @@ With about 1,000 organizations, 1,000 contacts, 1,000 deals and 1,000 activities
 - **[TEST-1]** pytest, in `backend/tests/`: every rule in section 3, every API endpoint including validation and delete effects, the seed's shape, and a run of `npm run seed -- --yes` twice in a row. Each test has its own database file, with today fixed at 2026-11-23.
 - **[TEST-2]** Vitest, beside each module: formatting (dates, amounts, counter words), search normalization, sorting in Korean order, the optimistic board totals, and form validation.
 - **[TEST-3]** Playwright, in installed Chrome, in `e2e/`, against servers and a database of its own: each success criterion in section 12 as a user would do it, including drag and drop with the mouse and with the keyboard, a refresh after each change, and a restart of the backend.
-- **[TEST-4]** Playwright with axe on every screen, in light and in dark mode (A11Y-7). Axe can't judge text drawn in SVG, so a check of its own works out the contrast of the charts' text, in both modes (LOOK-4, LOOK-12). Every Playwright test also fails on a console error or warning (APP-12), or a request that leaves `127.0.0.1` (APP-4).
+- **[TEST-4]** Playwright with axe on every screen, in light and in dark mode (A11Y-7). Axe can't judge text drawn in SVG, so a check of its own works out the contrast of the charts' text, in both modes (LOOK-4, LOOK-12). Another finds anything the two monthly charts draw in a color that no token has, since Recharts has grays of its own (LOOK-3). Every Playwright test also fails on a console error or warning (APP-12), or a request that leaves `127.0.0.1` (APP-4).
 - **[TEST-5]** Playwright with the 1,000-record database for PERF-1 to PERF-4.
 - **[TEST-6]** A leftover `.only` fails Vitest and Playwright.
 
@@ -578,7 +578,7 @@ What each test file proves:
 | `crm/dialogs.spec.ts`, `crm/loading.spec.ts` | FORM-1, UI-5 |
 | `crm/pipeline-mouse.spec.ts` | SC 4, PIPE-1 to PIPE-8, RULE-3, RULE-7, RULE-14, UI-7 |
 | `crm/pipeline-keyboard.spec.ts` | SC 8, PIPE-5, PIPE-9 |
-| `crm/dashboard.spec.ts` | SC 6, DASH-1 to DASH-13, A11Y-6 |
+| `crm/dashboard.spec.ts` | SC 6, DASH-1 to DASH-13, A11Y-6, LOOK-3 |
 | `restart.spec.ts` | SC 2, APP-6, APP-10, UI-5 |
 | `keyboard.spec.ts` | SC 8, A11Y-1, FORM-1 |
 | `a11y.spec.ts` | SC 8, SC 11, A11Y-2, A11Y-3, A11Y-7, LOOK-4, LOOK-12 |

@@ -9,7 +9,7 @@ import styles from './Layout.module.css'
 import { ModeToggle } from './ModeToggle'
 import { Toasts } from './Toasts'
 
-// The five sections, in the intent's order (UI-1). The only list of sections.
+// The five sections, in the spec's order (UI-1). The only list of sections.
 const SECTIONS = [
   { to: '/', label: '대시보드', end: true },
   { to: '/organizations', label: '거래처', end: false },

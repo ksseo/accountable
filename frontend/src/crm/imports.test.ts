@@ -1,4 +1,4 @@
-// Features import each other one way, so there are no cycles (docs/plan.md, "How
+// Features import each other one way, so there are no cycles (docs/spec.md, "How
 // the code is laid out"). The backend's test_imports.py checks its side.
 
 import { describe, expect, it } from 'vitest'

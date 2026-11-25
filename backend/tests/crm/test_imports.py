@@ -1,4 +1,4 @@
-"""Features import each other one way, so there are no cycles (docs/plan.md, "How
+"""Features import each other one way, so there are no cycles (docs/spec.md, "How
 the code is laid out"). The frontend's imports.test.ts checks its side."""
 
 import ast

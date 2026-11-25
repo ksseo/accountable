@@ -8,7 +8,7 @@ Make a separate pass over every change for each of these:
 
 - **Bugs:** the code does what it's meant to, including when something goes wrong.
 - **Security:** no secrets or personal data are exposed, and nobody can do what they shouldn't.
-- **Matches spec.md and plan.md:** the change does what those documents say, with nothing missing and nothing extra.
+- **Matches spec.md and plan.md:** the change does what those documents say, with nothing missing and nothing extra. Read all of spec.md, not only its diff, for what the change makes untrue, such as a table or a decision that still describes how it was.
 - **Undescribed code:** flag code that spec.md doesn't describe.
 - **Standards:** the change follows `docs/STANDARDS.md`.
 

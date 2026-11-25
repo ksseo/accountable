@@ -1,9 +1,11 @@
 // The dashboard: figures that match the deals, figures that change after a
 // deal is won or a follow-up is added or done, the links out, tooltips on
-// focus and "표로 보기" (SC 6, DASH-1 to DASH-13, A11Y-6).
+// focus, the charts' colors and "표로 보기" (SC 6, DASH-1 to DASH-13, A11Y-6,
+// LOOK-3).
 import type { Page } from '@playwright/test'
 import { formatChartMonth, formatDateWithWeekday, formatMonthDay } from '../../frontend/src/lib/dates'
 import { formatMoney } from '../../frontend/src/lib/money'
+import { strayColors } from '../support/colors'
 import { apiGet, expect, resetData, test, today } from '../support/fixtures'
 import { tableRows } from './helpers'
 
@@ -180,6 +182,23 @@ test('focusing a chart shows each month and its amount', async ({ page }) => {
   await expect(tooltip).toContainText(formatChartMonth(months[11], true))
   await expect(tooltip).toContainText(formatMoney(wonIn(months[11])))
 })
+
+for (const mode of ['light', 'dark'] as const) {
+  test.describe(`in ${mode} mode`, () => {
+    test.use({ mode })
+
+    test('everything drawn in the charts has a color from tokens.css', async ({ page }) => {
+      await page.goto('/')
+      for (const title of ['월별 수주 금액', '월별 수주·실주 건수']) {
+        const chart = panel(page, title).locator('svg[role="application"]')
+        // Focus also draws what marks the month.
+        await chart.focus()
+        await expect(panel(page, title).getByText(/^수주 [$\d]/)).toBeVisible()
+        expect(await strayColors(chart), title).toEqual([])
+      }
+    })
+  })
+}
 
 test('표로 보기 shows each chart’s figures as a table', async ({ page }) => {
   const deals = await apiGet<Deal[]>('/api/deals')
