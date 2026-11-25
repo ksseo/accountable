@@ -42,6 +42,7 @@ The data is in `backend/data/accountable.db`, which git ignores. The first start
 - Harness, hooks: the pre-commit hook in `lefthook.yml` (APP-19) and the two Claude Code hooks in `scripts/hooks/` (APP-20). `.claude/settings.json` turns the Claude Code hooks on, and it's git-ignored, so a fresh clone has the scripts but not the setting.
 - Harness, CI: `.github/workflows/ci.yml` (APP-21). Playwright writes its HTML report on CI only.
 - Harness, improve: `AGENTS.md` says to follow `docs/IMPROVE.md` at Deploy.
+- Dark mode, plan: `docs/changes/dark-mode/intent.md` written and updated with interview answers (where the choice is kept, Midnight fills on black panels, how contrast and an unchanged light mode are proved). Nothing is built yet.
 
 ## Speed (PERF-1, PERF-2)
 
