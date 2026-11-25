@@ -28,5 +28,6 @@ Testing will cover:
 1. Unit tests for the frontend, using Vitest
 2. Unit tests for the backend, using pytest
 3. End-to-end tests of the whole app in a browser, in `e2e/`, using Playwright Test (`@playwright/test`) with the installed Google Chrome. They start the app themselves, so `npm test` needs nothing else running.
+4. Tests for the subagents' hooks, in `scripts/`, using Node's own test runner
 
 The tests use a database of their own, so running them never changes your data.

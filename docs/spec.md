@@ -57,7 +57,7 @@ Every requirement has an ID such as RULE-3, in bold brackets where it's stated. 
 - **[APP-4]** No internet connection is needed, and losing it while the app is open changes nothing. Fonts and every library are installed by `npm install` or `uv` and served from this computer; nothing loads from a CDN or Google Fonts.
 - **[APP-5]** `npm run dev`, from the repo root, starts the backend on `127.0.0.1:8000` and the frontend on `127.0.0.1:5173`, waits until both answer, prints the address, and opens the dashboard in the default browser (`npm run dev -- --no-open` doesn't). Ctrl+C stops both. Both listen only on this computer, and the backend answers only requests addressed to `127.0.0.1` or `localhost`. If a port is taken, it says so in plain words and stops; if the servers aren't ready within 90 seconds, it says so.
 - **[APP-6]** `npm run seed` deletes all data and loads the sample data again, in one transaction. It first asks "모든 데이터를 지우고 샘플 데이터로 되돌릴까요? (y/N)" and does nothing unless the answer is y. `npm run seed -- --yes` skips the question, for scripts.
-- **[APP-7]** `npm test` runs every test (the frontend type check, pytest, Vitest, then Playwright), stops at the first failure and fails if any fails. The tests use their own database file and their own ports (8100 and 5273), refuse to open the real database, and can run while `npm run dev` is running.
+- **[APP-7]** `npm test` runs every test (the frontend type check, the subagents' hooks, pytest, Vitest, then Playwright), stops at the first failure and fails if any fails. The tests use their own database file and their own ports (8100 and 5273), refuse to open the real database, and can run while `npm run dev` is running.
 - **[APP-8]** The commands work the same on Mac, Linux and Windows: npm scripts only, with no shell-specific syntax, and Python started with `uv run`.
 - **[APP-9]** `docs/STATUS.md` says how to install, start, reset and test the app. `README.md` is the course's own guide and is left as it is.
 - **[APP-10]** Every change is saved to the database as it's made. It's still there after a browser refresh and after the app is stopped and started. Only the choice of light or dark mode is kept in the browser instead (UI-9).
@@ -70,7 +70,7 @@ Every requirement has an ID such as RULE-3, in bold brackets where it's stated. 
 - **[APP-17]** Four environment variables change the defaults: `ACCOUNTABLE_DB` (the database file), `ACCOUNTABLE_API_PORT` and `ACCOUNTABLE_WEB_PORT` (the ports), and `ACCOUNTABLE_TODAY` (for tests).
 - **[APP-18]** `npm run check` runs every check and fails if any of them fails. A warning counts as a failure. `npm run check:quick` runs the same checks without the end-to-end tests, and `npm run format` fixes the formatting. Everything but the tests runs together and all of it reports; the tests run once it passes. gitleaks is installed separately, and only these commands and committing need it.
 - **[APP-19]** `npm install` adds a git hook with lefthook. Before each commit it formats the staged files and stages them again, then runs ESLint, tsc, ruff, ty and gitleaks, without the tests. A failure stops the commit, and so does gitleaks not being installed.
-- **[APP-20]** Two hooks for Claude Code are in `scripts/hooks/`. When the agent finishes a turn, one runs `npm run check:quick` and sends a failure back to it, once per turn. The other refuses the agent's edits to `.env`, and any shell command of its that names `.env`.
+- **[APP-20]** Four hooks for Claude Code are in `scripts/hooks/`. When the agent finishes a turn, one runs `npm run check:quick` and sends a failure back to it, once per turn. Another refuses the agent's edits to `.env`, and any shell command of its that names `.env`. The other two belong to the subagents (APP-22).
 - **[APP-21]** GitHub Actions runs `npm run check` on Linux on every push to any branch, after gitleaks has looked through the repo. It uses the Google Chrome on GitHub's runner and no secrets. When it fails, the Playwright report is kept with the run.
   - Prettier and ESLint, over the frontend, the end-to-end tests and the scripts, with the recommended TypeScript, React Hooks and accessibility rules;
   - ruff's formatting and lint checks, over the backend;
@@ -78,6 +78,7 @@ Every requirement has an ID such as RULE-3, in bold brackets where it's stated. 
   - tsc for the frontend and ty for the backend;
   - gitleaks, over git's history on every branch and the files on this computer. Among the files it allows two things git ignores: `.env`, where this computer's own keys go, and the installed packages. A `.env` that's been committed is reported;
   - every test (APP-7).
+- **[APP-22]** Two subagents for Claude Code are in `.claude/agents/`, both on Sonnet. `reviewer` reviews the changes on a branch with `docs/REVIEW.md` and reports its findings by severity. It has no tool that edits, and its hook refuses any shell command that isn't known to only read. `ui-check` opens the running app's pages through the Playwright MCP server, checks a screenshot of each against the brand skill and this spec, and reports anything off-brand or broken. It has no shell and no tool that edits, and its hook refuses to save a file anywhere but `.playwright-mcp/`, which git ignores.
 
 ### Libraries
 
@@ -122,7 +123,8 @@ Adding an area touches its own folders, plus one line each in the backend's `mai
 
 | Path | What it holds |
 | --- | --- |
-| `scripts/` | `dev.mjs` (`npm run dev`) and `api-types.mjs` (`npm run api:types`) |
+| `.claude/agents/` | The subagents (APP-22) |
+| `scripts/` | `dev.mjs` (`npm run dev`), `api-types.mjs` (`npm run api:types`) and `hooks/` (APP-20) |
 | `backend/accountable/core/` | Settings, the clock, the database and the shape of errors. Everything specific to SQLite is in `db.py` |
 | `backend/accountable/migrations/` | One Alembic history for the whole app |
 | `backend/accountable/crm/` | The area's shared files: `tables.py` (the four tables, which point at each other), `stages.py`, `fields.py` (field rules), `figures.py` (expected revenue and lateness), `meta.py`, `router.py`, `sample.py` and `sample_data.py`, `bulk.py` |
@@ -131,7 +133,7 @@ Adding an area touches its own folders, plus one line each in the backend's `mai
 | `frontend/src/api/` | The API client and the generated types |
 | `frontend/src/lib/`, `styles/`, `ui/` | Formats and Korean text; tokens and global styles; shared components, with the table in `ui/DataTable/` |
 | `frontend/src/crm/` | The area's shared files, and one folder per feature with its pages, forms and `api.ts` |
-| `backend/tests/`, `frontend/src/**/*.test.ts(x)`, `e2e/` | The tests (section 11) |
+| `backend/tests/`, `frontend/src/**/*.test.ts(x)`, `scripts/**/*.test.mjs`, `e2e/` | The tests (section 11) |
 
 ## 2. Data
 
@@ -536,6 +538,7 @@ With about 1,000 organizations, 1,000 contacts, 1,000 deals and 1,000 activities
 - **[TEST-4]** Playwright with axe on every screen, in light and in dark mode (A11Y-7). Axe can't judge text drawn in SVG, so a check of its own works out the contrast of the charts' text, in both modes (LOOK-4, LOOK-12). Another finds anything the two monthly charts draw in a color that no token has, since Recharts has grays of its own (LOOK-3). Every Playwright test also fails on a console error or warning (APP-12), or a request that leaves `127.0.0.1` (APP-4).
 - **[TEST-5]** Playwright with the 1,000-record database for PERF-1 to PERF-4.
 - **[TEST-6]** A leftover `.only` fails Vitest and Playwright.
+- **[TEST-7]** Node's own test runner, in `scripts/`: the subagents' hooks, each run as Claude Code runs it, with calls it has to allow and calls it has to refuse.
 
 What each test file proves:
 
@@ -585,6 +588,10 @@ What each test file proves:
 | `dark-mode.spec.ts` | SC 11, UI-9, LOOK-5, LOOK-6, LOOK-8, LOOK-11, A11Y-1 |
 | `layout.spec.ts` | APP-1, PIPE-7 |
 | `perf/screens.spec.ts`, `perf/board.spec.ts` | SC 9, PERF-1 to PERF-4 |
+
+| Node | IDs |
+| --- | --- |
+| `hooks/subagent-hooks.test.mjs` | APP-22 (what the hooks refuse) |
 
 The rest is checked by a person; the list is under "Checks by hand" in `docs/STATUS.md`.
 
