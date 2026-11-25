@@ -7,7 +7,7 @@
   justify-content: center;
   padding: 72px 16px 32px;
   overflow-y: auto;
-  background: rgba(7, 59, 76, 0.32);
+  background: var(--veil);
 }
 
 .modal {
@@ -20,7 +20,7 @@
 }
 
 .dialog {
-  background: var(--panel);
+  background: var(--raised);
   border-radius: var(--radius-panel);
   box-shadow: var(--shadow-lift);
   padding: 26px 28px 24px;

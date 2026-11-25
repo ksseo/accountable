@@ -43,12 +43,12 @@
 }
 
 .navLink:hover {
-  color: var(--midnight);
+  color: var(--text);
 }
 
 .current {
   background: var(--panel);
-  color: var(--midnight);
+  color: var(--text);
   font-weight: 600;
 }
 

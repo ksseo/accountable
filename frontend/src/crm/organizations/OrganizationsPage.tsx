@@ -79,7 +79,7 @@ export function OrganizationsPage() {
 
   const linkedContacts = data?.reduce((total, row) => total + row.contact_count, 0) ?? 0
   const addButton = (
-    <Button variant="dark" onPress={() => setEditing('new')}>
+    <Button variant="strong" onPress={() => setEditing('new')}>
       <Plus size={18} aria-hidden="true" />
       거래처 추가
     </Button>

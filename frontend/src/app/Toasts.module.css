@@ -11,8 +11,8 @@
 }
 
 .toast {
-  background: var(--midnight);
-  color: #fff;
+  background: var(--strong);
+  color: var(--on-strong);
   font-size: 14px;
   font-weight: 500;
   padding: 11px 18px;
@@ -22,5 +22,6 @@
 }
 
 .error {
-  background: var(--raspberry-ink);
+  background: var(--raspberry-deep);
+  color: var(--on-deep);
 }

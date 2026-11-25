@@ -92,7 +92,7 @@ export function ContactsPage() {
   )
 
   const addButton = (
-    <Button variant="dark" onPress={() => setEditing('new')}>
+    <Button variant="strong" onPress={() => setEditing('new')}>
       <Plus size={18} aria-hidden="true" />
       연락처 추가
     </Button>

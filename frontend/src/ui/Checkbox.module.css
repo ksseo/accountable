@@ -25,13 +25,13 @@
 }
 
 .checkbox[data-hovered] .box {
-  border-color: var(--midnight);
+  border-color: var(--text);
 }
 
 .checkbox[data-selected] .box {
-  background: var(--sea-green-ink);
-  border-color: var(--sea-green-ink);
-  color: #fff;
+  background: var(--check-fill);
+  border-color: var(--check-fill);
+  color: var(--check-mark);
 }
 
 .checkbox[data-focus-visible] .box {

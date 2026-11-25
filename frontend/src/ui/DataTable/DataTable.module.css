@@ -65,11 +65,11 @@
 }
 
 .row:hover td {
-  background: #f7fafa;
+  background: var(--hover);
 }
 
 .row:hover td:not(:last-child) {
-  box-shadow: 1px 0 0 #f7fafa;
+  box-shadow: 1px 0 0 var(--hover);
 }
 
 .end {
@@ -98,7 +98,7 @@
 
 .sort:hover,
 .sorted {
-  color: var(--midnight);
+  color: var(--text);
 }
 
 .menuCell {
@@ -122,5 +122,5 @@
 .pageNumber {
   min-width: 56px;
   text-align: center;
-  color: var(--midnight);
+  color: var(--text);
 }

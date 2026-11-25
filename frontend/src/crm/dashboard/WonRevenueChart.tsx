@@ -7,7 +7,6 @@ import {
   CHART_HEIGHT,
   ChartTooltip,
   fullMonth,
-  GRID_OPACITY,
   GRID_STROKE,
   lastLabelPlace,
   MONTH_AXIS,
@@ -57,7 +56,7 @@ export function WonRevenueChart({
         margin={{ top: 28, right: 20, bottom: MONTH_AXIS.marginBottom, left: 0 }}
         title="월별 수주 금액"
       >
-        <CartesianGrid vertical={false} stroke={GRID_STROKE} strokeOpacity={GRID_OPACITY} />
+        <CartesianGrid vertical={false} stroke={GRID_STROKE} />
         <XAxis
           dataKey="month"
           tick={MonthTick}
@@ -75,7 +74,7 @@ export function WonRevenueChart({
           width={52}
         />
         <Tooltip
-          cursor={{ stroke: GRID_STROKE }}
+          cursor={{ stroke: 'var(--month-line)' }}
           isAnimationActive={false}
           content={({ active, payload }) => {
             const point = active ? payload?.[0]?.payload : undefined
@@ -95,12 +94,12 @@ export function WonRevenueChart({
           fillOpacity={0.16}
           dot={({ cx, cy, index }) =>
             index === data.length - 1 ? (
-              <circle key={index} cx={cx} cy={cy} r={6} fill={LINE} stroke="#fff" strokeWidth={2.5} />
+              <circle key={index} cx={cx} cy={cy} r={6} fill={LINE} stroke="var(--panel)" strokeWidth={2.5} />
             ) : (
-              <circle key={index} cx={cx} cy={cy} r={3.5} fill="#fff" stroke={LINE} strokeWidth={2} />
+              <circle key={index} cx={cx} cy={cy} r={3.5} fill="var(--panel)" stroke={LINE} strokeWidth={2} />
             )
           }
-          activeDot={{ r: 6, fill: LINE, stroke: '#fff', strokeWidth: 2.5 }}
+          activeDot={{ r: 6, fill: LINE, stroke: 'var(--panel)', strokeWidth: 2.5 }}
           isAnimationActive={false}
         >
           <LabelList

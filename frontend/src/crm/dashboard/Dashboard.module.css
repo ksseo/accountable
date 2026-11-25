@@ -72,7 +72,7 @@
 
 .bandExpectedLabel b {
   font-weight: 500;
-  color: var(--midnight);
+  color: var(--text);
 }
 
 .bandKey {
@@ -95,7 +95,7 @@
 .funnelValue {
   font-size: 14px;
   font-weight: 600;
-  fill: var(--midnight);
+  fill: var(--text);
 }
 
 .funnelSub {
@@ -114,7 +114,7 @@
 
 .funnelFoot b {
   font-size: 20px;
-  color: var(--midnight);
+  color: var(--text);
 }
 
 .axis {
@@ -126,8 +126,8 @@
 .tooltip {
   padding: 8px 12px;
   border-radius: 10px;
-  background: var(--midnight);
-  color: #fff;
+  background: var(--strong);
+  color: var(--on-strong);
   font-size: 13px;
 }
 
@@ -138,7 +138,7 @@
 .pointLabel {
   font-size: 13px;
   font-weight: 600;
-  fill: var(--midnight);
+  fill: var(--text);
 }
 
 /* Where the label has to cross the line, the panel's color around the letters keeps it readable. */
@@ -244,7 +244,7 @@
 }
 
 .figureLink:hover .figureLabel {
-  color: var(--midnight);
+  color: var(--text);
 }
 
 .figureLink:focus-visible {
@@ -366,7 +366,7 @@
   height: 36px;
   border-radius: 12px;
   background: var(--page);
-  color: var(--midnight);
+  color: var(--text);
 }
 
 .feedBody {

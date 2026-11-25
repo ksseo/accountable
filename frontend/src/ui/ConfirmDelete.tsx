@@ -14,7 +14,7 @@ type Props = {
 }
 
 /** Every delete asks first. Focus starts on 취소, and the delete button is
- * Raspberry ink with white text (DEL-1). */
+ * deep Raspberry with white text (DEL-1). */
 export function ConfirmDelete({ isOpen, onOpenChange, message, onConfirm }: Props) {
   const [pending, setPending] = useState(false)
 

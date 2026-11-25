@@ -113,7 +113,7 @@ export function DealsPage() {
   const rows = useMemo(() => (lateOnly ? data?.filter((row) => row.is_late) : data), [data, lateOnly])
 
   const addButton = (
-    <Button variant="dark" onPress={() => dealForm.openNew()}>
+    <Button variant="strong" onPress={() => dealForm.openNew()}>
       <Plus size={18} aria-hidden="true" />
       영업 기회 추가
     </Button>

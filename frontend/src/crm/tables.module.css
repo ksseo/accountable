@@ -51,12 +51,12 @@
 }
 
 .segment[data-hovered] {
-  color: var(--midnight);
+  color: var(--text);
 }
 
 .segment[data-selected] {
   background: var(--panel);
-  color: var(--midnight);
+  color: var(--text);
   font-weight: 600;
 }
 
@@ -97,12 +97,12 @@
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--switch-thumb);
   transition: transform 120ms ease;
 }
 
 .switch[data-selected] .track {
-  background: var(--raspberry-ink);
+  background: var(--raspberry-deep);
 }
 
 .switch[data-selected] .track::after {

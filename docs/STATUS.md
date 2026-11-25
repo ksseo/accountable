@@ -44,7 +44,9 @@ The data is in `backend/data/accountable.db`, which git ignores. The first start
 - Harness, improve: `AGENTS.md` says to follow `docs/IMPROVE.md` at Deploy.
 - Dark mode, plan: `docs/changes/dark-mode/intent.md` written and updated with interview answers (where the choice is kept, Midnight fills on black panels, how contrast and an unchanged light mode are proved).
 - Dark mode, design: `docs/spec.md` describes the product with dark mode (UI-9, LOOK-11, LOOK-12, section 6.2, SC 11). The dark colors were worked out for contrast and looked at in the app by overriding the tokens in the browser. The concerns are answered: the brand skill has the two lighter backgrounds for what floats, and the intent and spec have a contrast check for chart text, which axe can't judge, and a fixed date and time for the before and after screenshots.
-- Dark mode, build: `docs/changes/dark-mode/plan.md` written, in six phases. Nothing is built yet.
+- Dark mode, build: `docs/changes/dark-mode/plan.md` written, in six phases, and all six are built. `tokens.css` has one name per job and is the only place with a color of its own (28 lines elsewhere had one), with a second set of values for dark mode. The toggle is in the top bar, and `index.html` sets the mode and links the two stylesheets, so a dark page never shows light first. `dark-mode.spec.ts` is new and `a11y.spec.ts` runs in both modes. The new checks were each seen to fail on code broken on purpose: a color outside `tokens.css`, the stored key spelled differently in its two places, the stylesheets imported from `main.tsx`, no try and catch, and five wrong chart colors.
+- Dark mode, an unchanged light mode: 53 pictures of the screens and states in the plan's Phase 1, before any code changed and after, with the same database, date and time, compared pixel for pixel. Without the toggle all 53 were identical. With it, 50 differ by the moon only: 114 pixels in a box of 16 by 16, inside the toggle's box of 42 by 42 (24px from the top; its left edge is at 1180px on a page 1440px wide with a scrollbar, 1195px without one, 1020px at 1280px and 784px at 1024px). In the other three the top bar is scrolled out of view.
+- Dark mode, found on the way: what marks the month under the pointer in a chart was bright on black. Recharts outlines the bar chart's box in a gray of its own, `#CCCCCC`, and the line chart's line was full Sea Mist. Section 6.2 of the spec has a row for them, and `tokens.css` two names that aren't in the plan, `--month-line` and `--month-outline`; in light mode they are what they were. The lowest contrast of the charts' text is 5.13 in both modes, and it's the same with the sample data of 46 days through the year.
 
 ## Speed (PERF-1, PERF-2)
 
@@ -60,6 +62,9 @@ These need a person, so they aren't part of `npm test`:
 - Korean typed with a Korean keyboard in search and in forms, including Enter in the middle of a letter.
 - The network unplugged, then the app started and used.
 - The Korean wording read through for tone.
+- Each screen looked at in dark mode, in Chrome, as a salesperson would use it, with the console open.
+- The focus ring, hover colors, field outlines and lane edges, by eye, in dark mode.
+- Reloading and opening the app in dark mode, watching for a flash of white.
 
 ## Accessibility notes
 

@@ -10,7 +10,7 @@ type Props = HTMLAttributes<HTMLElement> & {
   children: ReactNode
 }
 
-/** A white, rounded panel with no outline (UI-3, LOOK-6). */
+/** A rounded panel with no outline (UI-3, LOOK-6). */
 export function Panel({ title, aside, headingLevel = 2, className, children, ...props }: Props) {
   const Heading = headingLevel === 2 ? 'h2' : 'h3'
   return (

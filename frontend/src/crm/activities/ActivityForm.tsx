@@ -233,14 +233,14 @@ export function ActivityForm({ mode, initial, onSave, onCancel }: Props) {
       </FieldStack>
       {mode === 'log' ? (
         <div className={styles.logActions}>
-          <Button type="submit" variant="dark" isDisabled={formState.isSubmitting}>
+          <Button type="submit" variant="strong" isDisabled={formState.isSubmitting}>
             기록
           </Button>
         </div>
       ) : (
         <DialogActions>
           <Button onPress={onCancel}>취소</Button>
-          <Button type="submit" variant="dark" isDisabled={formState.isSubmitting}>
+          <Button type="submit" variant="strong" isDisabled={formState.isSubmitting}>
             저장
           </Button>
         </DialogActions>

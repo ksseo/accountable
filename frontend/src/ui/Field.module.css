@@ -33,7 +33,7 @@
   gap: 8px;
 }
 
-/* Inputs keep a full outline so their edges reach 3:1 against white. */
+/* Inputs keep a full outline so their edges reach 3:1 against what they are on. */
 .input {
   width: 100%;
   min-width: 0;

@@ -25,27 +25,27 @@
   font-size: 13px;
 }
 
-.dark {
-  background: var(--midnight);
-  color: #fff;
+.strong {
+  background: var(--strong);
+  color: var(--on-strong);
 }
 
-.dark[data-hovered] {
-  background: #0b4a5e;
+.strong[data-hovered] {
+  background: var(--strong-hover);
 }
 
-.white {
+.plain {
   background: var(--panel);
-  color: var(--midnight);
+  color: var(--text);
 }
 
-.white[data-hovered] {
-  background: #f7fafa;
+.plain[data-hovered] {
+  background: var(--hover);
 }
 
 .page {
   background: var(--page);
-  color: var(--midnight);
+  color: var(--text);
 }
 
 .page[data-hovered] {
@@ -53,17 +53,17 @@
 }
 
 .danger {
-  background: var(--raspberry-ink);
-  color: #fff;
+  background: var(--raspberry-deep);
+  color: var(--on-deep);
 }
 
 .danger[data-hovered] {
-  background: #a91f42;
+  background: var(--raspberry-deep-hover);
 }
 
 .ghost {
   background: transparent;
-  color: var(--midnight);
+  color: var(--text);
 }
 
 .ghost[data-hovered] {

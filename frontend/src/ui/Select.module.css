@@ -17,7 +17,7 @@
   min-width: var(--trigger-width);
   max-height: 320px;
   overflow-y: auto;
-  background: var(--panel);
+  background: var(--popover);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-lift);
   padding: 6px;

@@ -1,13 +1,18 @@
 // The test fixture every end-to-end test uses. It fails a test on any console
 // error or warning, any page error, or any request to a host other than
-// 127.0.0.1 (APP-4, APP-12). It also has the data reset and the axe helper.
+// 127.0.0.1 (APP-4, APP-12). It also has light or dark mode, the data reset and
+// the axe helper.
 import AxeBuilder from '@axe-core/playwright'
 import { test as base, expect, type CDPSession, type Page } from '@playwright/test'
-import { API_URL, resetData } from './servers'
+import { API_URL, resetData, WEB_URL } from './servers'
 
 export { expect, resetData }
 
+export type Mode = 'light' | 'dark'
+
 type Fixtures = {
+  /** The mode kept in the browser before the test's first page loads (UI-9). */
+  mode: Mode
   /** Console messages a test expects, such as a 503 while the backend is stopped. */
   allowConsole: RegExp[]
   watchProblems: void
@@ -16,6 +21,13 @@ type Fixtures = {
 const WEB_PROTOCOLS = new Set(['http:', 'https:', 'ws:', 'wss:'])
 
 export const test = base.extend<Fixtures>({
+  mode: ['light', { option: true }],
+  // Kept once, as a person's choice would be, so a test that switches and
+  // reloads finds its own choice. Light is what a browser with no choice shows.
+  storageState: async ({ mode }, use) => {
+    const choice = { origin: WEB_URL, localStorage: [{ name: 'accountable.mode', value: mode }] }
+    await use({ cookies: [], origins: mode === 'light' ? [] : [choice] })
+  },
   allowConsole: [[], { option: true }],
   watchProblems: [
     async ({ page, allowConsole }, use) => {

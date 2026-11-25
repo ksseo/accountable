@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>Accountable</title>
+    <script>
+      // Before anything is drawn, so a dark page never shows light first (UI-9).
+      // src/app/mode.ts keeps the choice, under the same key.
+      try {
+        if (localStorage.getItem('accountable.mode') === 'dark')
+          document.documentElement.dataset.mode = 'dark'
+      } catch {
+        // The browser won't say, so it's light.
+      }
+    </script>
+    <!-- Linked, since the browser draws nothing until they're here. Imported from main.tsx, they'd come later. -->
+    <link rel="stylesheet" href="/src/styles/tokens.css" />
+    <link rel="stylesheet" href="/src/styles/global.css" />
   </head>
   <body>
     <div id="root"></div>

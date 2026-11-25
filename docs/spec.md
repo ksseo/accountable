@@ -424,6 +424,7 @@ Lane colors in light mode. Every title and the muted text (`#4A6470`) on these t
 | A main button under the pointer | `#0B4A5E` | `#E4EBED` |
 | A ticked checkbox | `#047A5C`, white tick | Sea Green, Midnight tick |
 | Grid lines in charts | Sea Mist at 55% | Sea Mist at 20% |
+| What marks the month under the pointer in a chart: the line, and the outline of the box | Sea Mist, and `#CCCCCC` | Sea Mist at 30% |
 | A lane's share bar, and its "추가" button | white at 85%, and at 70% | black at 45%, and at 40% |
 | A lane's scrollbar | Midnight at 20% | Sea Mist at 30% |
 | The shadow of what floats | Midnight at 16% | black at 60% |
@@ -557,6 +558,8 @@ What each test file proves:
 | --- | --- |
 | `lib/` (dates, money, korean) | KO-2 to KO-6, FORM-5 |
 | `api/` (client, queryClient, failedLoad) | APP-4, UI-5, FORM-2 |
+| `app/` (mode, ModeToggle) | UI-9, A11Y-1, A11Y-3 |
+| `styles/` (tokens) | LOOK-3 |
 | `ui/DataTable/` (DataTable, search, sort), `ui/SearchBox` | TBL-1 to TBL-4, TBL-6, UI-5, UI-6 |
 | `ui/Dialog`, `ui/ConfirmDelete`, `ui/ChartPanel` | FORM-1, DEL-1, DASH-11, A11Y-6 |
 | `crm/` forms of organizations, contacts and deals | FORM-2 to FORM-5, FORM-7, A11Y-3, DEL-2 |
@@ -579,7 +582,7 @@ What each test file proves:
 | `restart.spec.ts` | SC 2, APP-6, APP-10, UI-5 |
 | `keyboard.spec.ts` | SC 8, A11Y-1, FORM-1 |
 | `a11y.spec.ts` | SC 8, SC 11, A11Y-2, A11Y-3, A11Y-7, LOOK-4, LOOK-12 |
-| `dark-mode.spec.ts` | SC 11, UI-9, LOOK-11 |
+| `dark-mode.spec.ts` | SC 11, UI-9, LOOK-5, LOOK-6, LOOK-8, LOOK-11, A11Y-1 |
 | `layout.spec.ts` | APP-1, PIPE-7 |
 | `perf/screens.spec.ts`, `perf/board.spec.ts` | SC 9, PERF-1 to PERF-4 |
 

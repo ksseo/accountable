@@ -2,8 +2,8 @@ import { Clock } from 'lucide-react'
 import { Badge } from '../ui/Badge'
 import { stageLabel, statusLabel, useMeta, type StageKey, type StatusKey } from './meta'
 
-// Each stage's colors (LOOK-5). Small white text needs the ink shade, so
-// Negotiation's badge uses Cerulean ink rather than the Cerulean fill.
+// Each stage's colors (LOOK-5). Small white text needs the deep shade, so
+// Negotiation's badge uses deep Cerulean rather than the Cerulean fill.
 export const STAGE_COLORS: Record<
   StageKey,
   { fill: string; ink: string; on: string; tint: string; badge: string }
@@ -54,7 +54,7 @@ export const STAGE_COLORS: Record<
 
 const STATUS_COLORS: Record<StatusKey, { fill: string; ink: string }> = {
   lead: { fill: 'var(--marigold)', ink: 'var(--midnight)' },
-  qualified: { fill: 'var(--cerulean-ink)', ink: '#fff' },
+  qualified: { fill: 'var(--cerulean-deep)', ink: 'var(--on-deep)' },
   customer: { fill: 'var(--sea-green)', ink: 'var(--midnight)' },
 }
 
@@ -81,7 +81,7 @@ export function StatusBadge({ status }: { status: StatusKey }) {
 /** "지연", or "지연 9일" with the days. Raspberry means late and nothing else (LOOK-5). */
 export function LateBadge({ days }: { days?: number }) {
   return (
-    <Badge fill="var(--raspberry-ink)" ink="#fff" icon={<Clock size={14} aria-hidden="true" />}>
+    <Badge fill="var(--raspberry-deep)" ink="var(--on-deep)" icon={<Clock size={14} aria-hidden="true" />}>
       {days ? `지연 ${days}일` : '지연'}
     </Badge>
   )

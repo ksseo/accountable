@@ -1,6 +1,7 @@
-/* Brand colors, ink shades, stage colors and lane tints (LOOK-3 to LOOK-5, spec 6.1). */
+/* Every color in the app, in light mode and then in dark mode, and the mockup's sizes
+   (LOOK-3 to LOOK-5, spec 6.1). */
 :root {
-  /* Fills, for large areas: columns, bars, segments, badges, big buttons. */
+  /* Brand colors, for large areas: columns, bars, segments, badges, big buttons. */
   --sea-green: #06d6a0;
   --marigold: #ffc145;
   --coral: #f78c6b;
@@ -9,20 +10,55 @@
   --midnight: #073b4c;
   --sea-mist: #cdd8db;
 
-  /* Surfaces. */
+  /* Surfaces. Dialogs and a card being dragged are raised. */
   --page: #f0f4f5;
   --panel: #ffffff;
+  --raised: #ffffff;
+  --popover: #ffffff;
   --track: #e3eaec;
+  --hover: #f7fafa;
 
-  /* Ink shades, for text, thin lines and small white-on-color labels.
-     Each reaches 4.5:1 on white and on the page background (LOOK-4). */
+  /* Text, and the outlines of controls. */
+  --text: var(--midnight);
+  --muted: #4a6470;
+  --control-line: #5b7681;
+
+  /* Ink shades, for text, thin lines and small icons. Each reaches 4.5:1 on
+     white and on the page background (LOOK-4). */
   --sea-green-ink: #047a5c;
   --marigold-ink: #8a6000;
   --coral-ink: #a8432a;
   --cerulean-ink: #0d7194;
   --raspberry-ink: #c2244c;
-  --muted: #4a6470;
-  --control-line: #5b7681;
+
+  /* Fills under small white text (LOOK-4). */
+  --cerulean-deep: #0d7194;
+  --raspberry-deep: #c2244c;
+  --raspberry-deep-hover: #a91f42;
+  --on-deep: #ffffff;
+
+  /* The fill that stands out most: main buttons, messages, tooltips, the chosen day. */
+  --strong: var(--midnight);
+  --strong-hover: #0b4a5e;
+  --on-strong: #ffffff;
+
+  --check-fill: #047a5c;
+  --check-mark: #ffffff;
+  --switch-thumb: #ffffff;
+
+  /* Faint Sea Mist: the mockup's #E3EAEC on white (LOOK-8). */
+  --grid-line: rgba(205, 216, 219, 0.55);
+
+  /* The month under the pointer in a chart: its line, and the outline of its box. */
+  --month-line: var(--sea-mist);
+  --month-outline: #cccccc;
+
+  --lane-bar: rgba(255, 255, 255, 0.85);
+  --lane-button: rgba(255, 255, 255, 0.7);
+  --scroll-thumb: rgba(7, 59, 76, 0.2);
+
+  --shadow-lift: 0 12px 32px rgba(7, 59, 76, 0.16);
+  --veil: rgba(7, 59, 76, 0.32);
 
   /* Stages: fill, ink, text on the fill, lane tint (LOOK-5). */
   --stage-new: var(--sea-green);
@@ -40,21 +76,21 @@
   --stage-proposal-on: var(--midnight);
   --stage-proposal-tint: #feede7;
 
-  /* White text on Cerulean only reaches 3.96:1, so small labels use the ink. */
+  /* White text on Cerulean only reaches 3.96:1, so small labels use the deep shade. */
   --stage-negotiation: var(--cerulean);
-  --stage-negotiation-chip: var(--cerulean-ink);
+  --stage-negotiation-chip: var(--cerulean-deep);
   --stage-negotiation-ink: var(--cerulean-ink);
-  --stage-negotiation-on: #ffffff;
+  --stage-negotiation-on: var(--on-deep);
   --stage-negotiation-tint: #e2f1f6;
 
-  --stage-won: var(--midnight);
-  --stage-won-ink: var(--midnight);
-  --stage-won-on: #ffffff;
+  --stage-won: var(--strong);
+  --stage-won-ink: var(--text);
+  --stage-won-on: var(--on-strong);
   --stage-won-tint: #e3e9ec;
 
   --stage-lost: var(--sea-mist);
   --stage-lost-ink: var(--muted);
-  --stage-lost-on: var(--midnight);
+  --stage-lost-on: var(--text);
   --stage-lost-tint: #ebf0f1;
 
   /* Sizes from the chosen mockup. */
@@ -65,6 +101,58 @@
   --gap: 22px;
 
   --font-sans: 'Noto Sans KR', sans-serif;
+}
 
-  --shadow-lift: 0 12px 32px rgba(7, 59, 76, 0.16);
+/* Dark mode: the names whose color changes, and nothing else (LOOK-11, LOOK-12,
+   spec 6.2). */
+:root[data-mode='dark'] {
+  /* What the browser draws itself, such as the page's scrollbar. */
+  color-scheme: dark;
+
+  /* What floats is lighter than the page, since its shadow can't be seen on black (LOOK-6). */
+  --page: #04232e;
+  --panel: #000000;
+  --raised: #0c313e;
+  --popover: #154252;
+  --track: #103845;
+  --hover: #031920;
+
+  --text: var(--sea-mist);
+  --muted: #9db1ba;
+  --control-line: #6e8a96;
+
+  --sea-green-ink: #5ce5c0;
+  --marigold-ink: #ffd27a;
+  --coral-ink: #faad95;
+  --cerulean-ink: #54bcdd;
+  --raspberry-ink: #ff8aa5;
+
+  /* Midnight on black is 1.74:1, so the two change places. */
+  --strong: var(--sea-mist);
+  --strong-hover: #e4ebed;
+  --on-strong: var(--midnight);
+
+  --check-fill: var(--sea-green);
+  --check-mark: var(--midnight);
+
+  --grid-line: rgba(205, 216, 219, 0.2);
+  --month-line: rgba(205, 216, 219, 0.3);
+  --month-outline: rgba(205, 216, 219, 0.3);
+
+  --lane-bar: rgba(0, 0, 0, 0.45);
+  --lane-button: rgba(0, 0, 0, 0.4);
+  --scroll-thumb: rgba(205, 216, 219, 0.3);
+
+  --shadow-lift: 0 12px 32px rgba(0, 0, 0, 0.6);
+  --veil: rgba(0, 0, 0, 0.6);
+
+  --stage-new-tint: #05382f;
+  --stage-qualified-tint: #3a2e12;
+  --stage-proposal-tint: #3d241b;
+  --stage-negotiation-tint: #0a3a4c;
+  --stage-won-tint: #2b3b42;
+
+  /* Won is Sea Mist here, so Lost is a dark slate (LOOK-5). */
+  --stage-lost: #3b5561;
+  --stage-lost-tint: #15303b;
 }

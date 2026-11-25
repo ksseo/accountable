@@ -30,7 +30,7 @@
   height: 36px;
   border-radius: 12px;
   background: var(--page);
-  color: var(--midnight);
+  color: var(--text);
 }
 
 .automatic {
@@ -96,7 +96,7 @@
 }
 
 .today {
-  color: var(--midnight);
+  color: var(--text);
   font-weight: 600;
 }
 

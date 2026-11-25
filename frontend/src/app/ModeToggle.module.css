@@ -1,0 +1,14 @@
+/* As tall as the button beside it. */
+.toggle {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: var(--radius-control);
+  transition: background-color 120ms ease;
+}
+
+.toggle[data-hovered] {
+  background: var(--track);
+}

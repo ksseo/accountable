@@ -32,8 +32,8 @@
 }
 
 .segment[data-focused] {
-  background: var(--cerulean-ink);
-  color: #fff;
+  background: var(--cerulean-deep);
+  color: var(--on-deep);
 }
 
 .open {
@@ -51,7 +51,7 @@
 }
 
 .popover {
-  background: var(--panel);
+  background: var(--popover);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-lift);
   outline: none;
@@ -119,8 +119,8 @@
 }
 
 .cell[data-selected] {
-  background: var(--midnight);
-  color: #fff;
+  background: var(--strong);
+  color: var(--on-strong);
   font-weight: 600;
 }
 

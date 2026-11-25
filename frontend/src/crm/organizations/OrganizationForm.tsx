@@ -127,7 +127,7 @@ export function OrganizationForm({ initial, industries, onSave, onCancel }: Prop
         <Button variant="page" onPress={onCancel}>
           취소
         </Button>
-        <Button variant="dark" type="submit" isDisabled={formState.isSubmitting}>
+        <Button variant="strong" type="submit" isDisabled={formState.isSubmitting}>
           저장
         </Button>
       </DialogActions>

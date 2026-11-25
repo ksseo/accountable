@@ -24,12 +24,12 @@
 
 .toggle[data-hovered] {
   background: var(--page);
-  color: var(--midnight);
+  color: var(--text);
 }
 
 .toggle[data-selected] {
   background: var(--track);
-  color: var(--midnight);
+  color: var(--text);
   font-weight: 600;
 }
 

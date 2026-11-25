@@ -28,13 +28,15 @@ describe('ConfirmDelete', () => {
     expect(dialog).toHaveTextContent('연락처 3명과 영업 기회 2건은 그대로 남아요.')
   })
 
-  it('has a delete button in Raspberry ink with white text', () => {
+  it('has a delete button in deep Raspberry with white text, in both modes', () => {
     setup()
     expect(screen.getByRole('button', { name: '삭제' })).toHaveAttribute('data-variant', 'danger')
     const danger = /\.danger \{([^}]*)\}/.exec(buttonCss)?.[1] ?? ''
-    expect(danger).toContain('background: var(--raspberry-ink)')
-    expect(danger).toContain('color: #fff')
-    expect(tokens).toContain('--raspberry-ink: #c2244c')
+    expect(danger).toContain('background: var(--raspberry-deep)')
+    expect(danger).toContain('color: var(--on-deep)')
+    // One value each, so dark mode's is the same.
+    expect(tokens.match(/--raspberry-deep: .*;/g)).toEqual(['--raspberry-deep: #c2244c;'])
+    expect(tokens.match(/--on-deep: .*;/g)).toEqual(['--on-deep: #ffffff;'])
   })
 
   it('deletes on 삭제 and closes', async () => {

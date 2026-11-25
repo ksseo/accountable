@@ -5,7 +5,7 @@
 
 .popover {
   min-width: 160px;
-  background: var(--panel);
+  background: var(--popover);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-lift);
   padding: 6px;

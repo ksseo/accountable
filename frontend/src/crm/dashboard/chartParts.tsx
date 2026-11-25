@@ -1,5 +1,5 @@
-// What the two monthly charts share: the month labels under the axis, and the
-// Midnight tooltip with white text (KO-3, LOOK-8).
+// What the two monthly charts share: the month labels under the axis, the grid
+// and the tooltip (KO-3, LOOK-8).
 
 import type { ReactNode } from 'react'
 import { formatChartMonth } from '../../lib/dates'
@@ -69,7 +69,5 @@ export function lastLabelPlace(y: number, value: number, previous: number): { y:
   return { y: y - 14, overLine: falling }
 }
 
-export const GRID_STROKE = 'var(--sea-mist)'
-/** Faint Sea Mist: the mockup's #E3EAEC on white (LOOK-8). */
-export const GRID_OPACITY = 0.55
+export const GRID_STROKE = 'var(--grid-line)'
 export const AXIS_TICK = { fontSize: 11.5, fontWeight: 500, fill: 'var(--muted)' }

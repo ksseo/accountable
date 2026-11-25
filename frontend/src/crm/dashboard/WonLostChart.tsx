@@ -2,15 +2,7 @@ import { Bar, BarChart, CartesianGrid, LabelList, Tooltip, XAxis, YAxis } from '
 import { count } from '../../lib/korean'
 import { ChartPanel } from '../../ui/ChartPanel'
 import type { MonthFigures } from './api'
-import {
-  CHART_HEIGHT,
-  ChartTooltip,
-  fullMonth,
-  GRID_OPACITY,
-  GRID_STROKE,
-  MONTH_AXIS,
-  TightMonthTick,
-} from './chartParts'
+import { CHART_HEIGHT, ChartTooltip, fullMonth, GRID_STROKE, MONTH_AXIS, TightMonthTick } from './chartParts'
 import styles from './Dashboard.module.css'
 
 const WON = 'var(--sea-green)'
@@ -71,7 +63,6 @@ export function WonLostChart({ months, className }: { months: readonly MonthFigu
         <CartesianGrid
           vertical={false}
           stroke={GRID_STROKE}
-          strokeOpacity={GRID_OPACITY}
           horizontalCoordinatesGenerator={({ offset }) => [offset.top, offset.top + offset.height]}
         />
         <XAxis
@@ -85,7 +76,7 @@ export function WonLostChart({ months, className }: { months: readonly MonthFigu
         {/* One more than the tallest bar, so its count stays under the top line. */}
         <YAxis hide allowDecimals={false} domain={[0, (max: number) => max + 1]} />
         <Tooltip
-          cursor={{ fill: 'var(--page)' }}
+          cursor={{ fill: 'var(--page)', stroke: 'var(--month-outline)' }}
           isAnimationActive={false}
           content={({ active, payload }) => {
             const point = active ? payload?.[0]?.payload : undefined
@@ -102,7 +93,7 @@ export function WonLostChart({ months, className }: { months: readonly MonthFigu
           <LabelList
             dataKey="won"
             position="top"
-            fill="var(--midnight)"
+            fill="var(--text)"
             className={styles.barLabel}
             formatter={hideZero}
           />
@@ -111,7 +102,7 @@ export function WonLostChart({ months, className }: { months: readonly MonthFigu
           <LabelList
             dataKey="lost"
             position="top"
-            fill="var(--midnight)"
+            fill="var(--text)"
             className={styles.barLabel}
             formatter={hideZero}
           />

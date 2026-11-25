@@ -6,6 +6,7 @@ import { useDealForm } from '../crm/openForms'
 import { Button } from '../ui/Button'
 import { ConnectionBanner } from './ConnectionBanner'
 import styles from './Layout.module.css'
+import { ModeToggle } from './ModeToggle'
 import { Toasts } from './Toasts'
 
 // The five sections, in the intent's order (UI-1). The only list of sections.
@@ -20,10 +21,10 @@ const SECTIONS = [
 function BrandMark() {
   return (
     <svg width="34" height="14" viewBox="0 0 34 14" aria-hidden="true">
-      <rect x="0" y="0" width="12" height="14" rx="4" fill="#06D6A0" />
-      <rect x="14" y="0" width="9" height="14" rx="4" fill="#FFC145" />
-      <rect x="25" y="0" width="5" height="14" rx="2.5" fill="#F78C6B" />
-      <rect x="31.5" y="0" width="2.5" height="14" rx="1.25" fill="#118AB2" />
+      <rect x="0" y="0" width="12" height="14" rx="4" fill="var(--sea-green)" />
+      <rect x="14" y="0" width="9" height="14" rx="4" fill="var(--marigold)" />
+      <rect x="25" y="0" width="5" height="14" rx="2.5" fill="var(--coral)" />
+      <rect x="31.5" y="0" width="2.5" height="14" rx="1.25" fill="var(--cerulean)" />
     </svg>
   )
 }
@@ -64,7 +65,8 @@ function Frame() {
           ))}
         </nav>
         <div className={styles.actions}>
-          <Button variant="dark" onPress={() => dealForm.openNew()}>
+          <ModeToggle />
+          <Button variant="strong" onPress={() => dealForm.openNew()}>
             <Plus size={18} aria-hidden="true" />
             영업 기회 추가
           </Button>
